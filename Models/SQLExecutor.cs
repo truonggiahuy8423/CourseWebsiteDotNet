@@ -1,6 +1,6 @@
-﻿using System.Data.SqlClient;
-using System.Data;
+﻿using System.Data;
 using System.Data.Common;
+using MySql.Data.MySqlClient;
 
 namespace CourseWebsiteDotNet.Models
 {
@@ -10,13 +10,13 @@ namespace CourseWebsiteDotNet.Models
         {
             DataTable dataTable = new DataTable();
 
-            using (SqlConnection connection = new SqlConnection(DatabaseConnection.CONNECTION_STRING))
+            using (MySqlConnection connection = new MySqlConnection(DatabaseConnection.CONNECTION_STRING))
             {
-                using (SqlCommand command = new SqlCommand(sql, connection))
+                using (MySqlCommand command = new MySqlCommand(sql, connection))
                 {
                     connection.Open();
 
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (MySqlDataReader reader = command.ExecuteReader())
                     {
                         dataTable.Load(reader);
                     }
@@ -28,13 +28,13 @@ namespace CourseWebsiteDotNet.Models
         public static Response ExecuteDML(string Sql) {
             return ExecuteDatabaseOperation(() =>
             {
-                using (SqlConnection connection = new SqlConnection(DatabaseConnection.CONNECTION_STRING))
+                using (MySqlConnection connection = new MySqlConnection(DatabaseConnection.CONNECTION_STRING))
                 {
                     connection.Open();
 
                     string query = Sql;
 
-                    using (SqlCommand command = new SqlCommand(query, connection))
+                    using (MySqlCommand command = new MySqlCommand(query, connection))
                     {
                         int effectedRows = command.ExecuteNonQuery();
 
@@ -57,7 +57,7 @@ namespace CourseWebsiteDotNet.Models
             {
                 return operation();
             }
-            catch (DbException dbEx)
+            catch (MySqlException dbEx)
             {
                 return new Response
                 {

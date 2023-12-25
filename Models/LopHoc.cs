@@ -1,16 +1,15 @@
-﻿using MySql.Data.MySqlClient;
-using System.Data.Common;
-using System.Data.SqlClient;
+﻿using System.Data.Common;
+using MySql.Data.MySqlClient;
 
 namespace CourseWebsiteDotNet.Models
 {
     // Lớp LopHocModel chứa các thuộc tính
     public class LopHocModel
     {
-        public int IdLopHoc { get; set; }
-        public DateTime NgayBatDau { get; set; }
-        public DateTime NgayKetThuc { get; set; }
-        public int IdMonHoc { get; set; }
+        public int id_lop_hoc { get; set; }
+        public DateTime ngay_bat_dau { get; set; }
+        public DateTime ngay_ket_thuc { get; set; }
+        public int id_mon_hoc { get; set; }
     }
 
 
@@ -31,7 +30,7 @@ namespace CourseWebsiteDotNet.Models
             {
                 return operation();
             }
-            catch (DbException dbEx)
+            catch (MySqlException dbEx)
             {
                 return new Response
                 {
@@ -55,23 +54,23 @@ namespace CourseWebsiteDotNet.Models
         public List<LopHocModel> GetAllLopHoc()
         {
             List<LopHocModel> lopHocList = new List<LopHocModel>();
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 connection.Open();
 
                 string query = "SELECT * FROM lop_hoc";
 
-                using (SqlCommand command = new SqlCommand(query, connection))
+                using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (MySqlDataReader  reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
                             LopHocModel lopHoc = new LopHocModel();
-                            lopHoc.IdLopHoc = Convert.ToInt32(reader["id_lop_hoc"]);
-                            lopHoc.NgayBatDau = Convert.ToDateTime(reader["ngay_bat_dau"]);
-                            lopHoc.NgayKetThuc = Convert.ToDateTime(reader["ngay_ket_thuc"]);
-                            lopHoc.IdMonHoc = Convert.ToInt32(reader["id_mon_hoc"]);
+                            lopHoc.id_lop_hoc = Convert.ToInt32(reader["id_lop_hoc"]);
+                            lopHoc.ngay_bat_dau = Convert.ToDateTime(reader["ngay_bat_dau"]);
+                            lopHoc.ngay_ket_thuc = Convert.ToDateTime(reader["ngay_ket_thuc"]);
+                            lopHoc.id_mon_hoc = Convert.ToInt32(reader["id_mon_hoc"]);
                             lopHocList.Add(lopHoc);
                         }
                     }
@@ -84,26 +83,26 @@ namespace CourseWebsiteDotNet.Models
         // Trả về 1 LopHocModel
         public LopHocModel? GetLopHocById(int id)
         {
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 connection.Open();
 
                 string query = "SELECT * FROM lop_hoc WHERE id_lop_hoc = @Id";
 
-                using (SqlCommand command = new SqlCommand(query, connection))
+                using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@Id", id);
 
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (MySqlDataReader  reader = command.ExecuteReader())
                     {
                         if (reader.Read())
                         {
                             return new LopHocModel // Trả về 1 LopHocModel
                             {
-                                IdLopHoc = Convert.ToInt32(reader["id_lop_hoc"]),
-                                NgayBatDau = Convert.ToDateTime(reader["ngay_bat_dau"]),
-                                NgayKetThuc = Convert.ToDateTime(reader["ngay_ket_thuc"]),
-                                IdMonHoc = Convert.ToInt32(reader["id_mon_hoc"])
+                                id_lop_hoc = Convert.ToInt32(reader["id_lop_hoc"]),
+                                ngay_bat_dau = Convert.ToDateTime(reader["ngay_bat_dau"]),
+                                ngay_ket_thuc = Convert.ToDateTime(reader["ngay_ket_thuc"]),
+                                id_mon_hoc = Convert.ToInt32(reader["id_mon_hoc"])
                             };
                         }
                         else
@@ -111,8 +110,6 @@ namespace CourseWebsiteDotNet.Models
                     }
                 }
             }
-
-            return null;
         }
 
         // Trả về Response
@@ -120,18 +117,18 @@ namespace CourseWebsiteDotNet.Models
         {
             return ExecuteDatabaseOperation(() =>
             {
-                using (SqlConnection connection = new SqlConnection(connectionString))
+                using (MySqlConnection connection = new MySqlConnection(connectionString))
                 {
                     connection.Open();
 
                     string query = "INSERT INTO lop_hoc (ngay_bat_dau, ngay_ket_thuc, id_mon_hoc) " +
-                                   "VALUES (@NgayBatDau, @NgayKetThuc, @IdMonHoc); SELECT LAST_INSERT_ID();";
+                                   "VALUES (@ngay_bat_dau, @ngay_ket_thuc, @id_mon_hoc); SELECT LAST_INSERT_ID();";
 
-                    using (SqlCommand command = new SqlCommand(query, connection))
+                    using (MySqlCommand command = new MySqlCommand(query, connection))
                     {
-                        command.Parameters.AddWithValue("@NgayBatDau", lopHoc.NgayBatDau);
-                        command.Parameters.AddWithValue("@NgayKetThuc", lopHoc.NgayKetThuc);
-                        command.Parameters.AddWithValue("@IdMonHoc", lopHoc.IdMonHoc);
+                        command.Parameters.AddWithValue("@ngay_bat_dau", lopHoc.ngay_bat_dau);
+                        command.Parameters.AddWithValue("@ngay_ket_thuc", lopHoc.ngay_ket_thuc);
+                        command.Parameters.AddWithValue("@id_mon_hoc", lopHoc.id_mon_hoc);
 
                         int insertedId = Convert.ToInt32(command.ExecuteScalar());
 
@@ -151,20 +148,20 @@ namespace CourseWebsiteDotNet.Models
         {
             return ExecuteDatabaseOperation(() =>
             {
-                using (SqlConnection connection = new SqlConnection(connectionString))
+                using (MySqlConnection connection = new MySqlConnection(connectionString))
                 {
                     connection.Open();
 
-                    string query = "UPDATE lop_hoc SET ngay_bat_dau = @NgayBatDau, " +
-                                   "ngay_ket_thuc = @NgayKetThuc, id_mon_hoc = @IdMonHoc " +
+                    string query = "UPDATE lop_hoc SET ngay_bat_dau = @ngay_bat_dau, " +
+                                   "ngay_ket_thuc = @ngay_ket_thuc, id_mon_hoc = @id_mon_hoc " +
                     "WHERE id_lop_hoc = @Id";
 
-                    using (SqlCommand command = new SqlCommand(query, connection))
+                    using (MySqlCommand command = new MySqlCommand(query, connection))
                     {
-                        command.Parameters.AddWithValue("@NgayBatDau", lopHoc.NgayBatDau);
-                        command.Parameters.AddWithValue("@NgayKetThuc", lopHoc.NgayKetThuc);
-                        command.Parameters.AddWithValue("@IdMonHoc", lopHoc.IdMonHoc);
-                        command.Parameters.AddWithValue("@Id", lopHoc.IdLopHoc);
+                        command.Parameters.AddWithValue("@ngay_bat_dau", lopHoc.ngay_bat_dau);
+                        command.Parameters.AddWithValue("@ngay_ket_thuc", lopHoc.ngay_ket_thuc);
+                        command.Parameters.AddWithValue("@id_mon_hoc", lopHoc.id_mon_hoc);
+                        command.Parameters.AddWithValue("@Id", lopHoc.id_lop_hoc);
 
                         int effectedRows = command.ExecuteNonQuery();
 
@@ -185,13 +182,13 @@ namespace CourseWebsiteDotNet.Models
         {
             return ExecuteDatabaseOperation(() =>
             {
-                using (SqlConnection connection = new SqlConnection(connectionString))
+                using (MySqlConnection connection = new MySqlConnection(connectionString))
                 {
                     connection.Open();
 
                     string query = "DELETE FROM lop_hoc WHERE id_lop_hoc = @Id";
 
-                    using (SqlCommand command = new SqlCommand(query, connection))
+                    using (MySqlCommand command = new MySqlCommand(query, connection))
                     {
                         command.Parameters.AddWithValue("@Id", id);
 
