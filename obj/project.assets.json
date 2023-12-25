@@ -2079,19 +2079,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\GIAHUY\\.nuget\\packages\\": {}
+    "C:\\Users\\DELL\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\.NET_Projects\\CourseWebsiteDotNet\\CourseWebsiteDotNet.csproj",
+      "projectUniqueName": "C:\\Users\\DELL\\Source\\Repos\\CourseWebsiteDotNet\\CourseWebsiteDotNet.csproj",
       "projectName": "CourseWebsiteDotNet",
-      "projectPath": "D:\\.NET_Projects\\CourseWebsiteDotNet\\CourseWebsiteDotNet.csproj",
-      "packagesPath": "C:\\Users\\GIAHUY\\.nuget\\packages\\",
-      "outputPath": "D:\\.NET_Projects\\CourseWebsiteDotNet\\obj\\",
+      "projectPath": "C:\\Users\\DELL\\Source\\Repos\\CourseWebsiteDotNet\\CourseWebsiteDotNet.csproj",
+      "packagesPath": "C:\\Users\\DELL\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\DELL\\Source\\Repos\\CourseWebsiteDotNet\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\GIAHUY\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\DELL\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -2099,7 +2099,7 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "https://www.nuget.org/api/v2/curated-feeds/microsoftdotnet": {}
+        "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net6.0": {
@@ -2145,7 +2145,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.401\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.100\\RuntimeIdentifierGraph.json"
       }
     }
   }
