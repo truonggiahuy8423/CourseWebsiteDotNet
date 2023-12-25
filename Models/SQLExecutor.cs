@@ -43,7 +43,7 @@ namespace CourseWebsiteDotNet.Models
                             State = true,
                             Message = "Thực thi câu lệnh thành công",
                             InsertedId = null,
-                            effectedRows = effectedRows
+                            EffectedRows = effectedRows
                         };
                     }
                 }
