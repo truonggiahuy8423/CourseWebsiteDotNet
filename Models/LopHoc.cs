@@ -173,7 +173,7 @@ namespace CourseWebsiteDotNet.Models
                             State = true,
                             Message = "Cập nhật thông tin lớp học thành công",
                             InsertedId = null,
-                            effectedRows = effectedRows
+                            EffectedRows = effectedRows
                         };
                     }
                 }
@@ -202,7 +202,7 @@ namespace CourseWebsiteDotNet.Models
                             State = true,
                             Message = "Cập nhật thông tin lớp học thành công",
                             InsertedId = null,
-                            effectedRows = effectedRows
+                            EffectedRows = effectedRows
                         };
                     }
                 }
