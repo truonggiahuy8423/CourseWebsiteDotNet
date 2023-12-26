@@ -2,8 +2,7 @@
 
 namespace CourseWebsiteDotNet.Models
 {
-    public class GiangVien
-    {
+ 
         public class GiangVienModel
         {
             public int? id_giang_vien { get; set; }
@@ -214,5 +213,5 @@ namespace CourseWebsiteDotNet.Models
                 });
             }
         }
-    }
+    
 }

@@ -2,8 +2,7 @@
 
 namespace CourseWebsiteDotNet.Models
 {
-    public class PhanCongGiangVien
-    {
+
         public class PhanCongGiangVienModel
         {
             public int? id_giang_vien { get; set; }
@@ -197,5 +196,5 @@ namespace CourseWebsiteDotNet.Models
                 });
             }
         }
-    }
+    
 }
