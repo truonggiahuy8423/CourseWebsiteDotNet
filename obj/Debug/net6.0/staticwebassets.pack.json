@@ -5,12 +5,128 @@
       "PackagePath": "staticwebassets\\CourseWebsiteDotNet.bundle.scp.css"
     },
     {
+      "Id": "D:\\.NET_Projects\\CourseWebsiteDotNet\\wwwroot\\component\\Rectangle 50.png",
+      "PackagePath": "staticwebassets\\component\\Rectangle 50.png"
+    },
+    {
+      "Id": "D:\\.NET_Projects\\CourseWebsiteDotNet\\wwwroot\\component\\Vector.png",
+      "PackagePath": "staticwebassets\\component\\Vector.png"
+    },
+    {
+      "Id": "D:\\.NET_Projects\\CourseWebsiteDotNet\\wwwroot\\component\\back_icon.png",
+      "PackagePath": "staticwebassets\\component\\back_icon.png"
+    },
+    {
+      "Id": "D:\\.NET_Projects\\CourseWebsiteDotNet\\wwwroot\\css\\login.css",
+      "PackagePath": "staticwebassets\\css\\login.css"
+    },
+    {
+      "Id": "D:\\.NET_Projects\\CourseWebsiteDotNet\\wwwroot\\css\\schedule.css",
+      "PackagePath": "staticwebassets\\css\\schedule.css"
+    },
+    {
       "Id": "D:\\.NET_Projects\\CourseWebsiteDotNet\\wwwroot\\css\\site.css",
       "PackagePath": "staticwebassets\\css\\site.css"
     },
     {
+      "Id": "D:\\.NET_Projects\\CourseWebsiteDotNet\\wwwroot\\css\\style.css",
+      "PackagePath": "staticwebassets\\css\\style.css"
+    },
+    {
+      "Id": "D:\\.NET_Projects\\CourseWebsiteDotNet\\wwwroot\\css\\toast.css",
+      "PackagePath": "staticwebassets\\css\\toast.css"
+    },
+    {
       "Id": "D:\\.NET_Projects\\CourseWebsiteDotNet\\wwwroot\\favicon.ico",
       "PackagePath": "staticwebassets\\favicon.ico"
+    },
+    {
+      "Id": "D:\\.NET_Projects\\CourseWebsiteDotNet\\wwwroot\\img\\any_file_icon.png",
+      "PackagePath": "staticwebassets\\img\\any_file_icon.png"
+    },
+    {
+      "Id": "D:\\.NET_Projects\\CourseWebsiteDotNet\\wwwroot\\img\\assignment_icon.png",
+      "PackagePath": "staticwebassets\\img\\assignment_icon.png"
+    },
+    {
+      "Id": "D:\\.NET_Projects\\CourseWebsiteDotNet\\wwwroot\\img\\ava.jpg",
+      "PackagePath": "staticwebassets\\img\\ava.jpg"
+    },
+    {
+      "Id": "D:\\.NET_Projects\\CourseWebsiteDotNet\\wwwroot\\img\\avatar_blank.jpg",
+      "PackagePath": "staticwebassets\\img\\avatar_blank.jpg"
+    },
+    {
+      "Id": "D:\\.NET_Projects\\CourseWebsiteDotNet\\wwwroot\\img\\banner.jpg",
+      "PackagePath": "staticwebassets\\img\\banner.jpg"
+    },
+    {
+      "Id": "D:\\.NET_Projects\\CourseWebsiteDotNet\\wwwroot\\img\\bell_icon.png",
+      "PackagePath": "staticwebassets\\img\\bell_icon.png"
+    },
+    {
+      "Id": "D:\\.NET_Projects\\CourseWebsiteDotNet\\wwwroot\\img\\caret_down.png",
+      "PackagePath": "staticwebassets\\img\\caret_down.png"
+    },
+    {
+      "Id": "D:\\.NET_Projects\\CourseWebsiteDotNet\\wwwroot\\img\\classroom_icon.png",
+      "PackagePath": "staticwebassets\\img\\classroom_icon.png"
+    },
+    {
+      "Id": "D:\\.NET_Projects\\CourseWebsiteDotNet\\wwwroot\\img\\excel_icon.png",
+      "PackagePath": "staticwebassets\\img\\excel_icon.png"
+    },
+    {
+      "Id": "D:\\.NET_Projects\\CourseWebsiteDotNet\\wwwroot\\img\\folder_icon.png",
+      "PackagePath": "staticwebassets\\img\\folder_icon.png"
+    },
+    {
+      "Id": "D:\\.NET_Projects\\CourseWebsiteDotNet\\wwwroot\\img\\link_icon.png",
+      "PackagePath": "staticwebassets\\img\\link_icon.png"
+    },
+    {
+      "Id": "D:\\.NET_Projects\\CourseWebsiteDotNet\\wwwroot\\img\\loading.gif",
+      "PackagePath": "staticwebassets\\img\\loading.gif"
+    },
+    {
+      "Id": "D:\\.NET_Projects\\CourseWebsiteDotNet\\wwwroot\\img\\logo_course.png",
+      "PackagePath": "staticwebassets\\img\\logo_course.png"
+    },
+    {
+      "Id": "D:\\.NET_Projects\\CourseWebsiteDotNet\\wwwroot\\img\\message_icon.png",
+      "PackagePath": "staticwebassets\\img\\message_icon.png"
+    },
+    {
+      "Id": "D:\\.NET_Projects\\CourseWebsiteDotNet\\wwwroot\\img\\nav_logo.png",
+      "PackagePath": "staticwebassets\\img\\nav_logo.png"
+    },
+    {
+      "Id": "D:\\.NET_Projects\\CourseWebsiteDotNet\\wwwroot\\img\\noti_icon.png",
+      "PackagePath": "staticwebassets\\img\\noti_icon.png"
+    },
+    {
+      "Id": "D:\\.NET_Projects\\CourseWebsiteDotNet\\wwwroot\\img\\pdf_icon.png",
+      "PackagePath": "staticwebassets\\img\\pdf_icon.png"
+    },
+    {
+      "Id": "D:\\.NET_Projects\\CourseWebsiteDotNet\\wwwroot\\img\\ppt_icon.png",
+      "PackagePath": "staticwebassets\\img\\ppt_icon.png"
+    },
+    {
+      "Id": "D:\\.NET_Projects\\CourseWebsiteDotNet\\wwwroot\\img\\small_logo_course.png",
+      "PackagePath": "staticwebassets\\img\\small_logo_course.png"
+    },
+    {
+      "Id": "D:\\.NET_Projects\\CourseWebsiteDotNet\\wwwroot\\img\\word_icon.png",
+      "PackagePath": "staticwebassets\\img\\word_icon.png"
+    },
+    {
+      "Id": "D:\\.NET_Projects\\CourseWebsiteDotNet\\wwwroot\\js\\jquery.js",
+      "PackagePath": "staticwebassets\\js\\jquery.js"
+    },
+    {
+      "Id": "D:\\.NET_Projects\\CourseWebsiteDotNet\\wwwroot\\js\\script.js",
+      "PackagePath": "staticwebassets\\js\\script.js"
     },
     {
       "Id": "D:\\.NET_Projects\\CourseWebsiteDotNet\\wwwroot\\js\\site.js",

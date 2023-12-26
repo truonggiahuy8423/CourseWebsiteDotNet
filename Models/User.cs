@@ -1,12 +1,13 @@
 ﻿using System.Data.Common;
 using MySql.Data.MySqlClient;
+using Org.BouncyCastle.Crypto;
 
 namespace CourseWebsiteDotNet.Models
 {
     public class UserModel
     {
         public int id_user { get; set; }
-        public string? anh_dai_dien { get; set; }
+        public byte[]? anh_dai_dien { get; set; }
         public string tai_khoan { get; set; }
         public string mat_khau { get; set; }
         public DateTime? thoi_gian_dang_nhap_gan_nhat { get; set; }
@@ -62,19 +63,25 @@ namespace CourseWebsiteDotNet.Models
 
                 using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
-                    using (MySqlDataReader  reader = command.ExecuteReader())
+                    using (MySqlDataReader reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
                             UserModel user = new UserModel();
                             user.id_user = Convert.ToInt32(reader["id_user"]);
-                            user.anh_dai_dien = Convert.ToBase64String((byte[])reader["anh_dai_dien"]);
+                            user.anh_dai_dien = reader["anh_dai_dien"] != DBNull.Value ? reader["anh_dai_dien"] as byte[] : null;
                             user.tai_khoan = reader["tai_khoan"].ToString();
                             user.mat_khau = reader["mat_khau"].ToString();
-                            user.thoi_gian_dang_nhap_gan_nhat = Convert.ToDateTime(reader["thoi_gian_dang_nhap_gan_nhat"]);
-                            user.id_ad = Convert.ToInt32(reader["id_ad"]);
-                            user.id_giang_vien = Convert.ToInt32(reader["id_giang_vien"]);
-                            user.id_hoc_vien = Convert.ToInt32(reader["id_hoc_vien"]);
+                            user.thoi_gian_dang_nhap_gan_nhat = reader["thoi_gian_dang_nhap_gan_nhat"] != DBNull.Value
+                                ? Convert.ToDateTime(reader["thoi_gian_dang_nhap_gan_nhat"])
+                                : (DateTime?)null;
+                            user.id_ad = reader["id_ad"] != DBNull.Value ? Convert.ToInt32(reader["id_ad"]) : (int?)null;
+                                user.id_giang_vien = reader["id_giang_vien"] != DBNull.Value
+                                    ? Convert.ToInt32(reader["id_giang_vien"])
+                                    : (int?)null;
+                            user.id_hoc_vien = reader["id_hoc_vien"] != DBNull.Value
+                                ? Convert.ToInt32(reader["id_hoc_vien"])
+                                : (int?)null;
                             userList.Add(user);
                         }
                     }
@@ -96,20 +103,26 @@ namespace CourseWebsiteDotNet.Models
                 {
                     command.Parameters.AddWithValue("@Id", id);
 
-                    using (MySqlDataReader  reader = command.ExecuteReader())
+                    using (MySqlDataReader reader = command.ExecuteReader())
                     {
                         if (reader.Read())
                         {
                             return new UserModel
                             {
                                 id_user = Convert.ToInt32(reader["id_user"]),
-                                anh_dai_dien = reader["anh_dai_dien"] as string,
+                                anh_dai_dien = reader["anh_dai_dien"] != DBNull.Value ? reader["anh_dai_dien"] as byte[] : null,
                                 tai_khoan = reader["tai_khoan"].ToString(),
                                 mat_khau = reader["mat_khau"].ToString(),
-                                thoi_gian_dang_nhap_gan_nhat = Convert.ToDateTime(reader["thoi_gian_dang_nhap_gan_nhat"]),
-                                id_ad = Convert.ToInt32(reader["id_ad"]),
-                                id_giang_vien = Convert.ToInt32(reader["id_giang_vien"]),
-                                id_hoc_vien = Convert.ToInt32(reader["id_hoc_vien"])
+                                thoi_gian_dang_nhap_gan_nhat = reader["thoi_gian_dang_nhap_gan_nhat"] != DBNull.Value
+                                    ? Convert.ToDateTime(reader["thoi_gian_dang_nhap_gan_nhat"])
+                                    : (DateTime?)null,
+                                id_ad = reader["id_ad"] != DBNull.Value ? Convert.ToInt32(reader["id_ad"]) : (int?)null,
+                                id_giang_vien = reader["id_giang_vien"] != DBNull.Value
+                                    ? Convert.ToInt32(reader["id_giang_vien"])
+                                    : (int?)null,
+                                id_hoc_vien = reader["id_hoc_vien"] != DBNull.Value
+                                    ? Convert.ToInt32(reader["id_hoc_vien"])
+                                    : (int?)null
                             };
                         }
                         else
@@ -118,6 +131,48 @@ namespace CourseWebsiteDotNet.Models
                 }
             }
         }
+        public UserModel? GetUserByAuthentication(string account, string password)
+        {
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
+
+                string query = "SELECT * FROM users WHERE tai_khoan = @Acc and mat_khau = @Pas";
+
+                using (MySqlCommand command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.Add("@Acc", MySqlDbType.VarChar).Value = account;
+                    command.Parameters.Add("@Pas", MySqlDbType.VarChar).Value = password;
+
+                    using (MySqlDataReader reader = command.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            return new UserModel
+                            {
+                                id_user = Convert.ToInt32(reader["id_user"]),
+                                //anh_dai_dien = reader["anh_dai_dien"] != DBNull.Value ? reader["anh_dai_dien"] as string : null,
+                                tai_khoan = reader["tai_khoan"].ToString(),
+                                mat_khau = reader["mat_khau"].ToString(),
+                                thoi_gian_dang_nhap_gan_nhat = reader["thoi_gian_dang_nhap_gan_nhat"] != DBNull.Value
+                                    ? Convert.ToDateTime(reader["thoi_gian_dang_nhap_gan_nhat"])
+                                    : (DateTime?)null,
+                                id_ad = reader["id_ad"] != DBNull.Value ? Convert.ToInt32(reader["id_ad"]) : (int?)null,
+                                id_giang_vien = reader["id_giang_vien"] != DBNull.Value
+                                    ? Convert.ToInt32(reader["id_giang_vien"])
+                                    : (int?)null,
+                                id_hoc_vien = reader["id_hoc_vien"] != DBNull.Value
+                                    ? Convert.ToInt32(reader["id_hoc_vien"])
+                                    : (int?)null
+                            };
+                        }
+                        else
+                            return null;
+                    }
+                }
+            }
+        }
+
 
         // Trả về Response
         public Response InsertUser(UserModel user)
