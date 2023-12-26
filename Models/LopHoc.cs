@@ -67,10 +67,10 @@ namespace CourseWebsiteDotNet.Models
                         while (reader.Read())
                         {
                             LopHocModel lopHoc = new LopHocModel();
-                            lopHoc.id_lop_hoc = Convert.ToInt32(reader["id_lop_hoc"]);
-                            lopHoc.ngay_bat_dau = Convert.ToDateTime(reader["ngay_bat_dau"]);
-                            lopHoc.ngay_ket_thuc = Convert.ToDateTime(reader["ngay_ket_thuc"]);
-                            lopHoc.id_mon_hoc = Convert.ToInt32(reader["id_mon_hoc"]);
+                            lopHoc.id_lop_hoc = Convert.ToInt32(reader["id_lop_hoc"]) != DBNull.Value ? Convert.ToInt32(reader["id_lop_hoc"]) : (int?)null;
+                            lopHoc.ngay_bat_dau = Convert.ToDateTime(reader["ngay_bat_dau"]) != DBNull.Value ? Convert.ToDateTime(reader["ngay_bat_dau"]) : (DateTime?)null;
+                            lopHoc.ngay_ket_thuc = Convert.ToDateTime(reader["ngay_ket_thuc"]) != DBNull.Value ? Convert.ToDateTime(reader["ngay_ket_thuc"]) : (DateTime?)null;
+                            lopHoc.id_mon_hoc = Convert.ToInt32(reader["id_mon_hoc"]) != DBNull.Value ? Convert.ToInt32(reader["id_mon_hoc"]) : (int?)null;
                             lopHocList.Add(lopHoc);
                         }
                     }
@@ -99,10 +99,10 @@ namespace CourseWebsiteDotNet.Models
                         {
                             return new LopHocModel // Trả về 1 LopHocModel
                             {
-                                id_lop_hoc = Convert.ToInt32(reader["id_lop_hoc"]),
-                                ngay_bat_dau = Convert.ToDateTime(reader["ngay_bat_dau"]),
-                                ngay_ket_thuc = Convert.ToDateTime(reader["ngay_ket_thuc"]),
-                                id_mon_hoc = Convert.ToInt32(reader["id_mon_hoc"])
+                                id_lop_hoc = Convert.ToInt32(reader["id_lop_hoc"]) != DBNull.Value ? Convert.ToInt32(reader["id_lop_hoc"]) : (int?)null,
+                                ngay_bat_dau = Convert.ToDateTime(reader["ngay_bat_dau"]) != DBNull.Value ? Convert.ToDateTime(reader["ngay_bat_dau"]) : (DateTime?)null,
+                                ngay_ket_thuc = Convert.ToDateTime(reader["ngay_ket_thuc"]) != DBNull.Value ? Convert.ToDateTime(reader["ngay_ket_thuc"]) : (DateTime?)null,
+                                id_mon_hoc = Convert.ToInt32(reader["id_mon_hoc"]) != DBNull.Value ? Convert.ToInt32(reader["id_mon_hoc"]) : (int?)null
                             };
                         }
                         else

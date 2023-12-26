@@ -1,5 +1,6 @@
 ﻿using CourseWebsiteDotNet.Models;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System.Diagnostics;
 
 namespace CourseWebsiteDotNet.Controllers
@@ -22,7 +23,12 @@ namespace CourseWebsiteDotNet.Controllers
         {
             return View();
         }
+        public void Do()
+        {
+            string jsonString = "{\"Name\":\"John Doe\",\"Age\":25,\"IsStudent\":true}";
+            dynamic? dynamicObject = JsonConvert.DeserializeObject(jsonString);
 
+        }
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

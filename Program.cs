@@ -1,3 +1,6 @@
+using CourseWebsiteDotNet.Middleware;
+using System;
+
 namespace CourseWebsiteDotNet
 {
     public class Program
@@ -8,6 +11,15 @@ namespace CourseWebsiteDotNet
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(20);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
+
+
 
             var app = builder.Build();
 
@@ -21,14 +33,61 @@ namespace CourseWebsiteDotNet
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
             app.UseRouting();
-
+            app.UseSession();
             app.UseAuthorization();
+            app.UseSessionCheckMiddleware();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllerRoute(
+                    name: "login",
+                    pattern: "login",
+                    defaults: new { controller = "Authentication", action = "Index" }
+                );
 
-            app.MapControllerRoute(
-                name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller=Authentication}/{action=Index}"
+                );
+
+                endpoints.MapControllerRoute(
+                    name: "courses",
+                    pattern: "courses",
+                    defaults: new { controller = "Course", action = "Index" }
+                );
+                endpoints.MapControllerRoute(
+                    name: "lecturers",
+                    pattern: "lecturers",
+                    defaults: new { controller = "Lecturer", action = "Index" }
+                );
+
+                endpoints.MapControllerRoute(
+                    name: "students",
+                    pattern: "students",
+                    defaults: new { controller = "Student", action = "Index" }
+                );
+
+                endpoints.MapControllerRoute(
+                    name: "users",
+                    pattern: "users",
+                    defaults: new { controller = "User", action = "Index" }
+                );
+
+                endpoints.MapControllerRoute(
+                    name: "subjects",
+                    pattern: "subjects",
+                    defaults: new { controller = "Subject", action = "Index" }
+                );
+            });
+            //app.MapControllerRoute(
+            //   name: "default",
+            //   pattern: "{controller=Home}/{action=Index}/{id?}");
+
+            //app.MapControllerRoute(
+            //   name: "Login",
+            //   pattern: "{controller=User}/{action=Index}/{id?}");
+
+
 
             app.Run();
         }
