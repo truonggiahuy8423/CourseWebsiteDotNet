@@ -67,9 +67,9 @@ namespace CourseWebsiteDotNet.Models
                         {
                             MucModel muc = new MucModel();
                             muc.id_muc = Convert.ToInt32(reader["id_muc"]);
-                            muc.ten_muc = Convert.ToString(reader["ten_muc"]);
+                            muc.ten_muc = (reader["ten_muc"]) != DBNull.Value ? Convert.ToString(reader["ten_muc"]) : (string?)null;
                             muc.id_lop_hoc = Convert.ToInt32(reader["id_lop_hoc"]);
-                            muc.id_muc_cha = Convert.ToInt32(reader["id_muc_cha"]);
+                            muc.id_muc_cha = (reader["id_muc_cha"]) != DBNull.Value ? Convert.ToInt32(reader["id_muc_cha"]) : (int?)null;
                             mucList.Add(muc);
                         }
                     }
@@ -99,9 +99,9 @@ namespace CourseWebsiteDotNet.Models
                             return new MucModel // Trả về 1 MucModel
                             {
                                 id_muc = Convert.ToInt32(reader["id_muc"]),
-                                ten_muc = Convert.ToString(reader["ten_muc"]),
+                                ten_muc = (reader["ten_muc"]) != DBNull.Value ? Convert.ToString(reader["ten_muc"]) : (string?)null,
                                 id_lop_hoc = Convert.ToInt32(reader["id_lop_hoc"]),
-                                id_muc_cha = Convert.ToInt32(reader["id_muc_cha"])
+                                id_muc_cha = (reader["id_muc_cha"]) != DBNull.Value ? Convert.ToInt32(reader["id_muc_cha"]) : (int?)null
                             };
                         }
                         else

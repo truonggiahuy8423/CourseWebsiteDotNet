@@ -63,8 +63,8 @@ namespace CourseWebsiteDotNet.Models
                             DiemDanhModel diemDanh = new DiemDanhModel();
                             diemDanh.id_hoc_vien = Convert.ToInt32(reader["id_hoc_vien"]);
                             diemDanh.id_buoi_hoc = Convert.ToInt32(reader["id_buoi_hoc"]);
-                            diemDanh.ghi_chu = Convert.ToString(reader["ghi_chu"]);
-                            diemDanh.co_mat = Convert.ToInt32(reader["co_mat"]);
+                            diemDanh.ghi_chu = (reader["ghi_chu"]) != DBNull.Value ? Convert.ToString(reader["ghi_chu"]) : (string?)null;
+                            diemDanh.co_mat = (reader["co_mat"]) != DBNull.Value ? Convert.ToInt32(reader["co_mat"]) : (int?)null;
                             diemDanhList.Add(diemDanh);
                         }
                     }
@@ -95,8 +95,8 @@ namespace CourseWebsiteDotNet.Models
                             {
                                 id_hoc_vien = Convert.ToInt32(reader["id_hoc_vien"]),
                                 id_buoi_hoc = Convert.ToInt32(reader["id_buoi_hoc"]),
-                                ghi_chu = Convert.ToString(reader["ghi_chu"]),
-                                co_mat = Convert.ToInt32(reader["co_mat"])
+                                ghi_chu = (reader["ghi_chu"]) != DBNull.Value ? Convert.ToString(reader["ghi_chu"]) : (string?)null,
+                                co_mat = (reader["co_mat"]) != DBNull.Value ? Convert.ToInt32(reader["co_mat"]) : (int?)null
                             };
                         }
                         else

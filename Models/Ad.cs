@@ -61,7 +61,7 @@ namespace CourseWebsiteDotNet.Models
                         {
                             AdModel ad = new AdModel();
                             ad.id_ad = Convert.ToInt32(reader["id_ad"]);
-                            ad.ho_ten = Convert.ToString(reader["ho_ten"]);
+                            ad.ho_ten = (reader["ho_ten"]) != DBNull.Value ? Convert.ToString(reader["ho_ten"]) : (string?)null;
                             ad.email = Convert.ToString(reader["email"]);
                             adList.Add(ad);
                         }
@@ -92,7 +92,7 @@ namespace CourseWebsiteDotNet.Models
                             return new AdModel // Trả về 1 AdModel
                             {
                                 id_ad = Convert.ToInt32(reader["id_ad"]),
-                                ho_ten = Convert.ToString(reader["ho_ten"]),
+                                ho_ten = (reader["ho_ten"]) != DBNull.Value ? Convert.ToString(reader["ho_ten"]) : (string?)null,
                                 email = Convert.ToString(reader["email"])
                             };
                         }

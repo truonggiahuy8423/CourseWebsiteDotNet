@@ -69,8 +69,8 @@ namespace CourseWebsiteDotNet.Models
                             HocVienModel hocVien = new HocVienModel();
                             hocVien.id_hoc_vien = Convert.ToInt32(reader["id_hoc_vien"]);
                             hocVien.ho_ten = Convert.ToString(reader["ho_ten"]);
-                            hocVien.ngay_sinh = Convert.ToDateTime(reader["ngay_sinh"]);
-                            hocVien.gioi_tinh = Convert.ToInt32(reader["gioi_tinh"]);
+                            hocVien.ngay_sinh = (reader["ngay_sinh"]) != DBNull.Value ? Convert.ToDateTime(reader["ngay_sinh"]) : (DateTime?)null;
+                            hocVien.gioi_tinh = (reader["gioi_tinh"]) != DBNull.Value ? Convert.ToInt32(reader["gioi_tinh"]) : (int?)null;
                             hocVien.email = Convert.ToString(reader["email"]);
                             hocVienList.Add(hocVien);
                         }
@@ -102,8 +102,8 @@ namespace CourseWebsiteDotNet.Models
                             {
                                 id_hoc_vien = Convert.ToInt32(reader["id_hoc_vien"]),
                                 ho_ten = Convert.ToString(reader["ho_ten"]),
-                                ngay_sinh = Convert.ToDateTime(reader["ngay_sinh"]),
-                                gioi_tinh = Convert.ToInt32(reader["gioi_tinh"]),
+                                ngay_sinh = (reader["ngay_sinh"]) != DBNull.Value ? Convert.ToDateTime(reader["ngay_sinh"]) : (DateTime?)null,
+                                gioi_tinh = (reader["gioi_tinh"]) != DBNull.Value ? Convert.ToInt32(reader["gioi_tinh"]) : (int?)null,
                                 email = Convert.ToString(reader["email"]),
                             };
                         }
