@@ -6,13 +6,13 @@ namespace CourseWebsiteDotNet.Models
     {
         public class BaiTapModel
         {
-            public int id_bai_tap { get; set; }
-            public int trang_thai { get; set; }
-            public string ten { get; set; }
-            public string noi_dung { get; set; }
-            public DateTime thoi_han { get; set; }
-            public int id_giang_vien { get; set; }
-            public int id_muc { get; set; }
+            public int? id_bai_tap { get; set; }
+            public int? trang_thai { get; set; }
+            public string? ten { get; set; }
+            public string? noi_dung { get; set; }
+            public DateTime? thoi_han { get; set; }
+            public int? id_giang_vien { get; set; }
+            public int? id_muc { get; set; }
         }
 
 
@@ -70,13 +70,13 @@ namespace CourseWebsiteDotNet.Models
                             while (reader.Read())
                             {
                                 BaiTapModel baiTap = new BaiTapModel();
-                                baiTap.id_bai_tap = Convert.ToInt32(reader["id_bai_tap"]) != DBNull.Value ? Convert.ToInt32(reader["id_bai_tap"]) : (int?)null;
-                                baiTap.trang_thai = Convert.ToInt32(reader["trang_thai"]) != DBNull.Value ? Convert.ToInt32(reader["trang_thai"]) : (int?)null;
-                                baiTap.ten = Convert.ToString(reader["ten"]) != DBNull.Value ? Convert.ToString(reader["ten"]) : (string?)null;
-                                baiTap.noi_dung = Convert.ToString(reader["noi_dung"]) != DBNull.Value ? Convert.ToString(reader["noi_dung"]) : (string?)null;
-                                baiTap.thoi_han = Convert.ToDateTime(reader["thoi_han"]) != DBNull.Value ? Convert.ToDateTime(reader["thoi_han"]) : (string?)null;
-                                baiTap.id_giang_vien = Convert.ToInt32(reader["id_giang_vien"]) != DBNull.Value ? Convert.ToInt32(reader["id_giang_vien"]) : (int?)null;
-                                baiTap.id_muc = Convert.ToInt32(reader["id_muc"]) != DBNull.Value ? Convert.ToInt32(reader["id_muc"]) : (int?)null;
+                                baiTap.id_bai_tap = reader["id_bai_tap"] != DBNull.Value ? Convert.ToInt32(reader["id_bai_tap"]) : (int?)null;
+                                baiTap.trang_thai = reader["trang_thai"] != DBNull.Value ? Convert.ToInt32(reader["trang_thai"]) : (int?)null;
+                                baiTap.ten = reader["ten"] != DBNull.Value ? Convert.ToString(reader["ten"]) : (string?)null;
+                                baiTap.noi_dung = reader["noi_dung"] != DBNull.Value ? Convert.ToString(reader["noi_dung"]) : (string?)null;
+                                baiTap.thoi_han = reader["thoi_han"] != DBNull.Value ? Convert.ToDateTime(reader["thoi_han"]) : (DateTime?)null;
+                                baiTap.id_giang_vien = reader["id_giang_vien"] != DBNull.Value ? Convert.ToInt32(reader["id_giang_vien"]) : (int?)null;
+                                baiTap.id_muc = reader["id_muc"] != DBNull.Value ? Convert.ToInt32(reader["id_muc"]) : (int?)null;
                                 baiTapList.Add(baiTap);
                             }
                         }
@@ -105,13 +105,13 @@ namespace CourseWebsiteDotNet.Models
                             {
                                 return new BaiTapModel // Trả về 1 BaiTapModel
                                 {
-                                    id_bai_tap = Convert.ToInt32(reader["id_bai_tap"]) != DBNull.Value ? Convert.ToInt32(reader["id_bai_tap"]) : (int?)null,
-                                    trang_thai = Convert.ToInt32(reader["trang_thai"]) != DBNull.Value ? Convert.ToInt32(reader["trang_thai"]) : (int?)null,
-                                    ten = Convert.ToString(reader["ten"]) != DBNull.Value ? Convert.ToString(reader["ten"]) : (string?)null,
-                                    noi_dung = Convert.ToString(reader["noi_dung"]) != DBNull.Value ? Convert.ToString(reader["noi_dung"]) : (string?)null,
-                                    thoi_han = Convert.ToDateTime(reader["thoi_han"]) != DBNull.Value ? Convert.ToDateTime(reader["thoi_han"]) : (string?)null,
-                                    id_giang_vien = Convert.ToInt32(reader["id_giang_vien"]) != DBNull.Value ? Convert.ToInt32(reader["id_giang_vien"]) : (int?)null,
-                                    id_muc = Convert.ToInt32(reader["id_muc"]) != DBNull.Value ? Convert.ToInt32(reader["id_muc"]) : (int?)null
+                                    id_bai_tap = reader["id_bai_tap"] != DBNull.Value ? Convert.ToInt32(reader["id_bai_tap"]) : (int?)null,
+                                    trang_thai = reader["trang_thai"] != DBNull.Value ? Convert.ToInt32(reader["trang_thai"]) : (int?)null,
+                                    ten = reader["ten"] != DBNull.Value ? Convert.ToString(reader["ten"]) : (string?)null,
+                                    noi_dung = reader["noi_dung"] != DBNull.Value ? Convert.ToString(reader["noi_dung"]) : (string?)null,
+                                    thoi_han =reader["thoi_han"] != DBNull.Value ? Convert.ToDateTime(reader["thoi_han"]) : (DateTime?)null,
+                                    id_giang_vien = reader["id_giang_vien"] != DBNull.Value ? Convert.ToInt32(reader["id_giang_vien"]) : (int?)null,
+                                    id_muc = reader["id_muc"] != DBNull.Value ? Convert.ToInt32(reader["id_muc"]) : (int?)null
                                 };
                             }
                             else

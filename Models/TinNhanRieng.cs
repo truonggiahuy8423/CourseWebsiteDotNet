@@ -6,11 +6,11 @@ namespace CourseWebsiteDotNet.Models
     {
         public class TinNhanRiengModel
         {
-            public int id_tin_nhan { get; set; }
-            public string noi_dung { get; set; }
-            public DateTime thoi_gian { get; set; }
-            public int user_gui { get; set; }
-            public int user_nhan { get; set; }
+            public int? id_tin_nhan { get; set; }
+            public string? noi_dung { get; set; }
+            public DateTime? thoi_gian { get; set; }
+            public int? user_gui { get; set; }
+            public int? user_nhan { get; set; }
         }
 
 
@@ -68,11 +68,11 @@ namespace CourseWebsiteDotNet.Models
                             while (reader.Read())
                             {
                                 TinNhanRiengModel tn = new TinNhanRiengModel();
-                                tn.id_tin_nhan = Convert.ToInt32(reader["id_tin_nhan"]) != DBNull.Value ? Convert.ToInt32(reader["id_tin_nhan"]) : (int?)null;
-                                tn.noi_dung = Convert.ToString(reader["noi_dung"]) != DBNull.Value ? Convert.ToString(reader["noi_dung"]) : (string?)null;
-                                tn.thoi_gian = Convert.ToDateTime(reader["thoi_gian"]) != DBNull.Value ? Convert.ToDateTime(reader["thoi_gian"]) : (DateTime?)null;
-                                tn.user_gui = Convert.ToInt32(reader["user_gui"]) != DBNull.Value ? Convert.ToInt32(reader["user_gui"]) : (int?)null;
-                                tn.user_nhan = Convert.ToInt32(reader["user_nhan"]) != DBNull.Value ? Convert.ToInt32(reader["user_nhan"]) : (int?)null;
+                                tn.id_tin_nhan = reader["id_tin_nhan"] != DBNull.Value ? Convert.ToInt32(reader["id_tin_nhan"]) : (int?)null;
+                                tn.noi_dung = reader["noi_dung"] != DBNull.Value ? Convert.ToString(reader["noi_dung"]) : (string?)null;
+                                tn.thoi_gian = reader["thoi_gian"] != DBNull.Value ? Convert.ToDateTime(reader["thoi_gian"]) : (DateTime?)null;
+                                tn.user_gui = reader["user_gui"] != DBNull.Value ? Convert.ToInt32(reader["user_gui"]) : (int?)null;
+                                tn.user_nhan = reader["user_nhan"] != DBNull.Value ? Convert.ToInt32(reader["user_nhan"]) : (int?)null;
                                 tinNhanRiengList.Add(tn);
                             }
                         }
@@ -101,11 +101,11 @@ namespace CourseWebsiteDotNet.Models
                             {
                                 return new TinNhanRiengModel // Trả về 1 TinNhanRiengModel
                                 {
-                                    id_tin_nhan = Convert.ToInt32(reader["id_tin_nhan"]) != DBNull.Value ? Convert.ToInt32(reader["id_tin_nhan"]) : (int?)null,
-                                    noi_dung = Convert.ToString(reader["noi_dung"]) != DBNull.Value ? Convert.ToString(reader["noi_dung"]) : (string?)null,
-                                    thoi_gian = Convert.ToDateTime(reader["thoi_gian"]) != DBNull.Value ? Convert.ToDateTime(reader["thoi_gian"]) : (DateTime?)null,
-                                    user_gui = Convert.ToInt32(reader["user_gui"]) != DBNull.Value ? Convert.ToInt32(reader["user_gui"]) : (int?)null,
-                                    user_nhan = Convert.ToInt32(reader["user_nhan"]) != DBNull.Value ? Convert.ToInt32(reader["user_nhan"]) : (int?)null
+                                    id_tin_nhan = reader["id_tin_nhan"] != DBNull.Value ? Convert.ToInt32(reader["id_tin_nhan"]) : (int?)null,
+                                    noi_dung = reader["noi_dung"] != DBNull.Value ? Convert.ToString(reader["noi_dung"]) : (string?)null,
+                                    thoi_gian = reader["thoi_gian"] != DBNull.Value ? Convert.ToDateTime(reader["thoi_gian"]) : (DateTime?)null,
+                                    user_gui = reader["user_gui"] != DBNull.Value ? Convert.ToInt32(reader["user_gui"]) : (int?)null,
+                                    user_nhan = reader["user_nhan"] != DBNull.Value ? Convert.ToInt32(reader["user_nhan"]) : (int?)null
                                 };
                             }
                             else
