@@ -51,7 +51,7 @@ namespace CourseWebsiteDotNet.Models
             // Trả về List<PhanCongGiangVienModel>
             public List<PhanCongGiangVienModel> GetAllPhanCongGiangVien()
             {
-                List<PhanCongGiangVienModel> PhanCongGiangVienList = new List<PhanCongGiangVienModel>();
+                List<PhanCongGiangVienModel> phanCongGiangVienList = new List<PhanCongGiangVienModel>();
                 using (MySqlConnection connection = new MySqlConnection(connectionString))
                 {
                     connection.Open();
@@ -65,15 +65,15 @@ namespace CourseWebsiteDotNet.Models
                             while (reader.Read())
                             {
                                 PhanCongGiangVienModel pc = new PhanCongGiangVienModel();
-                                pc.id_giang_vien = Convert.ToInt32(reader["id_giang_vien"]);
-                                pc.id_lop_hoc = Convert.ToInt32(reader["id_lop_hoc"]);
-                                PhanCongGiangVienList.Add(pc);
+                                pc.id_giang_vien = Convert.ToInt32(reader["id_giang_vien"]) != DBNull.Value ? Convert.ToInt32(reader["id_giang_vien"]) : (int?)null;
+                                pc.id_lop_hoc = Convert.ToInt32(reader["id_lop_hoc"]) != DBNull.Value ? Convert.ToInt32(reader["id_lop_hoc"]) : (int?)null;
+                                phanCongGiangVienList.Add(pc);
                             }
                         }
                     }
                 }
 
-                return PhanCongGiangVienList;
+                return phanCongGiangVienList;
             }
 
             // Trả về 1 PhanCongGiangVienModel
@@ -95,8 +95,8 @@ namespace CourseWebsiteDotNet.Models
                             {
                                 return new PhanCongGiangVienModel // Trả về 1 PhanCongGiangVienModel
                                 {
-                                    id_giang_vien = Convert.ToInt32(reader["id_giang_vien"]),
-                                    id_lop_hoc = Convert.ToInt32(reader["id_lop_hoc"])
+                                    id_giang_vien = Convert.ToInt32(reader["id_giang_vien"]) != DBNull.Value ? Convert.ToInt32(reader["id_giang_vien"]) : (int?)null,
+                                    id_lop_hoc = Convert.ToInt32(reader["id_lop_hoc"]) != DBNull.Value ? Convert.ToInt32(reader["id_lop_hoc"]) : (int?)null
                                 };
                             }
                             else

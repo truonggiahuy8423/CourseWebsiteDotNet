@@ -68,11 +68,11 @@ namespace CourseWebsiteDotNet.Models
                             while (reader.Read())
                             {
                                 GiangVienModel giangVien = new GiangVienModel();
-                                giangVien.id_giang_vien = Convert.ToInt32(reader["id_giang_vien"]);
-                                giangVien.ho_ten = Convert.ToString(reader["ho_ten"]);
-                                giangVien.ngay_sinh = Convert.ToDateTime(reader["ngay_sinh"]);
-                                giangVien.gioi_tinh = Convert.ToInt32(reader["gioi_tinh"]);
-                                giangVien.email = Convert.ToString(reader["email"]);
+                                giangVien.id_giang_vien = Convert.ToInt32(reader["id_giang_vien"]) != DBNull.Value ? Convert.ToInt32(reader["id_giang_vien"]) : (int?)null;
+                                giangVien.ho_ten = Convert.ToString(reader["ho_ten"]) != DBNull.Value ? Convert.ToString(reader["ho_ten"]) : (string?)null;
+                                giangVien.ngay_sinh = Convert.ToDateTime(reader["ngay_sinh"]) != DBNull.Value ? Convert.ToDateTime(reader["ngay_sinh"]) : (DateTime?)null;
+                                giangVien.gioi_tinh = Convert.ToInt32(reader["gioi_tinh"]) != DBNull.Value ? Convert.ToInt32(reader["gioi_tinh"]) : (int?)null;
+                                giangVien.email = Convert.ToString(reader["email"]) != DBNull.Value ? Convert.ToString(reader["email"]) : (string?)null;
                                 giangVienList.Add(giangVien);
                             }
                         }
@@ -101,11 +101,11 @@ namespace CourseWebsiteDotNet.Models
                             {
                                 return new GiangVienModel // Trả về 1 LopHocModel
                                 {
-                                    id_giang_vien = Convert.ToInt32(reader["id_giang_vien"]),
-                                    ho_ten = Convert.ToString(reader["ho_ten"]),
-                                    ngay_sinh = Convert.ToDateTime(reader["ngay_sinh"]),
-                                    gioi_tinh = Convert.ToInt32(reader["gioi_tinh"]),
-                                    email = Convert.ToString(reader["email"])
+                                    id_giang_vien = Convert.ToInt32(reader["id_giang_vien"]) != DBNull.Value ? Convert.ToInt32(reader["id_giang_vien"]) : (int?)null,
+                                    ho_ten = Convert.ToString(reader["ho_ten"]) != DBNull.Value ? Convert.ToString(reader["ho_ten"]) : (string?)null,
+                                    ngay_sinh = Convert.ToDateTime(reader["ngay_sinh"]) != DBNull.Value ? Convert.ToDateTime(reader["ngay_sinh"]) : (DateTime?)null,
+                                    gioi_tinh = Convert.ToInt32(reader["gioi_tinh"]) != DBNull.Value ? Convert.ToInt32(reader["gioi_tinh"]) : (int?)null,
+                                    email = Convert.ToString(reader["email"]) != DBNull.Value ? Convert.ToString(reader["email"]) : (string?)null
                                 };
                             }
                             else

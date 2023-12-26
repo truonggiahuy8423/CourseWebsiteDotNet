@@ -54,7 +54,7 @@ namespace CourseWebsiteDotNet.Models
             // Trả về List<TinNhanRiengModel>
             public List<TinNhanRiengModel> GetAllTinNhanRieng()
             {
-                List<TinNhanRiengModel> TinNhanRiengList = new List<TinNhanRiengModel>();
+                List<TinNhanRiengModel> tinNhanRiengList = new List<TinNhanRiengModel>();
                 using (MySqlConnection connection = new MySqlConnection(connectionString))
                 {
                     connection.Open();
@@ -68,18 +68,18 @@ namespace CourseWebsiteDotNet.Models
                             while (reader.Read())
                             {
                                 TinNhanRiengModel tn = new TinNhanRiengModel();
-                                tn.id_tin_nhan = Convert.ToInt32(reader["id_tin_nhan"]);
-                                tn.noi_dung = Convert.ToString(reader["noi_dung"]);
-                                tn.thoi_gian = Convert.ToDateTime(reader["thoi_gian"]);
-                                tn.user_gui = Convert.ToInt32(reader["user_gui"]);
-                                tn.user_nhan = Convert.ToInt32(reader["user_nhan"]);
-                                TinNhanRiengList.Add(tn);
+                                tn.id_tin_nhan = Convert.ToInt32(reader["id_tin_nhan"]) != DBNull.Value ? Convert.ToInt32(reader["id_tin_nhan"]) : (int?)null;
+                                tn.noi_dung = Convert.ToString(reader["noi_dung"]) != DBNull.Value ? Convert.ToString(reader["noi_dung"]) : (string?)null;
+                                tn.thoi_gian = Convert.ToDateTime(reader["thoi_gian"]) != DBNull.Value ? Convert.ToDateTime(reader["thoi_gian"]) : (DateTime?)null;
+                                tn.user_gui = Convert.ToInt32(reader["user_gui"]) != DBNull.Value ? Convert.ToInt32(reader["user_gui"]) : (int?)null;
+                                tn.user_nhan = Convert.ToInt32(reader["user_nhan"]) != DBNull.Value ? Convert.ToInt32(reader["user_nhan"]) : (int?)null;
+                                tinNhanRiengList.Add(tn);
                             }
                         }
                     }
                 }
 
-                return TinNhanRiengList;
+                return tinNhanRiengList;
             }
 
             // Trả về 1 TinNhanRiengModel
@@ -101,11 +101,11 @@ namespace CourseWebsiteDotNet.Models
                             {
                                 return new TinNhanRiengModel // Trả về 1 TinNhanRiengModel
                                 {
-                                    id_tin_nhan = Convert.ToInt32(reader["id_tin_nhan"]),
-                                    noi_dung = Convert.ToString(reader["noi_dung"]),
-                                    thoi_gian = Convert.ToDateTime(reader["thoi_gian"]),
-                                    user_gui = Convert.ToInt32(reader["user_gui"]),
-                                    user_nhan = Convert.ToInt32(reader["user_nhan"])
+                                    id_tin_nhan = Convert.ToInt32(reader["id_tin_nhan"]) != DBNull.Value ? Convert.ToInt32(reader["id_tin_nhan"]) : (int?)null,
+                                    noi_dung = Convert.ToString(reader["noi_dung"]) != DBNull.Value ? Convert.ToString(reader["noi_dung"]) : (string?)null,
+                                    thoi_gian = Convert.ToDateTime(reader["thoi_gian"]) != DBNull.Value ? Convert.ToDateTime(reader["thoi_gian"]) : (DateTime?)null,
+                                    user_gui = Convert.ToInt32(reader["user_gui"]) != DBNull.Value ? Convert.ToInt32(reader["user_gui"]) : (int?)null,
+                                    user_nhan = Convert.ToInt32(reader["user_nhan"]) != DBNull.Value ? Convert.ToInt32(reader["user_nhan"]) : (int?)null
                                 };
                             }
                             else
