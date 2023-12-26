@@ -7,8 +7,8 @@ namespace CourseWebsiteDotNet.Models
     public class CaModel
     {
         public int id_ca { get; set; }
-        public DateTime thoi_gian_bat_dau { get; set; }
-        public DateTime thoi_gian_ket_thuc { get; set; }
+        public DateTime? thoi_gian_bat_dau { get; set; }
+        public DateTime? thoi_gian_ket_thuc { get; set; }
     }
 
     public class CaRepository
@@ -64,8 +64,12 @@ namespace CourseWebsiteDotNet.Models
                             CaModel ca = new CaModel
                             {
                                 id_ca = Convert.ToInt32(reader["id_ca"]),
-                                thoi_gian_bat_dau = Convert.ToDateTime(reader["thoi_gian_bat_dau"]),
-                                thoi_gian_ket_thuc = Convert.ToDateTime(reader["thoi_gian_ket_thuc"])
+                                thoi_gian_bat_dau = reader["thoi_gian_bat_dau"] != DBNull.Value
+                                    ? Convert.ToDateTime(reader["thoi_gian_bat_dau"])
+                                    : (DateTime?)null,
+                                thoi_gian_ket_thuc = reader["thoi_gian_ket_thuc"] != DBNull.Value
+                                    ? Convert.ToDateTime(reader["thoi_gian_ket_thuc"])
+                                    : (DateTime?)null
                             };
 
                             caList.Add(ca);
@@ -96,8 +100,12 @@ namespace CourseWebsiteDotNet.Models
                             return new CaModel
                             {
                                 id_ca = Convert.ToInt32(reader["id_ca"]),
-                                thoi_gian_bat_dau = Convert.ToDateTime(reader["thoi_gian_bat_dau"]),
-                                thoi_gian_ket_thuc = Convert.ToDateTime(reader["thoi_gian_ket_thuc"])
+                                thoi_gian_bat_dau = reader["thoi_gian_bat_dau"] != DBNull.Value
+                                    ? Convert.ToDateTime(reader["thoi_gian_bat_dau"])
+                                    : (DateTime?)null,
+                                thoi_gian_ket_thuc = reader["thoi_gian_ket_thuc"] != DBNull.Value
+                                    ? Convert.ToDateTime(reader["thoi_gian_ket_thuc"])
+                                    : (DateTime?)null
                             };
                         }
                         else

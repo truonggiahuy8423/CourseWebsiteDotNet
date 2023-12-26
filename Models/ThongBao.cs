@@ -1,4 +1,4 @@
-using System;
+锘縰sing System;
 using System.Collections.Generic;
 using MySql.Data.MySqlClient;
 
@@ -7,7 +7,7 @@ namespace CourseWebsiteDotNet.Models
     public class ThongBaoModel
     {
         public int id_thong_bao { get; set; }
-        public string noi_dung { get; set; }
+        public string? noi_dung { get; set; }
         public DateTime? ngay_dang { get; set; }
         public int id_giang_vien { get; set; }
         public int id_muc { get; set; }
@@ -67,8 +67,8 @@ namespace CourseWebsiteDotNet.Models
                             ThongBaoModel thongBao = new ThongBaoModel
                             {
                                 id_thong_bao = Convert.ToInt32(reader["id_thong_bao"]),
-                                noi_dung = reader["noi_dung"].ToString(),
-                                ngay_dang = reader["ngay_dang"] is DBNull ? (DateTime?)null : Convert.ToDateTime(reader["ngay_dang"]),
+                                noi_dung = reader["noi_dung"] != DBNull.Value ? reader["noi_dung"].ToString() : null,
+                                ngay_dang = reader["ngay_dang"] != DBNull.Value ? Convert.ToDateTime(reader["ngay_dang"]) : (DateTime?)null,
                                 id_giang_vien = Convert.ToInt32(reader["id_giang_vien"]),
                                 id_muc = Convert.ToInt32(reader["id_muc"]),
                                 tieu_de = reader["tieu_de"].ToString()
@@ -102,8 +102,8 @@ namespace CourseWebsiteDotNet.Models
                             return new ThongBaoModel
                             {
                                 id_thong_bao = Convert.ToInt32(reader["id_thong_bao"]),
-                                noi_dung = reader["noi_dung"].ToString(),
-                                ngay_dang = reader["ngay_dang"] is DBNull ? (DateTime?)null : Convert.ToDateTime(reader["ngay_dang"]),
+                                noi_dung = reader["noi_dung"] != DBNull.Value ? reader["noi_dung"].ToString() : null,
+                                ngay_dang = reader["ngay_dang"] != DBNull.Value ? Convert.ToDateTime(reader["ngay_dang"]) : (DateTime?)null,
                                 id_giang_vien = Convert.ToInt32(reader["id_giang_vien"]),
                                 id_muc = Convert.ToInt32(reader["id_muc"]),
                                 tieu_de = reader["tieu_de"].ToString()
@@ -126,13 +126,14 @@ namespace CourseWebsiteDotNet.Models
                 {
                     connection.Open();
 
-                    string query = "INSERT INTO thong_bao (noi_dung, ngay_dang, id_giang_vien, id_muc, tieu_de) " +
-                                   "VALUES (@NoiDung, @NgayDang, @IdGiangVien, @IdMuc, @TieuDe); SELECT LAST_INSERT_ID();";
+                    string query = @"INSERT INTO thong_bao (noi_dung, ngay_dang, id_giang_vien, id_muc, tieu_de) 
+                                     VALUES (@NoiDung, @NgayDang, @IdGiangVien, @IdMuc, @TieuDe); 
+                                     SELECT LAST_INSERT_ID();";
 
                     using (MySqlCommand command = new MySqlCommand(query, connection))
                     {
-                        command.Parameters.AddWithValue("@NoiDung", thongBao.noi_dung);
-                        command.Parameters.AddWithValue("@NgayDang", thongBao.ngay_dang);
+                        command.Parameters.AddWithValue("@NoiDung", thongBao.noi_dung ?? (object)DBNull.Value);
+                        command.Parameters.AddWithValue("@NgayDang", thongBao.ngay_dang ?? (object)DBNull.Value);
                         command.Parameters.AddWithValue("@IdGiangVien", thongBao.id_giang_vien);
                         command.Parameters.AddWithValue("@IdMuc", thongBao.id_muc);
                         command.Parameters.AddWithValue("@TieuDe", thongBao.tieu_de);
@@ -142,7 +143,7 @@ namespace CourseWebsiteDotNet.Models
                         return new Response
                         {
                             State = true,
-                            Message = "Th阭 th鬾g b醥 th鄋h c鬾g",
+                            Message = "Th锚m th么ng b谩o th脿nh c么ng",
                             InsertedId = insertedId,
                         };
                     }
@@ -154,16 +155,63 @@ namespace CourseWebsiteDotNet.Models
         {
             return ExecuteDatabaseOperation(() =>
             {
-            using (MySqlConnection connection = new MySqlConnection(connectionString))
-            {
-                connection.Open();
-
-                string query = "UPDATE thong_bao SET noi_dung = @NoiDung, " +
-                               "ngay_dang = @NgayDang, id_giang_vien = @IdGiangVien, " +
-                               "id_muc = @IdMuc, tieu_de = @TieuDe " +
-                               "WHERE id_thong_bao = @Id";
-
-                using (MySqlCommand command = new MySqlCommand(query, connection))
+                using (MySqlConnection connection = new MySqlConnection(connectionString))
                 {
-                    command.Parameters.AddWithValue("@NoiDung", thongBao.noi_dung);
-                    command.Parameters.AddWithValue("@NgayD
+                    connection.Open();
+
+                    string query = @"UPDATE thong_bao SET noi_dung = @NoiDung, ngay_dang = @NgayDang, 
+                                     id_giang_vien = @IdGiangVien, id_muc = @IdMuc, tieu_de = @TieuDe
+                                     WHERE id_thong_bao = @Id";
+
+                    using (MySqlCommand command = new MySqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@NoiDung", thongBao.noi_dung ?? (object)DBNull.Value);
+                        command.Parameters.AddWithValue("@NgayDang", thongBao.ngay_dang ?? (object)DBNull.Value);
+                        command.Parameters.AddWithValue("@IdGiangVien", thongBao.id_giang_vien);
+                        command.Parameters.AddWithValue("@IdMuc", thongBao.id_muc);
+                        command.Parameters.AddWithValue("@TieuDe", thongBao.tieu_de);
+                        command.Parameters.AddWithValue("@Id", thongBao.id_thong_bao);
+
+                        int effectedRows = command.ExecuteNonQuery();
+
+                        return new Response
+                        {
+                            State = true,
+                            Message = "C岷璸 nh岷璽 th么ng tin th么ng b谩o th脿nh c么ng",
+                            InsertedId = null,
+                            EffectedRows = effectedRows
+                        };
+                    }
+                }
+            });
+        }
+
+        public Response DeleteThongBao(int id)
+        {
+            return ExecuteDatabaseOperation(() =>
+            {
+                using (MySqlConnection connection = new MySqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    string query = "DELETE FROM thong_bao WHERE id_thong_bao = @Id";
+
+                    using (MySqlCommand command = new MySqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@Id", id);
+
+                        int effectedRows = command.ExecuteNonQuery();
+
+                        return new Response
+                        {
+                            State = true,
+                            Message = "X贸a th么ng b谩o th脿nh c么ng",
+                            InsertedId = null,
+                            EffectedRows = effectedRows
+                        };
+                    }
+                }
+            });
+        }
+    }
+}

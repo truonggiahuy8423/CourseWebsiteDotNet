@@ -8,7 +8,7 @@ namespace CourseWebsiteDotNet.Models
     {
         public int id_duong_link { get; set; }
         public string link { get; set; }
-        public DateTime ngay_dang { get; set; }
+        public DateTime? ngay_dang { get; set; }
         public int id_giang_vien { get; set; }
         public int id_muc { get; set; }
         public string tieu_de { get; set; }
@@ -49,7 +49,7 @@ namespace CourseWebsiteDotNet.Models
             }
         }
 
-        public List<DuongLinkModel> GetAllDuongLinks()
+        public List<DuongLinkModel> GetAllDuongLink()
         {
             List<DuongLinkModel> duongLinkList = new List<DuongLinkModel>();
             using (MySqlConnection connection = new MySqlConnection(connectionString))
@@ -68,7 +68,9 @@ namespace CourseWebsiteDotNet.Models
                             {
                                 id_duong_link = Convert.ToInt32(reader["id_duong_link"]),
                                 link = reader["link"].ToString(),
-                                ngay_dang = Convert.ToDateTime(reader["ngay_dang"]),
+                                ngay_dang = reader["ngay_dang"] != DBNull.Value
+                                    ? Convert.ToDateTime(reader["ngay_dang"])
+                                    : (DateTime?)null,
                                 id_giang_vien = Convert.ToInt32(reader["id_giang_vien"]),
                                 id_muc = Convert.ToInt32(reader["id_muc"]),
                                 tieu_de = reader["tieu_de"].ToString()
@@ -82,6 +84,7 @@ namespace CourseWebsiteDotNet.Models
 
             return duongLinkList;
         }
+
         public Response InsertDuongLink(DuongLinkModel duongLink)
         {
             return ExecuteDatabaseOperation(() =>
@@ -115,106 +118,104 @@ namespace CourseWebsiteDotNet.Models
             });
         }
 
-        // Các hàm xử lý khác...
-
-    }
-}
-
-public Response UpdateDuongLink(DuongLinkModel duongLink)
-    {
-        return ExecuteDatabaseOperation(() =>
+        public Response UpdateDuongLink(DuongLinkModel duongLink)
         {
-            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            return ExecuteDatabaseOperation(() =>
             {
-                connection.Open();
-
-                string query = @"UPDATE duong_link SET link = @Link, ngay_dang = @NgayDang, 
-                                 id_giang_vien = @IdGiangVien, id_muc = @IdMuc, tieu_de = @TieuDe
-                                 WHERE id_duong_link = @Id";
-
-                using (MySqlCommand command = new MySqlCommand(query, connection))
+                using (MySqlConnection connection = new MySqlConnection(connectionString))
                 {
-                    command.Parameters.AddWithValue("@Link", duongLink.link);
-                    command.Parameters.AddWithValue("@NgayDang", duongLink.ngay_dang);
-                    command.Parameters.AddWithValue("@IdGiangVien", duongLink.id_giang_vien);
-                    command.Parameters.AddWithValue("@IdMuc", duongLink.id_muc);
-                    command.Parameters.AddWithValue("@TieuDe", duongLink.tieu_de);
-                    command.Parameters.AddWithValue("@Id", duongLink.id_duong_link);
+                    connection.Open();
 
-                    int effectedRows = command.ExecuteNonQuery();
+                    string query = @"UPDATE duong_link SET link = @Link, ngay_dang = @NgayDang, 
+                                     id_giang_vien = @IdGiangVien, id_muc = @IdMuc, tieu_de = @TieuDe
+                                     WHERE id_duong_link = @Id";
 
-                    return new Response
+                    using (MySqlCommand command = new MySqlCommand(query, connection))
                     {
-                        State = true,
-                        Message = "Cập nhật thông tin đường link thành công",
-                        InsertedId = null,
-                        EffectedRows = effectedRows
-                    };
-                }
-            }
-        });
-    }
+                        command.Parameters.AddWithValue("@Link", duongLink.link);
+                        command.Parameters.AddWithValue("@NgayDang", duongLink.ngay_dang);
+                        command.Parameters.AddWithValue("@IdGiangVien", duongLink.id_giang_vien);
+                        command.Parameters.AddWithValue("@IdMuc", duongLink.id_muc);
+                        command.Parameters.AddWithValue("@TieuDe", duongLink.tieu_de);
+                        command.Parameters.AddWithValue("@Id", duongLink.id_duong_link);
 
-    public DuongLinkModel? GetDuongLinkById(int id)
-    {
-        using (MySqlConnection connection = new MySqlConnection(connectionString))
-        {
-            connection.Open();
+                        int effectedRows = command.ExecuteNonQuery();
 
-            string query = "SELECT * FROM duong_link WHERE id_duong_link = @Id";
-
-            using (MySqlCommand command = new MySqlCommand(query, connection))
-            {
-                command.Parameters.AddWithValue("@Id", id);
-
-                using (MySqlDataReader reader = command.ExecuteReader())
-                {
-                    if (reader.Read())
-                    {
-                        return new DuongLinkModel
+                        return new Response
                         {
-                            id_duong_link = Convert.ToInt32(reader["id_duong_link"]),
-                            link = reader["link"].ToString(),
-                            ngay_dang = Convert.ToDateTime(reader["ngay_dang"]),
-                            id_giang_vien = Convert.ToInt32(reader["id_giang_vien"]),
-                            id_muc = Convert.ToInt32(reader["id_muc"]),
-                            tieu_de = reader["tieu_de"].ToString()
+                            State = true,
+                            Message = "Cập nhật thông tin đường link thành công",
+                            InsertedId = null,
+                            EffectedRows = effectedRows
                         };
                     }
-                    else
-                    {
-                        return null;
-                    }
                 }
-            }
+            });
         }
-    }
 
-    public Response DeleteDuongLink(int id)
-    {
-        return ExecuteDatabaseOperation(() =>
+        public DuongLinkModel? GetDuongLinkById(int id)
         {
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 connection.Open();
 
-                string query = "DELETE FROM duong_link WHERE id_duong_link = @Id";
+                string query = "SELECT * FROM duong_link WHERE id_duong_link = @Id";
 
                 using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@Id", id);
 
-                    int effectedRows = command.ExecuteNonQuery();
-
-                    return new Response
+                    using (MySqlDataReader reader = command.ExecuteReader())
                     {
-                        State = true,
-                        Message = "Xóa đường link thành công",
-                        InsertedId = null,
-                        EffectedRows = effectedRows
-                    };
+                        if (reader.Read())
+                        {
+                            return new DuongLinkModel
+                            {
+                                id_duong_link = Convert.ToInt32(reader["id_duong_link"]),
+                                link = reader["link"].ToString(),
+                                ngay_dang = reader["ngay_dang"] != DBNull.Value
+                                    ? Convert.ToDateTime(reader["ngay_dang"])
+                                    : (DateTime?)null,
+                                id_giang_vien = Convert.ToInt32(reader["id_giang_vien"]),
+                                id_muc = Convert.ToInt32(reader["id_muc"]),
+                                tieu_de = reader["tieu_de"].ToString()
+                            };
+                        }
+                        else
+                        {
+                            return null;
+                        }
+                    }
                 }
             }
-        });
+        }
+
+        public Response DeleteDuongLink(int id)
+        {
+            return ExecuteDatabaseOperation(() =>
+            {
+                using (MySqlConnection connection = new MySqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    string query = "DELETE FROM duong_link WHERE id_duong_link = @Id";
+
+                    using (MySqlCommand command = new MySqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@Id", id);
+
+                        int effectedRows = command.ExecuteNonQuery();
+
+                        return new Response
+                        {
+                            State = true,
+                            Message = "Xóa đường link thành công",
+                            InsertedId = null,
+                            EffectedRows = effectedRows
+                        };
+                    }
+                }
+            });
+        }
     }
 }

@@ -7,7 +7,7 @@ namespace CourseWebsiteDotNet.Models
     public class MonHocModel
     {
         public int id_mon_hoc { get; set; }
-        public string ten_mon_hoc { get; set; }
+        public string? ten_mon_hoc { get; set; }
     }
 
     public class MonHocRepository
@@ -63,7 +63,7 @@ namespace CourseWebsiteDotNet.Models
                             MonHocModel monHoc = new MonHocModel
                             {
                                 id_mon_hoc = Convert.ToInt32(reader["id_mon_hoc"]),
-                                ten_mon_hoc = reader["ten_mon_hoc"].ToString()
+                                ten_mon_hoc = reader["ten_mon_hoc"] != DBNull.Value ? reader["ten_mon_hoc"].ToString() : null
                             };
 
                             monHocList.Add(monHoc);
@@ -94,7 +94,7 @@ namespace CourseWebsiteDotNet.Models
                             return new MonHocModel
                             {
                                 id_mon_hoc = Convert.ToInt32(reader["id_mon_hoc"]),
-                                ten_mon_hoc = reader["ten_mon_hoc"].ToString()
+                                ten_mon_hoc = reader["ten_mon_hoc"] != DBNull.Value ? reader["ten_mon_hoc"].ToString() : null
                             };
                         }
                         else
