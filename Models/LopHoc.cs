@@ -6,10 +6,10 @@ namespace CourseWebsiteDotNet.Models
     // Lớp LopHocModel chứa các thuộc tính
     public class LopHocModel
     {
-        public int id_lop_hoc { get; set; }
-        public DateTime ngay_bat_dau { get; set; }
-        public DateTime ngay_ket_thuc { get; set; }
-        public int id_mon_hoc { get; set; }
+        public int? id_lop_hoc { get; set; }
+        public DateTime? ngay_bat_dau { get; set; }
+        public DateTime? ngay_ket_thuc { get; set; }
+        public int? id_mon_hoc { get; set; }
     }
 
 
@@ -67,10 +67,10 @@ namespace CourseWebsiteDotNet.Models
                         while (reader.Read())
                         {
                             LopHocModel lopHoc = new LopHocModel();
-                            lopHoc.id_lop_hoc = Convert.ToInt32(reader["id_lop_hoc"]) != DBNull.Value ? Convert.ToInt32(reader["id_lop_hoc"]) : (int?)null;
-                            lopHoc.ngay_bat_dau = Convert.ToDateTime(reader["ngay_bat_dau"]) != DBNull.Value ? Convert.ToDateTime(reader["ngay_bat_dau"]) : (DateTime?)null;
-                            lopHoc.ngay_ket_thuc = Convert.ToDateTime(reader["ngay_ket_thuc"]) != DBNull.Value ? Convert.ToDateTime(reader["ngay_ket_thuc"]) : (DateTime?)null;
-                            lopHoc.id_mon_hoc = Convert.ToInt32(reader["id_mon_hoc"]) != DBNull.Value ? Convert.ToInt32(reader["id_mon_hoc"]) : (int?)null;
+                            lopHoc.id_lop_hoc = reader["id_lop_hoc"] != DBNull.Value ? Convert.ToInt32(reader["id_lop_hoc"]) : (int?)null;
+                            lopHoc.ngay_bat_dau = reader["ngay_bat_dau"] != DBNull.Value ? Convert.ToDateTime(reader["ngay_bat_dau"]) : (DateTime?)null;
+                            lopHoc.ngay_ket_thuc = reader["ngay_ket_thuc"] != DBNull.Value ? Convert.ToDateTime(reader["ngay_ket_thuc"]) : (DateTime?)null;
+                            lopHoc.id_mon_hoc = reader["id_mon_hoc"] != DBNull.Value ? Convert.ToInt32(reader["id_mon_hoc"]) : (int?)null;
                             lopHocList.Add(lopHoc);
                         }
                     }
@@ -99,10 +99,10 @@ namespace CourseWebsiteDotNet.Models
                         {
                             return new LopHocModel // Trả về 1 LopHocModel
                             {
-                                id_lop_hoc = Convert.ToInt32(reader["id_lop_hoc"]) != DBNull.Value ? Convert.ToInt32(reader["id_lop_hoc"]) : (int?)null,
-                                ngay_bat_dau = Convert.ToDateTime(reader["ngay_bat_dau"]) != DBNull.Value ? Convert.ToDateTime(reader["ngay_bat_dau"]) : (DateTime?)null,
-                                ngay_ket_thuc = Convert.ToDateTime(reader["ngay_ket_thuc"]) != DBNull.Value ? Convert.ToDateTime(reader["ngay_ket_thuc"]) : (DateTime?)null,
-                                id_mon_hoc = Convert.ToInt32(reader["id_mon_hoc"]) != DBNull.Value ? Convert.ToInt32(reader["id_mon_hoc"]) : (int?)null
+                                id_lop_hoc = reader["id_lop_hoc"] != DBNull.Value ? Convert.ToInt32(reader["id_lop_hoc"]) : (int?)null,
+                                ngay_bat_dau = reader["ngay_bat_dau"] != DBNull.Value ? Convert.ToDateTime(reader["ngay_bat_dau"]) : (DateTime?)null,
+                                ngay_ket_thuc = reader["ngay_ket_thuc"] != DBNull.Value ? Convert.ToDateTime(reader["ngay_ket_thuc"]) : (DateTime?)null,
+                                id_mon_hoc = reader["id_mon_hoc"] != DBNull.Value ? Convert.ToInt32(reader["id_mon_hoc"]) : (int?)null
                             };
                         }
                         else

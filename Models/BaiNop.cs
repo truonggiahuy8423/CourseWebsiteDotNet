@@ -6,10 +6,10 @@ namespace CourseWebsiteDotNet.Models
     {
         public class BaiNopModel
         {
-            public int id_bai_nop { get; set; }
-            public DateTime thoi_gian_nop { get; set; }
-            public int id_bai_tap { get; set; }
-            public int id_hoc_vien { get; set; }
+            public int? id_bai_nop { get; set; }
+            public DateTime? thoi_gian_nop { get; set; }
+            public int? id_bai_tap { get; set; }
+            public int? id_hoc_vien { get; set; }
         }
 
 
@@ -67,11 +67,11 @@ namespace CourseWebsiteDotNet.Models
                             while (reader.Read())
                             {
                                 BaiNopModel baiNop = new BaiNopModel();
-                                baiNop.id_bai_nop = Convert.ToInt32(reader["id_bai_nop"]) != DBNull.Value ? Convert.ToInt32(reader["id_bai_nop"]) : (int?)null;
-                                baiNop.thoi_gian_nop = Convert.ToDateTime(reader["thoi_gian_nop"]) != DBNull.Value ? Convert.ToDateTime(reader["thoi_gian_nop"]) : (DateTime?)null;
-                                baiNop.id_bai_tap = Convert.ToInt32(reader["id_bai_tap"]) != DBNull.Value ? Convert.ToInt32(reader["id_bai_tap"]) : (int?)null;
-                                baiNop.id_hoc_vien = Convert.ToInt32(reader["id_hoc_vien"]) != DBNull.Value ? Convert.ToInt32(reader["id_hoc_vien"]) : (int?)null;
-                                baiNopList.Add(BaiNop);
+                                baiNop.id_bai_nop = reader["id_bai_nop"] != DBNull.Value ? Convert.ToInt32(reader["id_bai_nop"]) : (int?)null;
+                                baiNop.thoi_gian_nop = reader["thoi_gian_nop"] != DBNull.Value ? Convert.ToDateTime(reader["thoi_gian_nop"]) : (DateTime?)null;
+                                baiNop.id_bai_tap = reader["id_bai_tap"] != DBNull.Value ? Convert.ToInt32(reader["id_bai_tap"]) : (int?)null;
+                                baiNop.id_hoc_vien = reader["id_hoc_vien"] != DBNull.Value ? Convert.ToInt32(reader["id_hoc_vien"]) : (int?)null;
+                                baiNopList.Add(baiNop);
                             }
                         }
                     }
@@ -99,10 +99,10 @@ namespace CourseWebsiteDotNet.Models
                             {
                                 return new BaiNopModel // Trả về 1 BaiNopModel
                                 {
-                                    id_bai_nop = Convert.ToInt32(reader["id_bai_nop"]) != DBNull.Value ? Convert.ToInt32(reader["id_bai_nop"]) : (int?)null,
-                                    thoi_gian_nop = Convert.ToDateTime(reader["thoi_gian_nop"]) != DBNull.Value ? Convert.ToDateTime(reader["thoi_gian_nop"]) : (DateTime?)null,
-                                    id_bai_tap = Convert.ToInt32(reader["id_bai_tap"]) != DBNull.Value ? Convert.ToInt32(reader["id_bai_tap"]) : (int?)null,
-                                    id_hoc_vien = Convert.ToInt32(reader["id_hoc_vien"]) != DBNull.Value ? Convert.ToInt32(reader["id_hoc_vien"]) : (int?)null
+                                    id_bai_nop = reader["id_bai_nop"] != DBNull.Value ? Convert.ToInt32(reader["id_bai_nop"]) : (int?)null,
+                                    thoi_gian_nop = reader["thoi_gian_nop"] != DBNull.Value ? Convert.ToDateTime(reader["thoi_gian_nop"]) : (DateTime?)null,
+                                    id_bai_tap = reader["id_bai_tap"] != DBNull.Value ? Convert.ToInt32(reader["id_bai_tap"]) : (int?)null,
+                                    id_hoc_vien = reader["id_hoc_vien"] != DBNull.Value ? Convert.ToInt32(reader["id_hoc_vien"]) : (int?)null
                                 };
                             }
                             else

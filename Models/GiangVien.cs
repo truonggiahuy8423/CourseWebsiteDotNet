@@ -6,11 +6,11 @@ namespace CourseWebsiteDotNet.Models
     {
         public class GiangVienModel
         {
-            public int id_giang_vien { get; set; }
-            public string ho_ten { get; set; }
-            public DateTime ngay_sinh { get; set; }
-            public int gioi_tinh {  get; set; }
-            public string email { get; set; }
+            public int? id_giang_vien { get; set; }
+            public string? ho_ten { get; set; }
+            public DateTime? ngay_sinh { get; set; }
+            public int? gioi_tinh {  get; set; }
+            public string? email { get; set; }
         }
 
 
@@ -68,11 +68,11 @@ namespace CourseWebsiteDotNet.Models
                             while (reader.Read())
                             {
                                 GiangVienModel giangVien = new GiangVienModel();
-                                giangVien.id_giang_vien = Convert.ToInt32(reader["id_giang_vien"]) != DBNull.Value ? Convert.ToInt32(reader["id_giang_vien"]) : (int?)null;
-                                giangVien.ho_ten = Convert.ToString(reader["ho_ten"]) != DBNull.Value ? Convert.ToString(reader["ho_ten"]) : (string?)null;
-                                giangVien.ngay_sinh = Convert.ToDateTime(reader["ngay_sinh"]) != DBNull.Value ? Convert.ToDateTime(reader["ngay_sinh"]) : (DateTime?)null;
-                                giangVien.gioi_tinh = Convert.ToInt32(reader["gioi_tinh"]) != DBNull.Value ? Convert.ToInt32(reader["gioi_tinh"]) : (int?)null;
-                                giangVien.email = Convert.ToString(reader["email"]) != DBNull.Value ? Convert.ToString(reader["email"]) : (string?)null;
+                                giangVien.id_giang_vien = reader["id_giang_vien"] != DBNull.Value ? Convert.ToInt32(reader["id_giang_vien"]) : (int?)null;
+                                giangVien.ho_ten = reader["ho_ten"] != DBNull.Value ? Convert.ToString(reader["ho_ten"]) : (string?)null;
+                                giangVien.ngay_sinh = reader["ngay_sinh"] != DBNull.Value ? Convert.ToDateTime(reader["ngay_sinh"]) : (DateTime?)null;
+                                giangVien.gioi_tinh = reader["gioi_tinh"] != DBNull.Value ? Convert.ToInt32(reader["gioi_tinh"]) : (int?)null;
+                                giangVien.email = reader["email"] != DBNull.Value ? Convert.ToString(reader["email"]) : (string?)null;
                                 giangVienList.Add(giangVien);
                             }
                         }
@@ -101,11 +101,11 @@ namespace CourseWebsiteDotNet.Models
                             {
                                 return new GiangVienModel // Trả về 1 LopHocModel
                                 {
-                                    id_giang_vien = Convert.ToInt32(reader["id_giang_vien"]) != DBNull.Value ? Convert.ToInt32(reader["id_giang_vien"]) : (int?)null,
-                                    ho_ten = Convert.ToString(reader["ho_ten"]) != DBNull.Value ? Convert.ToString(reader["ho_ten"]) : (string?)null,
-                                    ngay_sinh = Convert.ToDateTime(reader["ngay_sinh"]) != DBNull.Value ? Convert.ToDateTime(reader["ngay_sinh"]) : (DateTime?)null,
-                                    gioi_tinh = Convert.ToInt32(reader["gioi_tinh"]) != DBNull.Value ? Convert.ToInt32(reader["gioi_tinh"]) : (int?)null,
-                                    email = Convert.ToString(reader["email"]) != DBNull.Value ? Convert.ToString(reader["email"]) : (string?)null
+                                    id_giang_vien = reader["id_giang_vien"] != DBNull.Value ? Convert.ToInt32(reader["id_giang_vien"]) : (int?)null,
+                                    ho_ten = reader["ho_ten"] != DBNull.Value ? Convert.ToString(reader["ho_ten"]) : (string?)null,
+                                    ngay_sinh = reader["ngay_sinh"] != DBNull.Value ? Convert.ToDateTime(reader["ngay_sinh"]) : (DateTime?)null,
+                                    gioi_tinh = reader["gioi_tinh"] != DBNull.Value ? Convert.ToInt32(reader["gioi_tinh"]) : (int?)null,
+                                    email = reader["email"] != DBNull.Value ? Convert.ToString(reader["email"]) : (string?)null
                                 };
                             }
                             else

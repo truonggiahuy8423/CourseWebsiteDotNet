@@ -6,8 +6,8 @@ namespace CourseWebsiteDotNet.Models
     {
         public class PhanCongGiangVienModel
         {
-            public int id_giang_vien { get; set; }
-            public int id_lop_hoc { get; set; }
+            public int? id_giang_vien { get; set; }
+            public int? id_lop_hoc { get; set; }
         }
 
 
@@ -65,8 +65,8 @@ namespace CourseWebsiteDotNet.Models
                             while (reader.Read())
                             {
                                 PhanCongGiangVienModel pc = new PhanCongGiangVienModel();
-                                pc.id_giang_vien = Convert.ToInt32(reader["id_giang_vien"]) != DBNull.Value ? Convert.ToInt32(reader["id_giang_vien"]) : (int?)null;
-                                pc.id_lop_hoc = Convert.ToInt32(reader["id_lop_hoc"]) != DBNull.Value ? Convert.ToInt32(reader["id_lop_hoc"]) : (int?)null;
+                                pc.id_giang_vien = reader["id_giang_vien"] != DBNull.Value ? Convert.ToInt32(reader["id_giang_vien"]) : (int?)null;
+                                pc.id_lop_hoc = reader["id_lop_hoc"] != DBNull.Value ? Convert.ToInt32(reader["id_lop_hoc"]) : (int?)null;
                                 phanCongGiangVienList.Add(pc);
                             }
                         }
@@ -95,8 +95,8 @@ namespace CourseWebsiteDotNet.Models
                             {
                                 return new PhanCongGiangVienModel // Trả về 1 PhanCongGiangVienModel
                                 {
-                                    id_giang_vien = Convert.ToInt32(reader["id_giang_vien"]) != DBNull.Value ? Convert.ToInt32(reader["id_giang_vien"]) : (int?)null,
-                                    id_lop_hoc = Convert.ToInt32(reader["id_lop_hoc"]) != DBNull.Value ? Convert.ToInt32(reader["id_lop_hoc"]) : (int?)null
+                                    id_giang_vien = reader["id_giang_vien"] != DBNull.Value ? Convert.ToInt32(reader["id_giang_vien"]) : (int?)null,
+                                    id_lop_hoc = reader["id_lop_hoc"] != DBNull.Value ? Convert.ToInt32(reader["id_lop_hoc"]) : (int?)null
                                 };
                             }
                             else
