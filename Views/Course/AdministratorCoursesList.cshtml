@@ -78,23 +78,23 @@
                             y++;
                         }
                         string status=kiem_tra_tinh_trang(courses.Rows[i]["ngay_bat_dau"].ToString(), courses.Rows[i]["ngay_ket_thuc"].ToString());
-                        string courseid = courses.Rows[i]["id_mon_hoc"].ToString().PadLeft(3, '0') + "." + courses.Rows[i]["id_mon_hoc"].ToString().PadLeft(6, '0');
+                        string courseid = courses.Rows[i]["id_mon_hoc"].ToString().PadLeft(3, '0') + "." + courses.Rows[i]["id_lop_hoc"].ToString().PadLeft(6, '0');
           
-                        <div class='class__item col-4 col-xxl-4' courseid='@courses.Rows[i]["id_lop_hoc"]' >
-                            <div class='p-3 border border-gray rounded-2 shadow-sm class-div'>
-                                <div class='class__item__title mb-5'>
-                                    <h6>@courses.Rows[i]["ten_mon_hoc"] @Html.Raw(courseid)</h6>
-                                    <p>Giảng viên: @Html.Raw(dsgv)</p>
-                                </div>
-                                <div class='class__item__state'>
-                                    <p>Thời gian: @courses.Rows[i]["ngay_bat_dau"] - @courses.Rows[i]["ngay_ket_thuc"]</p>
-                                    <p>Trạng thái: @Html.Raw(status)</p>
-                                </div>
-                                <input type='checkbox' class='delete-checkbox' value='@courses.Rows[i]["id_lop_hoc"]'>
+                                                <div class='class__item col-4 col-xxl-4' courseid='@courses.Rows[i]["id_lop_hoc"]' >
+                                                    <div class='p-3 border border-gray rounded-2 shadow-sm class-div'>
+                                                        <div class='class__item__title mb-5'>
+                                                            <h6>@courses.Rows[i]["ten_mon_hoc"] @Html.Raw(courseid)</h6>
+                                                            <p>Giảng viên: @Html.Raw(dsgv)</p>
+                                                        </div>
+                                                        <div class='class__item__state'>
+                                                            <p>Thời gian: @courses.Rows[i]["ngay_bat_dau"] - @courses.Rows[i]["ngay_ket_thuc"]</p>
+                                                            <p>Trạng thái: @Html.Raw(status)</p>
+                                                        </div>
+                                                        <input type='checkbox' class='delete-checkbox' value='@courses.Rows[i]["id_lop_hoc"]'>
 
 
-                            </div>
-                        </div>
+                                                    </div>
+                                                </div>
            
                     }
                     }
@@ -164,9 +164,10 @@
                     jsonData[`courses`] = courses;
                     jsonData = JSON.stringify(jsonData);
                     $.ajax({
-                        url: '<?php echo base_url(); ?>/Admin/CoursesController/deleteCourse',
+                        url: 'Course/deleteCourse',
                         method: 'POST',
                         dataType: 'json', // Kiểu dữ liệu bạn mong đợi từ phản hồi (json, html, text, vv.)
+                        contentType: 'application/json',
                         data: // Dữ liệu bạn muốn gửi đi (nếu có)
                             jsonData,
                         success: function (response) {
@@ -187,6 +188,7 @@
                             deletebtn.prop(`disabled`, false);
                             deletebtn.removeClass(`highlight-button--disable`);
                             deletebtn.addClass(`highlight-button`);
+                            reloadCoursesList();
                             for (var [id_lop_hoc, processstate] of Object.entries(response)) {
                                 if (processstate.state) {
                                     toast({
@@ -220,16 +222,53 @@
                 event.stopPropagation();
             });
             let loadingstate = false;
-            $(`.add-class-btn`).click(function () {
-                $.ajax({
-                    url: '/Course/test',
-                    method: 'GET',
-                    dataType: 'json',
-                    success: function (response) { 
-                        console.log(response)
-                    }
-                });
-            });
+            // $(`.add-class-btn`).click(function () {
+            //     let obj = {"name": "Huy"}
+            //     $.ajax({
+            //         url: '/Course/test2',
+            //         method: 'POST',
+            //         dataType: 'text',
+            //         contentType: 'application/json',
+            //         data: JSON.stringify( { 
+            //             data: JSON.stringify(obj),
+            //             data2: 10
+            //         }),
+            //         success: function (response) { 
+            //             console.log("data received2:" + response)
+            //         }
+            //     });
+            // });
+            // $(`.add-class-btn`).click(function () {
+            //     let obj = { "name": "Huy" }
+            //     $.ajax({
+            //         url: '/Course/test4',
+            //         method: 'POST',
+            //         dataType: 'text',
+            //         data: {
+            //             name: JSON.stringify(obj),
+            //             id: 10
+            //         },
+            //         success: function (response) {
+            //             console.log("data received4:" + response)
+            //         }
+            //     });
+            // });
+            // $(`.add-class-btn`).click(function () {
+            //     let obj = { "name": "Huy" }
+            //     $.ajax({
+            //         url: '/Course/test3?id=10',
+            //         method: 'POST',
+            //         dataType: 'text',
+            //         contentType: 'application/json',
+            //         data: JSON.stringify({
+            //             data: JSON.stringify(obj),
+            //             data2: 10
+            //         }),
+            //         success: function (response) {
+            //             console.log("data received3:" + response)
+            //         }
+            //     });
+            // });
             $(`.add-class-btn`).click(function () {
                 console.log('OK');
                 loadingEffect(true);
@@ -264,14 +303,15 @@
                             }
                             console.log($('.insert-class-form__subject-cbb').html());
                             var jsonData = JSON.stringify(obj);
-                            console.log(jsonData);
+                            console.log(jsonData + "Here");
                             // Send insert request with data(Converted to JSON)
                             $.ajax({
-                                url: '<?php echo base_url(); ?>/Admin/CoursesController/insertCourse', // Đường dẫn tới API hoặc resource bạn muốn gọi
+                                url: 'Course/insertCourse', // Đường dẫn tới API hoặc resource bạn muốn gọi
                                 method: 'POST', // Phương thức HTTP (GET, POST, PUT, DELETE, vv.)
+                                contentType: 'application/json',
                                 dataType: 'json', // Kiểu dữ liệu bạn mong đợi từ phản hồi (json, html, text, vv.)
                                 data: // Dữ liệu bạn muốn gửi đi (nếu có)
-                                    jsonData,
+                                    jsonData ,
                                 success: function (response) {
                                     console.log("here");
                                     console.log(response);
@@ -287,10 +327,12 @@
                                         var jsonData = JSON.stringify(obj);
                                         // Insert list of lecturers's id into phanconggiangvien
                                         $.ajax({
-                                            url: '<?php echo base_url(); ?>/Admin/CoursesController/insertLecturersIntoClass',
+                                            url: 'Course/insertLecturersIntoClass',
                                             method: 'POST',
                                             contentType: 'application/json', // Đặt kiểu dữ liệu của yêu cầu là JSON
-                                            data: jsonData,
+                                            dataType: 'json',
+                                            data:
+                                                jsonData ,
                                             success: function (response) {
                                                 // Xử lý in ra thông báo khi request thêm danh sách giảng viên vào lớp
                                                 var className = $(`.insert-class-form__subject-cbb`).find(':selected').text();
@@ -313,7 +355,7 @@
                                                     if (processstate.state) {
                                                         toast({
                                                             title: "Thành công!",
-                                                            message: `Thêm giảng viên ${lecturer} vào lớp ${className} ${selectedSubjectId.toString().padStart(3, '0')}.${processResult1.auto_increment_id.toString().padStart(6, '0')} thành công`,
+                                                            message: `Thêm giảng viên(ID ${lecturer}) vào lớp ${className} ${selectedSubjectId.toString().padStart(3, '0')}.${processResult1.auto_increment_id.toString().padStart(6, '0')} thành công`,
                                                             type: "success",
                                                             duration: 100000
                                                         });
@@ -321,7 +363,7 @@
                                                     } else {
                                                         toast({
                                                             title: "Thất bại!",
-                                                            message: `Thêm giảng viên ${lecturer} vào lớp ${className} ${selectedSubjectId.toString().padStart(3, '0')}.${processResult1.auto_increment_id.toString().padStart(6, '0')} thất bại(${processstate.message}).`,
+                                                            message: `Thêm giảng viên(ID ${lecturer}) vào lớp ${className} ${selectedSubjectId.toString().padStart(3, '0')}.${processResult1.auto_increment_id.toString().padStart(6, '0')} thất bại(${processstate.message}).`,
                                                             type: "error",
                                                             duration: 100000
                                                         });
@@ -374,39 +416,51 @@
                     // jquery từ html tạo mảng current(id-ngaybd) gồm các khóa đang hiển thị
                     console.log("kkk2");
                     console.log(response);
-                    console.log(response[0]['lecturers']);
+                    // console.log(response[0]['lecturers']);
                     let current = [];
                     let toDelete = [];
                     let toAdd = [];
                     $(`.class__list .class__item`).each(function () {
                         current.push({
                             "id_lop_hoc": `${$(this).attr(`courseid`)}`,
+                            // "id_lop_hoc": `1`,
+
                         });
                     })
+                    console.log('current: ');
+                    console.log(current.length)
+                    console.log('current: ');
+
                     // duyệt từng phần tử ở mảng current so với mảng response, phần tử nào không có(đã xóa) hoặc có nhưng không trùng ngày thì xóa khỏi mảng current và thêm vào mảng toDelete
                     for (let i = 0; i < current.length; i++) {
                         let isAppear = false;
                         for (let j = 0; j < response.length; j++) {
-                            if (response[j][`id_lop_hoc`] === current[i][`id_lop_hoc`]) {
+                            console.log(response[j][`id_lop_hoc`] + " " + current[i][`id_lop_hoc`])
+                            if (response[j][`id_lop_hoc`] == current[i][`id_lop_hoc`]) {
                                 isAppear = true;
                                 break;
                             }
                         }
                         if (!isAppear) {
                             toDelete.push(i);
+                            console.log(current[i][`id_lop_hoc`]);
                         }
                     }
+                    console.log('current: ');
+                    console.log(current);
+                    console.log('current: ');
+                    console.log("todel:" + toDelete)
                     for (let i = toDelete.length - 1; i >= 0; i--) {
                         current.splice(toDelete[i], 1);
                         $(`.class__list .class__item`).eq(i).remove();
                     }
-                    console.log(current);
+                    console.log('current: ' + current);
 
                     // duyệt từng phần tử ở mảng response, phần tử nào không có id ở mảng current thì thêm vào mảng toAdd
                     for (let i = 0; i < response.length; i++) {
                         let isAppear = false;
                         for (let j = 0; j < current.length; j++) {
-                            if (response[i][`id_lop_hoc`] === current[j][`id_lop_hoc`]) {
+                            if (response[i][`id_lop_hoc`] == current[j][`id_lop_hoc`]) {
                                 isAppear = true;
                                 break;
                             }
@@ -439,6 +493,22 @@
                                     </div>
                             `
                             );
+                            console.log(`
+                                            <div class='class__item col-4 col-xxl-4' courseid='${response[i]["id_lop_hoc"]}' >
+                                                <div class='p-3 border border-gray rounded-2 shadow-sm class-div' style="animation: newClassEffect ease 3s">
+                                                    <div class='class__item__title mb-5'>
+                                                        <h6>${response[i]["ten_mon_hoc"]} ${courseid}</h6>
+                                                        <p>Giảng viên: ${dsgv}</p>
+                                                    </div>
+                                                    <div class='class__item__state'>
+                                                        <p>Thời gian: ${response[i]['ngay_bat_dau']} - ${response[i]["ngay_ket_thuc"]}</p>
+                                                        <p>Trạng thái: ${status}</p>
+                                                    </div>
+                                                    <input type='checkbox' class='delete-checkbox' value='${response[i].id_lop_hoc}'>
+
+                                                </div>
+                                            </div>
+                                    `)
 
                         }
                     }
