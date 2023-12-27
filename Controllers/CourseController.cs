@@ -4,12 +4,20 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Razor.Language.Intermediate;
 using Newtonsoft.Json;
 using System.Data;
+using System.Diagnostics;
 using System.Dynamic;
+using System.Text.Json;
 
 namespace CourseWebsiteDotNet.Controllers
 {
     public class CourseController : Controller
     {
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public CourseController(IHttpContextAccessor httpContextAccessor)
+        {
+            _httpContextAccessor = httpContextAccessor;
+        }
         public IActionResult Index()
         {
             ViewData["chosenItem"] = 1;
@@ -81,6 +89,59 @@ namespace CourseWebsiteDotNet.Controllers
             string json = JsonConvert.SerializeObject(rs);
             return Ok(json);
         }
+        public class ModelForTest2
+        {
+            public string data { get; set; }
+            public int data2 { get; set; }
+        }
+        [HttpPost]
+        [HttpGet]
+        public IActionResult test3([FromBody] dynamic dataRe, [FromQuery] int id)
+        {
+            var data = dataRe.GetProperty("data").GetString();
+            //var data = dataRe.data;
+            //var data2 = dataRe.data2;
+
+            // Xử lý dữ liệu từ phần thân của yêu cầu (POST) và query string (GET)
+            // Sử dụng id từ query string (GET)
+
+            return Ok($"Received data - id: {id}, data from body: {data}");
+        }
+        public class FormData
+        {
+            public int id { get; set; }
+            public string name { get; set; }
+        }
+        //public IActionResult test4([FromBody] string name, int id)
+        //{
+        //    using (var reader = new StreamReader(HttpContext.Request.Body))
+        //    {
+        //        var body = reader.ReadAsync();
+        //        var formData = JsonConvert.DeserializeObject<FormData>(body);
+
+        //        // Xử lý dữ liệu từ phần thân của yêu cầu (POST)
+        //        // Sử dụng formData.id và formData.name
+
+        //        return Ok($"Received data - id: {formData.id}, name: {formData.name}");
+        //    }
+        //}
+        [HttpPost]
+        public IActionResult test4(string name,  int id)
+        {
+
+            // Xử lý dữ liệu từ phần thân của yêu cầu (POST) và query string (GET)
+            // Sử dụng id từ query string (GET)
+
+            return Ok($"Received data - id: {id}, name: {name}");
+        }
+        [HttpPost]
+        public IActionResult test2([FromBody] ModelForTest2 dataRe)
+        {
+            //var data = _httpContextAccessor.HttpContext.Request.Query["data"];
+            //var idGiangVien = _httpContextAccessor.HttpContext.Request.Query["data2"];
+            var data = dataRe.data; 
+            return Ok(data);
+        }
         public IActionResult getListOfCourses()
         {
             var courses = SQLExecutor.ExecuteQuery(
@@ -99,14 +160,14 @@ namespace CourseWebsiteDotNet.Controllers
             }
             return Ok(JsonConvert.SerializeObject(courses));
         }
-
-        public IActionResult insertCourse([FromBody] ExpandoObject dataReceived)
+        [HttpPost]
+        public IActionResult insertCourse([FromBody] JsonDocument dataReceived)
         {
-            dynamic obj = dataReceived;
+            dynamic obj = JsonConvert.DeserializeObject<ExpandoObject>(dataReceived.RootElement.ToString());
             var courseModel = new LopHocModel();
-            courseModel.id_mon_hoc = obj.id_mon_hoc;
-            courseModel.ngay_bat_dau = obj.ngay_bat_dau;
-            courseModel.ngay_ket_thuc = obj.ngay_ket_thuc;
+            courseModel.id_mon_hoc = Convert.ToInt32(obj.id_mon_hoc);
+            courseModel.ngay_bat_dau = DateTime.Parse(obj.ngay_bat_dau);
+            courseModel.ngay_ket_thuc = DateTime.Parse(obj.ngay_ket_thuc);
             var courseRepo = new LopHocRepository();
             var processResult = courseRepo.InsertLopHoc(courseModel);
             dynamic response = new
@@ -116,6 +177,32 @@ namespace CourseWebsiteDotNet.Controllers
                 auto_increment_id = processResult.insertedId
             };
             return Ok(JsonConvert.SerializeObject(response));
+        }
+        public IActionResult insertLecturersIntoClass([FromBody] JsonDocument dataReceived)
+        {
+            //string json = HttpContext.Request.Form["json"];
+
+            //dynamic obj = JsonConvert.DeserializeObject<ExpandoObject>(json);
+            dynamic obj = JsonConvert.DeserializeObject<ExpandoObject>(dataReceived.RootElement.ToString());
+            var id_lop_hoc = Convert.ToInt32(obj.id_lop_hoc);
+            dynamic lecturer_id_list = (ExpandoObject)obj.lecturer_id_list;
+
+            ExpandoObject response = new ExpandoObject();
+            foreach (var property in (IDictionary<string, object>)lecturer_id_list)
+            {
+                PhanCongGiangVienModel pcModel = new PhanCongGiangVienModel()
+                {
+                    id_giang_vien = Convert.ToInt32(property.Key),
+                    id_lop_hoc = Convert.ToInt32(id_lop_hoc)
+                };
+                PhanCongGiangVienRepository pcRepo = new PhanCongGiangVienRepository();
+                ((IDictionary<string, object>)response)[property.Key] = pcRepo.InsertPhanCongGiangVien(pcModel);
+
+            }
+
+
+            return Ok(JsonConvert.SerializeObject(response));
+
         }
         public IActionResult getInsertClassForm()
         {
@@ -127,6 +214,19 @@ namespace CourseWebsiteDotNet.Controllers
 
 
             return View("InsertClassForm");
+        }
+
+        public IActionResult deleteCourse([FromBody] JsonDocument dataReceived)
+        {
+            dynamic obj = JsonConvert.DeserializeObject<ExpandoObject>(dataReceived.RootElement.ToString());
+            ExpandoObject response = new ExpandoObject();
+            foreach (string id_lop_hoc in obj.courses)
+            {
+                LopHocRepository lopHocRepository = new LopHocRepository();
+                ((IDictionary<string, object>)response)[id_lop_hoc] = lopHocRepository.DeleteLopHoc(Convert.ToInt32(id_lop_hoc));
+            }
+
+            return Ok(JsonConvert.SerializeObject(response));
         }
     }
 }

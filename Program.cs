@@ -19,6 +19,7 @@ namespace CourseWebsiteDotNet
                 options.Cookie.IsEssential = true;
             });
 
+            builder.Services.AddHttpContextAccessor();
 
 
             var app = builder.Build();
@@ -87,6 +88,10 @@ namespace CourseWebsiteDotNet
             //   name: "Login",
             //   pattern: "{controller=User}/{action=Index}/{id?}");
 
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
 
 
             app.Run();
