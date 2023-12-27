@@ -21,7 +21,15 @@ namespace CourseWebsiteDotNet.Controllers
             }
             return View("Index");
         }
+        public IActionResult Logout()
+        {
+            ISession session = HttpContext.Session;
 
+            // Xóa tất cả các biến session
+            session.Clear();
+
+            return RedirectToAction("Index");
+        }
         public IActionResult Login()
         {
             string userAccount = HttpContext.Request.Form["account"];

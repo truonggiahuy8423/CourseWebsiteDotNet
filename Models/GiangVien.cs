@@ -2,14 +2,14 @@
 
 namespace CourseWebsiteDotNet.Models
 {
-    public class GiangVienModel
-    {
-        public int? id_giang_vien { get; set; }
-        public string? ho_ten { get; set; }
-        public DateTime? ngay_sinh { get; set; }
-        public int? gioi_tinh {  get; set; }
-        public string? email { get; set; }
-    }
+        public class GiangVienModel
+        {
+            public int? id_giang_vien { get; set; }
+            public string? ho_ten { get; set; }
+            public DateTime? ngay_sinh { get; set; }
+            public int? gioi_tinh {  get; set; }
+            public string? email { get; set; }
+        }
 
 
     // Lớp GiangVienRepository chứa các hàm thao tác với cơ sở dữ liệu
@@ -200,16 +200,17 @@ namespace CourseWebsiteDotNet.Models
 
                         int effectedRows = command.ExecuteNonQuery();
 
-                        return new Response
-                        {
-                            State = true,
-                            Message = "Cập nhật thông tin giảng viên thành công",
-                            InsertedId = null,
-                            EffectedRows = effectedRows
-                        };
+                            return new Response
+                            {
+                                State = true,
+                                Message = "Cập nhật thông tin giảng viên thành công",
+                                InsertedId = null,
+                                EffectedRows = effectedRows
+                            };
+                        }
                     }
-                }
-            });
+                });
+            }
         }
-    
-}
+    }
+
