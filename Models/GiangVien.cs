@@ -200,17 +200,18 @@ namespace CourseWebsiteDotNet.Models
 
                         int effectedRows = command.ExecuteNonQuery();
 
-                        return new Response
-                        {
-                            State = true,
-                            Message = "Cập nhật thông tin giảng viên thành công",
-                            InsertedId = null,
-                            EffectedRows = effectedRows
-                        };
+                            return new Response
+                            {
+                                State = true,
+                                Message = "Cập nhật thông tin giảng viên thành công",
+                                InsertedId = null,
+                                EffectedRows = effectedRows
+                            };
+                        }
                     }
-                }
-            });
+                });
+            }
         }
-
     }
 }
+

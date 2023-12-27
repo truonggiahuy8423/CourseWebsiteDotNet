@@ -1,6 +1,7 @@
 ﻿using CourseWebsiteDotNet.Models;
 using Humanizer;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System.Data;
 
 namespace CourseWebsiteDotNet.Controllers
@@ -72,7 +73,30 @@ namespace CourseWebsiteDotNet.Controllers
 
         }
 
+        public IActionResult test()
+        {
+            var rs = SQLExecutor.ExecuteQuery("SELECT lop_hoc.id_lop_hoc,  DATE_FORMAT(lop_hoc.ngay_bat_dau, '%d/%m/%Y') as ngay_bat_dau,  DATE_FORMAT(lop_hoc.ngay_ket_thuc, '%d/%m/%Y') as ngay_ket_thuc, mon_hoc.id_mon_hoc, mon_hoc.ten_mon_hoc FROM lop_hoc INNER JOIN mon_hoc on lop_hoc.id_mon_hoc = mon_hoc.id_mon_hoc order by lop_hoc.ngay_bat_dau desc");
+            string json = JsonConvert.SerializeObject(rs);
+            return Ok(json);
+        }
+        public IActionResult getListOfCourses()
+        {
+            var courses = SQLExecutor.ExecuteQuery(
+                        "SELECT lop_hoc.id_lop_hoc,  DATE_FORMAT(lop_hoc.ngay_bat_dau, '%d/%m/%Y') as ngay_bat_dau,  DATE_FORMAT(lop_hoc.ngay_ket_thuc, '%d/%m/%Y') as ngay_ket_thuc, mon_hoc.id_mon_hoc, mon_hoc.ten_mon_hoc FROM lop_hoc INNER JOIN mon_hoc on lop_hoc.id_mon_hoc = mon_hoc.id_mon_hoc order by lop_hoc.ngay_bat_dau desc"
+                    );
+            courses.Columns.Add("lecturers", typeof(DataTable));
 
+            foreach (DataRow row in courses.Rows)
+            {
+                row["lecturers"] = SQLExecutor.ExecuteQuery(
+                    "SELECT giang_vien.id_giang_vien, giang_vien.ho_ten " +
+                    "FROM phan_cong_giang_vien INNER JOIN giang_vien ON phan_cong_giang_vien.id_giang_vien = giang_vien.id_giang_vien " +
+                    $"WHERE phan_cong_giang_vien.id_lop_hoc = {row["id_lop_hoc"]};"
+                    );
+
+            }
+            return Ok(JsonConvert.SerializeObject(courses));
+        }
         public IActionResult getInsertClassForm()
         {
             var subjectRepo = new MonHocRepository();

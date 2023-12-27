@@ -407,7 +407,7 @@ img {
 }
 
 .highlight-button {
-    background-color: white!important;
+    background-color: white;
     border-style: solid!important;
     border-width: 0.1px!important;
     border-color: #cacaca!important;
@@ -503,7 +503,7 @@ img {
 
 .highlight-button--save:hover {
     background-color: #308c2c;
-    ;
+    
     border-color: #308c2c !important;
 }
 

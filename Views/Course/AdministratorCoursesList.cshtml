@@ -80,21 +80,21 @@
                         string status=kiem_tra_tinh_trang(courses.Rows[i]["ngay_bat_dau"].ToString(), courses.Rows[i]["ngay_ket_thuc"].ToString());
                         string courseid = courses.Rows[i]["id_mon_hoc"].ToString().PadLeft(3, '0') + "." + courses.Rows[i]["id_mon_hoc"].ToString().PadLeft(6, '0');
           
-                <div class='class__item col-4 col-xxl-4' courseid='@courses.Rows[i]["id_lop_hoc"]' >
-                    <div class='p-3 border border-gray rounded-2 shadow-sm class-div'>
-                        <div class='class__item__title mb-5'>
-                            <h6>@courses.Rows[i]["ten_mon_hoc"] @Html.Raw(courseid)</h6>
-                            <p>Giảng viên: @Html.Raw(dsgv)</p>
-                        </div>
-                        <div class='class__item__state'>
-                            <p>Thời gian: @courses.Rows[i]["ngay_bat_dau"] - @courses.Rows[i]["ngay_ket_thuc"]</p>
-                            <p>Trạng thái: @Html.Raw(status)</p>
-                        </div>
-                        <input type='checkbox' class='delete-checkbox' value='@courses.Rows[i]["id_lop_hoc"]'>
+                        <div class='class__item col-4 col-xxl-4' courseid='@courses.Rows[i]["id_lop_hoc"]' >
+                            <div class='p-3 border border-gray rounded-2 shadow-sm class-div'>
+                                <div class='class__item__title mb-5'>
+                                    <h6>@courses.Rows[i]["ten_mon_hoc"] @Html.Raw(courseid)</h6>
+                                    <p>Giảng viên: @Html.Raw(dsgv)</p>
+                                </div>
+                                <div class='class__item__state'>
+                                    <p>Thời gian: @courses.Rows[i]["ngay_bat_dau"] - @courses.Rows[i]["ngay_ket_thuc"]</p>
+                                    <p>Trạng thái: @Html.Raw(status)</p>
+                                </div>
+                                <input type='checkbox' class='delete-checkbox' value='@courses.Rows[i]["id_lop_hoc"]'>
 
 
-                    </div>
-                </div>
+                            </div>
+                        </div>
            
                     }
                     }
@@ -220,7 +220,16 @@
                 event.stopPropagation();
             });
             let loadingState = false;
-
+            $(`.add-class-btn`).click(function () {
+                $.ajax({
+                    url: '/Course/test',
+                    method: 'GET',
+                    dataType: 'json',
+                    success: function (response) { 
+                        console.log(response)
+                    }
+                });
+            });
             $(`.add-class-btn`).click(function () {
                 console.log('OK');
                 loadingEffect(true);
@@ -356,7 +365,7 @@
         function reloadCoursesList() {
             console.log("kkk");
             $.ajax({
-                url: '<?php echo base_url(); ?>/Admin/CoursesController/getListOfCourses',
+                url: '/Course/getListOfCourses',
                 method: 'GET',
                 contentType: 'application/json', // Đặt kiểu dữ liệu của yêu cầu là JSON
                 data: null,
