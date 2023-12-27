@@ -1,8 +1,11 @@
 ﻿@*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
+@model IEnumerable<CourseWebsiteDotNet.Models.HocVienModel>
+@using System.Data;
 @{
     Layout = "_AdministratorMainLayout";
+    var students = ViewData["students"] as DataTable;
 }
 
 @section Navbar {
@@ -10,7 +13,86 @@
 }
 
 @section MainSection {
+    @* Students list section layout of Admin *@
     <div class="main">
-        Students list section of admin
+        <div>
+            <h2 class="text-center mt-4 mb-4">Danh sách học viên</h2>
+        </div>
+
+        <div style="height: 30px; margin-bottom: 20px;" class="class__search me-2 d-flex justify-content-end">
+            <input id="searchInput" style="border-radius: 0; height: 30px; width: 90px; z-index: 3" type="text" class="w-25 form-control search-input" placeholder="Tìm kiếm theo tên học viên" name="search" aria-label="Tìm kiếm" aria-describedby="basic-addon2">
+            <button id="searchButton" class="btn btn-info search-button highlight-button"><i class="fas fa-search icon-search highlight-icon"></i></button>
+            <button class="btn highlight-button" style="height: 100%; width: 116px; font-size: 13px; border-radius: 5px; margin-left: 20px;" data-bs-toggle="modal" data-bs-target="#themHocVienModal">Thêm<i class="fa-solid fa-plus highlight-icon"></i></button>
+        </div>
+
+        <div class="class__list p-4 border border-gray rounded-2 m-2 mt-3 shadow-inset" style="margin-top: 8px!important;">
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th class="text-center text-white bg-dark">Mã học viên</th>
+                            <th class="text-center text-white bg-dark">Họ tên</th>
+                            <th class="text-center text-white bg-dark">Giới tính</th>
+                            <th class="text-center text-white bg-dark">Ngày sinh</th>
+                            <th class="text-center text-white bg-dark">Email</th>
+                            <th class="text-center text-white bg-dark"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null)  
+                        {
+                        @foreach (var student in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => student.id_hoc_vien)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => student.ho_ten)
+                                </td>
+                                <td>
+                                    @if (student?.gioi_tinh == 1)
+                                    {
+                                        @Html.DisplayFor(modelItem => "Nam")
+                                    }
+                                    else if (student?.gioi_tinh == 0)
+                                    {
+                                        @Html.DisplayFor(modelItem => "Nữ")
+                                    }
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => student.ngay_sinh)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => student.email)
+                                </td>
+                                <td>
+                                    <a asp-action="Edit" asp-route-id="@student.id_hoc_vien">Edit</a> |
+                                    <a asp-action="Details" asp-route-id="@student.id_hoc_vien">Details</a> |
+                                    <a asp-action="Delete" asp-route-id="@student.id_hoc_vien">Delete</a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <br>
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-center">
+                <li class="page-item <?php echo ($currentPage <= 1) ? 'disabled' : ''; ?>">
+                    <a class="page-link" href="?page=<?php echo ($currentPage - 1); ?>" tabindex="-1" aria-disabled="true">Trang trước</a>
+                </li>
+                <?php for ($i = 1; $i <= $totalPages; $i++) : ?>
+                <li class="page-item <?php echo ($i == $currentPage) ? 'active' : ''; ?>">
+                    <a class="page-link" href="?page=<?php echo $i; ?>"><?php echo $i; ?></a>
+                </li>
+                <?php endfor; ?>
+                <li class="page-item <?php echo ($currentPage >= $totalPages) ? 'disabled' : ''; ?>">
+                    <a class="page-link" href="?page=<?php echo ($currentPage + 1); ?>">Trang sau</a>
+                </li>
+            </ul>
+        </nav>
     </div>
 }
