@@ -11,6 +11,236 @@
 
 @section MainSection {
     <div class="main">
-        Subjects list section of admin
+        <div style="margin-bottom: 30px;" class="title w-100 text-center text-uppercase">
+            <h4>Danh sách môn học</h4>
+        </div>
+
+        <div class="class-container">
+            <div style="height: 30px;" class="class__search me-2 d-flex justify-content-end">
+
+                <input style="border-radius: 0; height: 30px; width: 90px; z-index: 3" type="text" id="name_search" class="w-25 form-control search-input"  placeholder="Tìm môn học">
+                <button class="btn btn-info search-button highlight-button" onclick="return loadDataSubject()"><i class="fas fa-search icon-search highlight-icon" style=""></i></button>
+                <button class="add-class-btn highlight-button"  onclick="onAddMonHoc()">
+                    <i class="fa-solid fa-plus add-class-icon highlight-icon"></i>
+                </button>
+
+            </div>
+            
+
+        </div>
+
+        <div class="class__list p-4 border border-gray rounded-2 m-2 mt-3 shadow-inset" style="margin-top: 8px!important;">
+            <div class="row mb-4">
+                <table class="insert-class-form__lecturers-table">
+                    <thead>
+                        <tr >
+                            <th style="width:50px"><button id="btnDeleteSelected"><i class="fa-solid fa-trash-can highlight-icon"></i></button></th>
+                            <th>ID</th>
+                            <th>Tên Môn Học</th>
+                            <th style="width:70px">Chức năng</th>
+                        </tr>
+                    </thead>
+                    <tbody id="data_subject">
+                       
+                         
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
+  
+
+    <!-- Modal -->
+    <div class="modal fade" id="modalMonHoc" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="title-monhoc">Thêm môn học</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="tenMonHoc">Tên Môn Học:</label>
+                    <input type="hidden" class="form-control" id="idmonhoc">
+                    <input type="text" class="form-control" id="tenMonHoc" name="tenMonHoc" placeholder="Nhập tên môn học">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" id="btn-edit-monhoc" class="btn btn-dark">Sửa </button>
+                    <button type="button" id="btn-add-monhoc" class="btn btn-dark">Thêm </button>
+                </div>
+            </div>
+        </div>
+    </div>
+   
+    <script>
+        $(document).ready(function () {
+            loadDataSubject();
+        });
+        function loadDataSubject(){
+            $.ajax({
+                url: "/subject/GetListSubject",
+                type: "GET",
+                data: { name: $('#name_search').val() },
+                dataType: "json",
+                success: function (data) {
+
+                    var tableBody = $("#data_subject");
+                    tableBody.empty(); 
+
+                    data.forEach(function (item) {
+                        var row = `
+                                <tr>
+                                    <td><input type="checkbox" class="form-check-input" data-id="${item.id_mon_hoc}"></td>
+                                    <td>${item.id_mon_hoc}</td>
+                                    <td>${item.ten_mon_hoc}</td>
+                                    <td><i class="fa-solid fa-pen-to-square" onclick="return onEditMonHoc('${item.id_mon_hoc}','${item.ten_mon_hoc}') "></i></td>
+                                </tr>`;
+
+
+                        tableBody.append(row);
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error(error);
+                }
+            });
+
+        }
+        function onAddMonHoc() {
+            $('#tenMonHoc').val('');
+            $('#modalMonHoc').modal('show');
+            $('#title-monhoc').text('Thêm môn học');
+            $('#btn-edit-monhoc').hide();
+            $('#btn-add-monhoc').show();
+            
+        }
+
+        function onEditMonHoc(id,name) {
+            $('#modalMonHoc').modal('show');
+            $('#title-monhoc').text('Sửa môn học');
+            $('#btn-edit-monhoc').show();
+            $('#btn-add-monhoc').hide();
+
+            $('#idmonhoc').val(id);
+            $('#tenMonHoc').val(name);
+
+        }
+        $("#btnDeleteSelected").click(function () {
+            var selectedIds = [];
+            $("input:checkbox:checked").each(function () {
+                selectedIds.push($(this).data("id"));
+            });
+            if (selectedIds.length === 0) {
+                // Nếu không có checkbox được chọn, hiển thị thông báo
+                toast({
+                    title: "Lỗi!",
+                    message: "Vui lòng chọn ít nhất một mục để xóa",
+                    type: "error",
+                    duration: 5000
+                });
+                return; // Dừng lại và không thực hiện yêu cầu xóa
+            }
+            if (confirm("Bạn có chắc chắn muốn xóa các mục đã chọn không?")) {
+            selectedIds.forEach(function (id) {
+                $.ajax({
+                    url: "/subject/DeleteSelected",
+                    type: "POST",
+                    data: { 
+                        id: id                        
+                    },
+                    success: function (response) {
+                        if (response.status == 1) {
+                            toast({
+                                title: "Thành công!",
+                                message: response.mess,
+                                type: "success",
+                                duration: 100000
+                            });
+                            
+                        } else {
+                            toast({
+                                title: "Thất bại !",
+                                message: response.mess,
+                                type: "error",
+                                duration: 100000
+                            });
+
+                        }
+                        loadDataSubject();
+                    },
+                    error: function (xhr, status, error) {
+                        console.error(error);
+                    }
+                });
+                });
+            }
+        });
+        $("#btn-add-monhoc").click(function () { 
+           
+            $.ajax({
+                url: "/subject/ThemMonHoc",
+                type: "POST",
+                data: {
+                    name: $('#tenMonHoc').val()
+                },
+                success: function (response) {
+                    if (response.status == 1) {
+                        toast({
+                            title: "Thành công!",
+                            message: response.mess,
+                            type: "success",
+                            duration: 100000
+                        });
+                        loadDataSubject();
+                        $('#modalMonHoc').modal('hide');
+                    } else {
+                        toast({
+                            title: "Thất bại !",
+                            message: response.mess,
+                            type: "error",
+                            duration: 100000
+                        });
+
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error(error);
+                }
+            });
+        });
+        $("#btn-edit-monhoc").click(function () {
+            $.ajax({
+                url: "/subject/SuaMonHoc",
+                type: "POST",
+                data: {
+                    id:  $('#idmonhoc').val(),
+                    name: $('#tenMonHoc').val()
+                },
+                success: function (response) {
+                    if (response.status == 1) {
+                        toast({
+                            title: "Thành công!",
+                            message: response.mess,
+                            type: "success",
+                            duration: 100000
+                        });
+                        loadDataSubject();
+                        $('#modalMonHoc').modal('hide');
+                    } else {
+                        toast({
+                            title: "Thất bại !",
+                            message: response.mess,
+                            type: "error",
+                            duration: 100000
+                        });
+
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error(error);
+                }
+            });
+        });
+     </script>
+
 }
