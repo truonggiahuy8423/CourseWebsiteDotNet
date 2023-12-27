@@ -15,14 +15,16 @@
 @section MainSection {
     @* Students list section layout of Admin *@
     <div class="main">
-        <div>
-            <h2 class="text-center mt-4 mb-4">Danh sách học viên</h2>
+        <div style="margin-bottom: 30px;" class="title w-100 text-center text-uppercase">
+            <h4>Danh sách học viên</h4>
         </div>
 
         <div style="height: 30px; margin-bottom: 20px;" class="class__search me-2 d-flex justify-content-end">
             <input id="searchInput" style="border-radius: 0; height: 30px; width: 90px; z-index: 3" type="text" class="w-25 form-control search-input" placeholder="Tìm kiếm theo tên học viên" name="search" aria-label="Tìm kiếm" aria-describedby="basic-addon2">
             <button id="searchButton" class="btn btn-info search-button highlight-button"><i class="fas fa-search icon-search highlight-icon"></i></button>
-            <button class="btn highlight-button" style="height: 100%; width: 116px; font-size: 13px; border-radius: 5px; margin-left: 20px;" data-bs-toggle="modal" data-bs-target="#themHocVienModal">Thêm<i class="fa-solid fa-plus highlight-icon"></i></button>
+            <button class="add-student-btn highlight-button" onclick="onAddHocVien()"
+                    style="height: 100%; width: 116px; font-size: 13px; border-radius: 5px; margin-left: 20px;"><i class="fa-solid fa-plus highlight-icon"></i>
+            </button>
         </div>
 
         <div class="class__list p-4 border border-gray rounded-2 m-2 mt-3 shadow-inset" style="margin-top: 8px!important;">
@@ -39,60 +41,343 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @if (Model != null)  
-                        {
-                        @foreach (var student in Model)
-                        {
+                        @{
+                        for (int i = 0; i < students.Rows.Count; i++) {
                             <tr>
                                 <td>
-                                    @Html.DisplayFor(modelItem => student.id_hoc_vien)
+                                    @students.Rows[i]["id_hoc_vien"]
                                 </td>
                                 <td>
-                                    @Html.DisplayFor(modelItem => student.ho_ten)
+                                    @students.Rows[i]["ho_ten"]
                                 </td>
                                 <td>
-                                    @if (student?.gioi_tinh == 1)
-                                    {
-                                        @Html.DisplayFor(modelItem => "Nam")
-                                    }
-                                    else if (student?.gioi_tinh == 0)
-                                    {
-                                        @Html.DisplayFor(modelItem => "Nữ")
-                                    }
+                                    @students.Rows[i]["gioi_tinh"]
                                 </td>
                                 <td>
-                                    @Html.DisplayFor(modelItem => student.ngay_sinh)
+                                    @students.Rows[i]["ngay_sinh"]
                                 </td>
                                 <td>
-                                    @Html.DisplayFor(modelItem => student.email)
+                                    @students.Rows[i]["email"]
                                 </td>
-                                <td>
-                                    <a asp-action="Edit" asp-route-id="@student.id_hoc_vien">Edit</a> |
-                                    <a asp-action="Details" asp-route-id="@student.id_hoc_vien">Details</a> |
-                                    <a asp-action="Delete" asp-route-id="@student.id_hoc_vien">Delete</a>
+                                <td class="text-center">
+                                    <button class="btn-link text-primary border-0 btn-sm" style="background-color: transparent;"
+                                                onclick="sua(@students.Rows[i]["id_hoc_vien"])">
+                                            Sửa
+                                        </button>
+                                    <button class="btn-link text-primary border-0 btn-sm" style="background-color: transparent;" onclick="xoa(@students.Rows[i]["id_hoc_vien"])">Xóa</button>
                                 </td>
                             </tr>
                         }
-                    }
+                        }
                     </tbody>
                 </table>
             </div>
         </div>
         <br>
-        <nav aria-label="Page navigation example">
+@*         <nav aria-label="Page navigation example">
             <ul class="pagination justify-content-center">
-                <li class="page-item <?php echo ($currentPage <= 1) ? 'disabled' : ''; ?>">
-                    <a class="page-link" href="?page=<?php echo ($currentPage - 1); ?>" tabindex="-1" aria-disabled="true">Trang trước</a>
+                <li class="page-item @(currentPage <= 1 ? "disabled" : "")">
+                    <a class="page-link" href="?page=@(currentPage - 1)" tabindex="-1" aria-disabled="true">Trang trước</a>
                 </li>
-                <?php for ($i = 1; $i <= $totalPages; $i++) : ?>
-                <li class="page-item <?php echo ($i == $currentPage) ? 'active' : ''; ?>">
-                    <a class="page-link" href="?page=<?php echo $i; ?>"><?php echo $i; ?></a>
-                </li>
-                <?php endfor; ?>
-                <li class="page-item <?php echo ($currentPage >= $totalPages) ? 'disabled' : ''; ?>">
-                    <a class="page-link" href="?page=<?php echo ($currentPage + 1); ?>">Trang sau</a>
+                @for (int i = 1; i <= totalPages; i++)
+                {
+                    <li class="page-item @(i == currentPage ? "active" : "")">
+                        <a class="page-link" href="?page=@i">@i</a>
+                    </li>
+                }
+                <li class="page-item @(currentPage >= totalPages ? "disabled" : "")">
+                    <a class="page-link" href="?page=@(currentPage + 1)">Trang sau</a>
                 </li>
             </ul>
-        </nav>
+        </nav> *@
+
     </div>
+
+    @* Insert Form *@
+    <div class="modal fade" id="themHocVienModal" tabindex="-1" aria-labelledby="themHocVienModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="themHocVienModalLabel">Thêm học viên</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="hoTen" class="form-label name">Họ Tên</label> <span id="error_name" class="text-danger ms-3"></span>
+                            <input type="text" class="form-control" id="hoTen" placeholder="Họ tên">
+                        </div>
+                        <div class="mb-3">
+                            <label for="ngaySinh" class="form-label dob">Ngày Sinh</label> <span id="error_dob" class="text-danger ms-3"></span>
+                            <input type="date" class="form-control" id="ngaySinh">
+                        </div>
+                        <div class="mb-3">
+                            <label for="gioiTinh" class="form-label gender">Giới Tính</label> <span id="error_gender" class="text-danger ms-3"></span>
+                            <select class="form-select" id="gioiTinh">
+                                <option value="" disabled selected>--Chọn giới tính--</option>
+                                <option value="1">Nam</option>
+                                <option value="2">Nữ</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label mail">Email</label> <span id="error_email" class="text-danger ms-3"></span>
+                            <input type="email" class="form-control" id="email" placeholder="Email">
+                        </div>
+                        <button type="button" class="btn btn-primary save-student-btn">Lưu</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* Update Form *@
+    <div class="modal fade" id="SuaStudentForm" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Sửa Thông Tin Học Viên</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+                    <form>
+                        <div class="mb-3">
+                            <label for="hoTenSua" class="form-label">Họ Tên</label> <span id="error_fixname" class="text-danger ms-3"></span>
+                            <input type="text" class="form-control" id="hoTenSua" placeholder="Họ tên">
+                        </div>
+                        <div class="mb-3">
+                            <label for="ngaySinhSua" class="form-label">Ngày Sinh</label> <span id="error_fixdob" class="text-danger ms-3"></span>
+                            <input type="date" class="form-control" id="ngaySinhSua">
+                        </div>
+                        <div class="mb-3">
+                            <label for="gioiTinhSua" class="form-label">Giới Tính</label> <span id="error_fixgender" class="text-danger ms-3"></span>
+                            <select class="form-select" id="gioiTinhSua">
+                                <option value="" disabled selected>--Chọn giới tính--</option>
+                                <option value="1">Nam</option>
+                                <option value="2">Nữ</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="emailSua" class="form-label">Email</label> <span id="error_fixmail" class="text-danger ms-3"></span>
+                            <input type="email" class="form-control" id="emailSua" placeholder="Email">
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="luuThongTinSua()">Lưu</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        function onAddHocVien() {
+            $('#themHocVienModal').modal('show');
+        }
+
+        $(document).ready(function () {
+            $(document).on('click', '.save-student-btn', function () {
+                var hoTen = document.getElementById('hoTen').value;
+                var ngaySinh = document.getElementById('ngaySinh').value;
+                var gioiTinh = document.getElementById('gioiTinh').value;
+                var email = document.getElementById('email').value;
+
+                $('#error_name, #error_dob, #error_gender, #error_email').text('');
+                // Perform input validation
+                var isValid = true;
+
+                if ($.trim(hoTen) == '') {
+                    $('#error_name').text('Vui lòng điền họ tên');
+                    isValid = false;
+                }
+
+                if ($.trim(ngaySinh) == '') {
+                    $('#error_dob').text('Vui lòng chọn ngày sinh');
+                    isValid = false;
+                }
+
+                if ($.trim(gioiTinh) == '') {
+                    $('#error_gender').text('Vui lòng chọn giới tính');
+                    isValid = false;
+                }
+
+                if ($.trim(email) == '') {
+                    $('#error_email').text('Vui lòng điền Email');
+                    isValid = false;
+                }
+
+                if (!isValid) {
+                    return false;
+                }
+
+                $.ajax({
+                    url: 'Student/insertStudent',
+                    method: 'POST',
+                    //dataType: 'json',
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        ho_ten: hoTen,
+                        ngay_sinh: ngaySinh,
+                        gioi_tinh: gioiTinh,
+                        email: email
+                    }),
+                    success: function (response) {
+                        $('#themHocVienModal').modal('hide');
+
+                        toast({
+                            title: "Thành công!",
+                            message: "Thêm học viên thành công",
+                            type: "success",
+                            duration: 3000
+                        });
+
+                        setTimeout(function () {
+                            location.reload();
+                        }, 2000);
+
+                    },
+                    error: function (xhr, status, error) {
+                        toast({
+                            title: "Thất bại!",
+                            message: "không thể thêm học viên",
+                            type: "error",
+                            duration: 3000
+                        });
+                        console.error('Error:', status, error);
+                    }
+                });
+            });
+        });
+
+        function onUpdateHocVien() {
+            $('#suaStudentForm').modal('show');
+        }
+
+        var currentStudentId;
+        function sua(id) {
+            $('#SuaStudentForm').modal('show');
+            currentStudentId = id;
+            $.ajax({
+                url: 'Student/getStudentInfo/',
+                method: 'GET',
+                data: { id_hoc_vien: id },
+                success: function (response) {
+                    // Populate the form fields with the fetched data
+                    $('#hoTenSua').val(response.ho_ten);
+                    $('#ngaySinhSua').val(response.ngay_sinh);
+                    $('#gioiTinhSua').val(response.gioi_tinh);
+                    $('#emailSua').val(response.email);
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error fetching student information:', status, error);
+                }
+            });
+        }
+
+        function luuThongTinSua() {
+            var hoTen = document.getElementById('hoTenSua').value;
+            var ngaySinh = document.getElementById('ngaySinhSua').value;
+            var gioiTinh = document.getElementById('gioiTinhSua').value;
+            var email = document.getElementById('emailSua').value;
+
+            $('#error_fixname, #error_fixdob, #error_fixgender, #error_fixmail').text('');
+            // Perform input validation
+            var isValid = true;
+
+            if ($.trim(hoTen) == '') {
+                $('#error_fixname').text('Vui lòng điền họ tên');
+                isValid = false;
+            }
+
+            if ($.trim(ngaySinh) == '') {
+                $('#error_fixdob').text('Vui lòng chọn ngày sinh');
+                isValid = false;
+            }
+
+            if ($.trim(gioiTinh) == '') {
+                $('#error_fixgender').text('Vui lòng chọn giới tính');
+                isValid = false;
+            }
+
+            if ($.trim(email) == '') {
+                $('#error_fixmail').text('Vui lòng điền Email');
+                isValid = false;
+            }
+
+            if (!isValid) {
+                return false;
+            }
+
+            $.ajax({
+                url: 'Student/updateStudent',
+                method: 'POST',
+                contentType: "application/json",
+                data: JSON.stringify({
+                    id_hoc_vien: currentStudentId,
+                    ho_ten: hoTen,
+                    ngay_sinh: ngaySinh,
+                    gioi_tinh: gioiTinh,
+                    email: email
+                }),
+                success: function (response) {
+                    $('#suaStudentForm').modal('hide');
+
+                    toast({
+                        title: "Thành công!",
+                        message: "Cập nhật thông tin học viên thành công",
+                        type: "success",
+                        duration: 3000
+                    });
+
+                    setTimeout(function () {
+                        location.reload();
+                    }, 2000);
+
+                },
+                error: function (xhr, status, error) {
+                    toast({
+                        title: "Thất bại!",
+                        message: "Cập nhật thất bại",
+                        type: "error",
+                        duration: 3000
+                    });
+                    console.error('Error:', status, error);
+                }
+            });
+        }
+
+        function xoa(id) {
+            var confirmation = confirm("Bạn có chắc chắn muốn xóa học viên " + id);
+            if (confirmation) {
+                $.ajax({
+                    url: 'Student/deleteStudent',
+                    method: 'POST',
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        id_hoc_vien: id
+                    }),
+                    success: function (response) {
+
+                        //$('#row_' + id).remove();
+                        toast({
+                            title: 'Thành công',
+                            message: 'Xóa học viên thành công',
+                            type: 'success',
+                            duration: 5000
+                        });
+
+                        setTimeout(function () {
+                            location.reload();
+                        }, 1000);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Delete error:', status, error);
+                        toast({
+                            title: 'Thất bại',
+                            message: 'Có lỗi xảy ra, vui lòng liên hệ quản trị viên',
+                            type: 'error',
+                            duration: 5000
+                        });
+                    }
+                });
+            }
+        }
+    </script>
 }

@@ -1,4 +1,5 @@
 ﻿using MySql.Data.MySqlClient;
+using System.Data;
 
 namespace CourseWebsiteDotNet.Models
 {
@@ -208,6 +209,63 @@ namespace CourseWebsiteDotNet.Models
                     }
                 }
             });
+        }
+
+        // Trả về List<Dictionary<string, object>> thực hiện truy vấn tùy chỉnh
+        public List<Dictionary<string, object>> ExecuteCustomQueryWithPagination(string query, int page, int recordsPerPage)
+        {
+            List<Dictionary<string, object>> result = new List<Dictionary<string, object>>();
+
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
+
+                using (MySqlCommand command = new MySqlCommand(query, connection))
+                {
+                    using (MySqlDataReader reader = command.ExecuteReader())
+                    {
+                        int count = 0;
+
+                        // Skip rows for previous pages
+                        while (count < (page - 1) * recordsPerPage && reader.Read())
+                        {
+                            count++;
+                        }
+
+                        // Read rows for the current page
+                        while (count < page * recordsPerPage && reader.Read())
+                        {
+                            Dictionary<string, object> row = new Dictionary<string, object>();
+
+                            for (int i = 0; i < reader.FieldCount; i++)
+                            {
+                                row.Add(reader.GetName(i), reader[i]);
+                            }
+
+                            result.Add(row);
+                            count++;
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        public int ExecuteCustomScalarQuery(string query)
+        {
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
+
+                using (MySqlCommand command = new MySqlCommand(query, connection))
+                {
+                    object result = command.ExecuteScalar();
+
+                    // If the result is null, return 0
+                    return result != null ? Convert.ToInt32(result) : 0;
+                }
+            }
         }
     }
 }
