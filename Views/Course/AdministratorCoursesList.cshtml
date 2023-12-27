@@ -369,10 +369,12 @@
                 method: 'GET',
                 contentType: 'application/json', // Đặt kiểu dữ liệu của yêu cầu là JSON
                 data: null,
+                dataType: 'json',
                 success: function (response) { // Trả về mảng
                     // jquery từ html tạo mảng current(id-ngaybd) gồm các khóa đang hiển thị
                     console.log("kkk2");
                     console.log(response);
+                    console.log(response[0]['lecturers']);
                     let current = [];
                     let toDelete = [];
                     let toAdd = [];
@@ -413,25 +415,12 @@
                             let dsgv = "";
                             let y = 0;
                             response[i]['lecturers'].forEach((lecturer) => {
-                                dsgv += (y !== 0 ? ', ' : '') + '<a href="' + '<?php echo base_url(); ?>' + '/profile/lecturer?id=' + lecturer.id_giang_vien + '">' + lecturer.ho_ten + '</a>';
+                                dsgv += (y !== 0 ? ', ' : '') + '<a href="/profile/lecturer?id=' + lecturer.id_giang_vien + '">' + lecturer.ho_ten + '</a>';
                                 y++;
                             });
 
                             let status = kiem_tra_tinh_trang(response[i]["ngay_bat_dau"], response[i]["ngay_ket_thuc"]);
                             let courseid = String(response[i].id_mon_hoc).padStart(3, '0') + "." + String(response[i].id_lop_hoc).padStart(6, '0');
-                            console.log(`<div class='class__item col-4 col-xxl-4' courseid='${response[i]["id_lop_hoc"]}' >
-                                        <div class='p-3 border border-gray rounded-2 shadow-sm class-div' style="animation: newClassEffect ease 3s">
-                                            <div class='class__item__title mb-5'>
-                                                <h6>${response[i]["ten_mon_hoc"]} ${courseid}</h6>
-                                                <p>Giảng viên: ${dsgv}</p>
-                                            </div>
-                                            <div class='class__item__state'>
-                                                <p>Thời gian: ${response[i]['ngay_bat_dau']} - ${response[i]["ngay_ket_thuc"]}</p>
-                                                <p>Trạng thái: ${status}</p>
-                                            </div>
-                                            <input type='checkbox' class='delete-checkbox'>
-                                        </div>
-                                    </div>`);
                             $(`.class__list .class__item`).eq(i).before(
                                 `
                                     <div class='class__item col-4 col-xxl-4' courseid='${response[i]["id_lop_hoc"]}' >

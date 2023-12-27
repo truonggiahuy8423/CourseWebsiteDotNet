@@ -1,8 +1,10 @@
 ﻿using CourseWebsiteDotNet.Models;
 using Humanizer;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Razor.Language.Intermediate;
 using Newtonsoft.Json;
 using System.Data;
+using System.Dynamic;
 
 namespace CourseWebsiteDotNet.Controllers
 {
@@ -96,6 +98,24 @@ namespace CourseWebsiteDotNet.Controllers
 
             }
             return Ok(JsonConvert.SerializeObject(courses));
+        }
+
+        public IActionResult insertCourse([FromBody] ExpandoObject dataReceived)
+        {
+            dynamic obj = dataReceived;
+            var courseModel = new LopHocModel();
+            courseModel.id_mon_hoc = obj.id_mon_hoc;
+            courseModel.ngay_bat_dau = obj.ngay_bat_dau;
+            courseModel.ngay_ket_thuc = obj.ngay_ket_thuc;
+            var courseRepo = new LopHocRepository();
+            var processResult = courseRepo.InsertLopHoc(courseModel);
+            dynamic response = new
+            {
+                state = processResult.state,
+                message = processResult.message,
+                auto_increment_id = processResult.insertedId
+            };
+            return Ok(JsonConvert.SerializeObject(response));
         }
         public IActionResult getInsertClassForm()
         {

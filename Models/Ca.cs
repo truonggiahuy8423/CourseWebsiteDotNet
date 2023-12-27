@@ -30,18 +30,18 @@ namespace CourseWebsiteDotNet.Models
             {
                 return new Response
                 {
-                    State = false,
-                    Message = $"Database Exception: {dbEx.Message}",
-                    InsertedId = null
+                    state = false,
+                    message = $"Database Exception: {dbEx.Message}",
+                    insertedId = null
                 };
             }
             catch (Exception ex)
             {
                 return new Response
                 {
-                    State = false,
-                    Message = $"Exception: {ex.Message}",
-                    InsertedId = null
+                    state = false,
+                    message = $"Exception: {ex.Message}",
+                    insertedId = null
                 };
             }
         }
@@ -137,9 +137,9 @@ namespace CourseWebsiteDotNet.Models
 
                         return new Response
                         {
-                            State = true,
-                            Message = "Thêm ca thành công",
-                            InsertedId = insertedId,
+                            state = true,
+                            message = "Thêm ca thành công",
+                            insertedId = insertedId,
                         };
                     }
                 }
@@ -168,10 +168,10 @@ namespace CourseWebsiteDotNet.Models
 
                         return new Response
                         {
-                            State = true,
-                            Message = "Cập nhật thông tin ca thành công",
-                            InsertedId = null,
-                            EffectedRows = effectedRows
+                            state = true,
+                            message = "Cập nhật thông tin ca thành công",
+                            insertedId = null,
+                            effectedRows = effectedRows
                         };
                     }
                 }
@@ -196,10 +196,10 @@ namespace CourseWebsiteDotNet.Models
 
                         return new Response
                         {
-                            State = true,
-                            Message = "Xóa ca thành công",
-                            InsertedId = null,
-                            EffectedRows = effectedRows
+                            state = true,
+                            message = "Xóa ca thành công",
+                            insertedId = null,
+                            effectedRows = effectedRows
                         };
                     }
                 }
