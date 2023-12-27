@@ -187,8 +187,8 @@
                             deletebtn.prop(`disabled`, false);
                             deletebtn.removeClass(`highlight-button--disable`);
                             deletebtn.addClass(`highlight-button`);
-                            for (var [id_lop_hoc, processState] of Object.entries(response)) {
-                                if (processState.state) {
+                            for (var [id_lop_hoc, processstate] of Object.entries(response)) {
+                                if (processstate.state) {
                                     toast({
                                         title: "Thành công!",
                                         message: `Xóa lớp học ${id_lop_hoc.toString().padStart(6, '0')} thành công!`,
@@ -199,12 +199,12 @@
                                 } else {
                                     toast({
                                         title: `Xóa lớp học ${id_lop_hoc.toString().padStart(6, '0')} thất bại!`,
-                                        message: `(${processState.message}).`,
+                                        message: `(${processstate.message}).`,
                                         type: "error",
                                         duration: 100000
                                     });
 
-                                    // Gọi hàm in thông báo, type: "error", title: "Thêm giảng viên ${lecturer} thêm vào lớp ${selectedSubjectId}.${processResult1.auto_increment_id} thất bại", content: "processState.message"
+                                    // Gọi hàm in thông báo, type: "error", title: "Thêm giảng viên ${lecturer} thêm vào lớp ${selectedSubjectId}.${processResult1.auto_increment_id} thất bại", content: "processstate.message"
                                 }
                             }
                         }
@@ -219,7 +219,7 @@
             $(document).on('click', '.delete-checkbox', function (event) {
                 event.stopPropagation();
             });
-            let loadingState = false;
+            let loadingstate = false;
             $(`.add-class-btn`).click(function () {
                 $.ajax({
                     url: '/Course/test',
@@ -309,8 +309,8 @@
                                                     duration: 100000
                                                 });
                                                 // Gọi hàm in thông báo, type: "succcess", title: "Thêm lớp thành công", content: "Lớp ${className} ${selectedSubjectId}.${processResult1.auto_increment_id} được thêm thành công"
-                                                for (var [lecturer, processState] of Object.entries(processResult)) { // có vấn đề
-                                                    if (processState.state) {
+                                                for (var [lecturer, processstate] of Object.entries(processResult)) { // có vấn đề
+                                                    if (processstate.state) {
                                                         toast({
                                                             title: "Thành công!",
                                                             message: `Thêm giảng viên ${lecturer} vào lớp ${className} ${selectedSubjectId.toString().padStart(3, '0')}.${processResult1.auto_increment_id.toString().padStart(6, '0')} thành công`,
@@ -321,12 +321,12 @@
                                                     } else {
                                                         toast({
                                                             title: "Thất bại!",
-                                                            message: `Thêm giảng viên ${lecturer} vào lớp ${className} ${selectedSubjectId.toString().padStart(3, '0')}.${processResult1.auto_increment_id.toString().padStart(6, '0')} thất bại(${processState.message}).`,
+                                                            message: `Thêm giảng viên ${lecturer} vào lớp ${className} ${selectedSubjectId.toString().padStart(3, '0')}.${processResult1.auto_increment_id.toString().padStart(6, '0')} thất bại(${processstate.message}).`,
                                                             type: "error",
                                                             duration: 100000
                                                         });
 
-                                                        // Gọi hàm in thông báo, type: "error", title: "Thêm giảng viên ${lecturer} thêm vào lớp ${selectedSubjectId}.${processResult1.auto_increment_id} thất bại", content: "processState.message"
+                                                        // Gọi hàm in thông báo, type: "error", title: "Thêm giảng viên ${lecturer} thêm vào lớp ${selectedSubjectId}.${processResult1.auto_increment_id} thất bại", content: "processstate.message"
                                                     }
                                                 }
                                                 reloadCoursesList();
@@ -341,7 +341,7 @@
                                     } else {
                                         loadingEffect(false);
                                         // Error
-                                        $(`.insert-class-form .error-message`).html(processState.message);
+                                        $(`.insert-class-form .error-message`).html(processstate.message);
                                     }
                                 },
                                 error: function (xhr, status, error) {
