@@ -7,7 +7,7 @@ namespace CourseWebsiteDotNet.Models
         public int? id_giang_vien { get; set; }
         public string? ho_ten { get; set; }
         public DateTime? ngay_sinh { get; set; }
-        public int? gioi_tinh {  get; set; }
+        public int? gioi_tinh { get; set; }
         public string? email { get; set; }
     }
 
@@ -211,5 +211,6 @@ namespace CourseWebsiteDotNet.Models
                 }
             });
         }
-    
+
+    }
 }
