@@ -3,10 +3,11 @@
 *@
 @{
     string? class_name = ViewData["class_name"] as string;
+    int? student_quantity = ViewData["student_quantity"] as int?;
 }
 <!DOCTYPE html>
 <html lang="en">
-
+    
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -43,8 +44,8 @@
                     </button>
                 </div>
                 <div>
-                    <h5 class="class-infor-section__class-name"><?php echo $class_name?></h5>
-                    <p style="font-size: 13px; line-height: 16px;">Thành viên: <span class="class-infor-section__members-quantity"><?php echo $student_quantity?></span></p>
+                    <h5 class="class-infor-section__class-name">@class_name</h5>
+                    <p style="font-size: 13px; line-height: 16px;">Thành viên: <span class="class-infor-section__members-quantity">@student_quantity</span></p>
                     <p style="font-size: 13px; line-height: 16px;">Trạng thái: <?php echo $state ?></p>
                 </div>
             </div>

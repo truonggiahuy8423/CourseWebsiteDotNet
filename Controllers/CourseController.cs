@@ -127,14 +127,14 @@ namespace CourseWebsiteDotNet.Controllers
         //        return Ok($"Received data - id: {formData.id}, name: {formData.name}");
         //    }
         //}
-        [HttpPost]
+        [HttpGet]
         public IActionResult test4(string name, int id)
         {
 
             // Xử lý dữ liệu từ phần thân của yêu cầu (POST) và query string (GET)
             // Sử dụng id từ query string (GET)
 
-            return Ok($"Received data - id: {id}, name: {name}");
+            return Ok(JsonConvert.SerializeObject((new HocVienRepository()).GetHocVienById(id)));
         }
         [HttpPost]
         public IActionResult test2([FromBody] ModelForTest2 dataRe)
@@ -267,9 +267,9 @@ namespace CourseWebsiteDotNet.Controllers
 
                     // MainSection
 
-
                     // Layout data
-                    ViewData["class_name"] = "";
+                    ViewData["class_name"] = $"{courses.Rows[0]["ten_mon_hoc"]} {courses.Rows[0]["id_mon_hoc"].ToString().PadLeft(3, '0')}.{courses.Rows[0]["id_lop_hoc"].ToString().PadLeft(6, '0')}";
+                    ViewData["student_quantity"] = courses.Rows[0]["so_luong_hoc_vien"];
                     // Mainsection
                     return View("AdministratorCourseInformation");
                 }

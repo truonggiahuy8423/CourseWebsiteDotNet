@@ -238,21 +238,21 @@
             //         }
             //     });
             // });
-            // $(`.add-class-btn`).click(function () {
-            //     let obj = { "name": "Huy" }
-            //     $.ajax({
-            //         url: '/Course/test4',
-            //         method: 'POST',
-            //         dataType: 'text',
-            //         data: {
-            //             name: JSON.stringify(obj),
-            //             id: 10
-            //         },
-            //         success: function (response) {
-            //             console.log("data received4:" + response)
-            //         }
-            //     });
-            // });
+            $(`.add-class-btn`).click(function () {
+                let obj = { "name": "Huy" }
+                $.ajax({
+                    url: '/Course/test4',
+                    method: 'GET',
+                    dataType: 'text',
+                    data: {
+                        name: JSON.stringify(obj),
+                        id: 10
+                    },
+                    success: function (response) {
+                        console.log("data received4:" + response)
+                    }
+                });
+            });
             // $(`.add-class-btn`).click(function () {
             //     let obj = { "name": "Huy" }
             //     $.ajax({
