@@ -114,12 +114,13 @@ namespace CourseWebsiteDotNet.Models
                 {
                     connection.Open();
 
-                    string query = "INSERT INTO hoc_vien_tham_gia (id_lop_hoc) " +
-                                   "VALUES (@id_lop_hoc); SELECT LAST_INSERT_ID();";
+                    string query = "INSERT INTO hoc_vien_tham_gia(id_lop_hoc, id_hoc_vien) " +
+                                   "VALUES (@id_lop_hoc, @id_hoc_vien); SELECT LAST_INSERT_ID();";
 
                     using (MySqlCommand command = new MySqlCommand(query, connection))
                     {
                         command.Parameters.AddWithValue("@id_lop_hoc", hocVienThamGia.id_lop_hoc);
+                        command.Parameters.AddWithValue("@id_hoc_vien", hocVienThamGia.id_hoc_vien);
 
                         int insertedId = Convert.ToInt32(command.ExecuteScalar());
 
@@ -165,7 +166,7 @@ namespace CourseWebsiteDotNet.Models
         }
 
         // Trả về Response
-        public Response DeleteHocVienThamGia(int id)
+        public Response DeleteHocVienThamGia(HocVienThamGiaModel hvtg)
         {
             return ExecuteDatabaseOperation(() =>
             {
@@ -173,11 +174,12 @@ namespace CourseWebsiteDotNet.Models
                 {
                     connection.Open();
 
-                    string query = "DELETE FROM hoc_vien_tham_gia WHERE id_hoc_vien = @Id";
+                    string query = "DELETE FROM hoc_vien_tham_gia WHERE id_hoc_vien = @Id and id_lop_hoc = @id_lop_hoc";
 
                     using (MySqlCommand command = new MySqlCommand(query, connection))
                     {
-                        command.Parameters.AddWithValue("@Id", id);
+                        command.Parameters.AddWithValue("@Id", hvtg.id_hoc_vien);
+                        command.Parameters.AddWithValue("@id_lop_hoc", hvtg.id_lop_hoc);
 
                         int effectedRows = command.ExecuteNonQuery();
 

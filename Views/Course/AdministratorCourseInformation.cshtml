@@ -331,24 +331,24 @@
                         if (window.confirm(`Xóa giảng viên ${lecturer} khỏi lớp ${class_name}?`)) {
                             loadingEffect(true);
                             $.ajax({
-                                url: `<?php echo base_url() ?>Admin/CoursesController/deleteLecturerFromCourse`,
-                                contentType: "text",
+                                url: `${window.location.protocol}//${window.location.hostname}:${window.location.port}/Course/deleteLecturerFromCourse`,
+                                method: 'POST',
                                 dataType: "json",
                                 data: {
                                     id_giang_vien: id_giang_vien,
-                                    id_lop_hoc: id_lop_hoc
                                 },
                                 success: function (response) {
                                     loadingEffect(false);
+                                    console.log(response)
                                     reloadLecturerList();
-                                    if (response.state && response.effectedNumRows > 0) {
+                                    if (response.state && response.effectedRows > 0) {
                                         toast({
                                             title: "Thành công!",
                                             message: `Xóa giảng viên ${lecturer} khỏi lớp ${class_name} thành công`,
                                             type: "success",
                                             duration: 100000
                                         });
-                                    } else if (response.state && response.effectedNumRows == 0) {
+                                    } else if (response.state && response.effectedRows == 0) {
                                         toast({
                                             title: "Thông báo!",
                                             message: `Giảng viên ${lecturer} không có trong lớp ${class_name}!`,
@@ -436,7 +436,7 @@
             $(`.add-student-into-class-btn`).click(function () {
                 loadingEffect(true);
                 $.ajax({
-                    url: `<?php echo base_url(); ?>/Admin/CoursesController/getInsertStudentForm`,
+                    url: `${window.location.protocol}//${window.location.hostname}:${window.location.port}/Course/getInsertStudentForm`,
                     method: 'GET',
                     // dataType: "json",
                     success: function (response) {
@@ -456,23 +456,28 @@
                             console.log(selectedStudents);
                             let class_name = $(`.class-infor-table tr`).eq(2).find(`td`).eq(1).text();
                             var obj = {
-                                id_lop_hoc: id_lop_hoc,
                                 student_id_list: selectedStudents
                             }
                             var jsonData = JSON.stringify(obj);
+                            loadingEffect(true);
+
                             //     // Insert list of lecturers's id into phanconggiangvien
                             $.ajax({
-                                url: '<?php echo base_url(); ?>/Admin/CoursesController/insertStudentsIntoClass',
+                                url: `${window.location.protocol}//${window.location.hostname}:${window.location.port}/Course/insertStudentsIntoClass`,
                                 method: 'POST',
                                 contentType: 'application/json', // Đặt kiểu dữ liệu của yêu cầu là JSON
+                                dataType: 'json',
                                 data: jsonData,
                                 success: function (response) {
+                                    console.log("insert student")
+                                    console.log(response);
                                     var processResult = (response);
                                     loadingEffect(false);
                                     reloadStudentList();
                                     $('.form-container').remove();
                                     // Gọi hàm in thông báo, type: "succcess", title: "Thêm lớp thành công", content: "Lớp ${className} ${selectedSubjectId}.${processResult1.auto_increment_id} được thêm thành công"
                                     for (var [student, processState] of Object.entries(processResult)) { // có vấn đề
+                                        console.log(processState.state);
                                         if (processState.state) {
                                             toast({
                                                 title: "Thành công!",
@@ -506,53 +511,7 @@
                 });
             })
         })
-        $(`.delete-lecturer-btn`).click(function () {
-            let ho_ten = $(this).attr('name');
-            let id_giang_vien = $(this).attr('value');
-            let lecturer = ho_ten + `(${id_giang_vien})`;
-            // let id_lop_hoc = id_lop_hoc * 1;
-            let id_mon_hoc = $(`.class-infor-table tr`).eq(1).find(`td`).eq(1).text();
-            let class_name_field = $(`.class-infor-table tr`).eq(2).find(`td`).eq(1);
-            let class_name = class_name_field.text() + ` ${id_mon_hoc.toString().padStart(3, '0')}.${id_lop_hoc.toString().padStart(6, '0')}`;
-            if (window.confirm(`Xóa giảng viên ${lecturer} khỏi lớp ${class_name}?`)) {
-                loadingEffect(true);
-                $.ajax({
-                    url: `<?php echo base_url() ?>Admin/CoursesController/deleteLecturerFromCourse`,
-                    contentType: "text",
-                    dataType: "json",
-                    data: {
-                        id_giang_vien: id_giang_vien,
-                        id_lop_hoc: id_lop_hoc
-                    },
-                    success: function (response) {
-                        loadingEffect(false);
-                        reloadLecturerList();
-                        if (response.state && response.effectedNumRows > 0) {
-                            toast({
-                                title: "Thành công!",
-                                message: `Xóa giảng viên ${lecturer} khỏi lớp ${class_name} thành công`,
-                                type: "success",
-                                duration: 100000
-                            });
-                        } else if (response.state && response.effectedNumRows == 0) {
-                            toast({
-                                title: "Thông báo!",
-                                message: `Giảng viên ${lecturer} không có trong lớp ${class_name}!`,
-                                type: "warning",
-                                duration: 100000
-                            });
-                        } else {
-                            toast({
-                                title: `Xóa giảng viên ${lecturer} vào lớp ${class_name} thất bại`,
-                                message: response.message,
-                                type: "error",
-                                duration: 100000
-                            });
-                        }
-                    }
-                })
-            }
-        })
+       
         $(`.delete-student-into-class-btn`).click(function () {
             if (confirm("Xóa các học viên tương ứng ra khỏi lớp học này?")) {
                 loadingEffect(true);
@@ -568,7 +527,6 @@
                     contentType: "json",
                     dataType: "json",
                     data: JSON.stringify({
-                        id_lop_hoc: id_lop_hoc,
                         danh_sach_id_hoc_vien: student_id_list
                     }),
                     success: function (response) {
@@ -665,7 +623,7 @@
         $(`.add-lecturer-btn`).click(function () {
             loadingEffect(true);
             $.ajax({
-                url: `${window.location.protocol}//${window.location.hostname}/Admin/CoursesController/getInsertLecturerForm`,
+                url: `${window.location.protocol}//${window.location.hostname}:${window.location.port}/Course/getInsertLecturerForm`,
                 method: 'GET',
                 success: function (response) {
                     loadingEffect(false);
@@ -674,6 +632,7 @@
                         $('.form-container').remove();
                     });
                     $(`.insert-lecturer-form__save-btn`).click(function () {
+                        loadingEffect(true);
                         var selectedLecturers = {};
                         $(`.insert-lecturer-form__lecturers-table .lecturer-checkbox:checked`).each(function () {
                             selectedLecturers[$(this).val() + ""] = $(this).parent().parent().find(`td`).eq(1).text();
@@ -682,15 +641,15 @@
                         let id_mon_hoc = $(`.class-infor-table tr`).eq(1).find(`td`).eq(1).text() * 1;
                         let class_name = $(`.class-infor-table tr`).eq(2).find(`td`).eq(1).text();
                         var obj = {
-                            id_lop_hoc: id_lop_hoc,
                             lecturer_id_list: selectedLecturers
                         }
                         var jsonData = JSON.stringify(obj);
                         // Insert list of lecturers's id into phanconggiangvien
                         $.ajax({
-                            url: '<?php echo base_url(); ?>/Admin/CoursesController/insertLecturersIntoClass',
+                            url: `${window.location.protocol}//${window.location.hostname}:${window.location.port}/Course/insertLecturersIntoClass2`,
                             method: 'POST',
                             contentType: 'application/json', // Đặt kiểu dữ liệu của yêu cầu là JSON
+                            dataType: 'json',
                             data: jsonData,
                             success: function (response) {
                                 console.log(id_lop_hoc);
@@ -758,15 +717,15 @@
             console.log(ngbd);
             let options = '';
             $.ajax({
-                url: `${window.location.protocol}//${window.location.hostname}/Admin/CoursesController/getListOfSubjects`,
+                url: `${window.location.protocol}//${window.location.hostname}:${window.location.port}/Course/getListOfSubjects`,
                 method: 'POST',
-                contentType: 'application/json', // Đặt kiểu dữ liệu của yêu cầu là JSON
+                dataType: 'json', // Đặt kiểu dữ liệu của yêu cầu là JSON
                 data: null,
                 success: function (response) {
-                    // console.log(response);
+                    console.log(response);
 
                     for (let subject of response) {
-                        options += `<option name="${subject['ten_mon_hoc']}" ${subject['id_mon_hoc'] == id ? "selected" : ""} value="${subject['id_mon_hoc']}">${subject['id_mon_hoc'].padStart(3, '0') + " - " + subject['ten_mon_hoc']}</option>`;
+                        options += `<option name="${subject['ten_mon_hoc']}" ${subject['id_mon_hoc'] == id ? "selected" : ""} value="${subject['id_mon_hoc']}">${subject['id_mon_hoc'] + " - " + subject['ten_mon_hoc']}</option>`;
                     }
                     class_name_field.html(`
                             <select style="height: 23px" class="mon_hoc_cbb">${options}</select>
@@ -820,16 +779,16 @@
             // Lấy dữ liệu bỏ vào obj
             loadingEffect(true);
             let course = {
-                id_lop_hoc: id_lop_hoc * 1,
                 id_mon_hoc: $(`.mon_hoc_cbb`).val() * 1,
                 ngay_bat_dau: $(`.ngbd`).val(),
                 ngay_ket_thuc: $(`.ngkt`).val()
             }
             courseData = JSON.stringify(course);
             $.ajax({
-                url: `<?php echo base_url() ?>/Admin/CoursesController/updateCourse`,
+                url: `${window.location.protocol}//${window.location.hostname}:${window.location.port}/Course/updateCourse`,
                 method: 'POST',
                 contentType: 'application/json', // Đặt kiểu dữ liệu của yêu cầu là JSON
+                dataType: 'json',
                 data: courseData,
                 success: function (response) {
                     loadingEffect(false);

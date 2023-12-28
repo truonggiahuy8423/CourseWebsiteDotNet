@@ -1,4 +1,5 @@
 ﻿using CourseWebsiteDotNet.Models;
+using Google.Protobuf;
 using Humanizer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -8,12 +9,14 @@ using Newtonsoft.Json;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Tls.Crypto;
+using System;
 using System.Data;
 using System.Diagnostics;
 using System.Dynamic;
 using System.Globalization;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 
 namespace CourseWebsiteDotNet.Controllers
 {
@@ -211,16 +214,54 @@ namespace CourseWebsiteDotNet.Controllers
             return Ok(JsonConvert.SerializeObject(response));
 
         }
-        public IActionResult getInsertClassForm()
+        [HttpPost]
+        public IActionResult insertStudentsIntoClass([FromBody] JsonDocument dataReceived)
         {
-            var subjectRepo = new MonHocRepository();
-            ViewData["subjects"] = subjectRepo.GetAllMonHoc();
+            //string json = HttpContext.Request.Form["json"];
 
-            var lecturerRepo = new GiangVienRepository();
-            ViewData["lecturers"] = lecturerRepo.GetAllGiangVien();
+            //dynamic obj = JsonConvert.DeserializeObject<ExpandoObject>(json);
+            dynamic obj = JsonConvert.DeserializeObject<ExpandoObject>(dataReceived.RootElement.ToString());
+            int? courseid = HttpContext.Session.GetInt32("courseid");
+            dynamic student_id_list = (ExpandoObject)obj.student_id_list;
 
+            ExpandoObject response = new ExpandoObject();
+            foreach (var property in (IDictionary<string, object>)student_id_list)
+            {
+                HocVienThamGiaModel pcModel = new HocVienThamGiaModel()
+                {
+                    id_hoc_vien = Convert.ToInt32(property.Key),
+                    id_lop_hoc = Convert.ToInt32(courseid)
+                };
+                HocVienThamGiaRepository pcRepo = new HocVienThamGiaRepository();
+                ((IDictionary<string, object>)response)[property.Key] = pcRepo.InsertHocVienThamGia(pcModel);
 
-            return View("InsertClassForm");
+            }
+            return Ok(JsonConvert.SerializeObject(response));
+        }
+        [HttpPost]
+        public IActionResult insertLecturersIntoClass2([FromBody] JsonDocument dataReceived)
+        {
+            //string json = HttpContext.Request.Form["json"];
+
+            //dynamic obj = JsonConvert.DeserializeObject<ExpandoObject>(json);
+            dynamic obj = JsonConvert.DeserializeObject<ExpandoObject>(dataReceived.RootElement.ToString());
+            int? courseid = HttpContext.Session.GetInt32("courseid");
+            dynamic lecturer_id_list = (ExpandoObject)obj.lecturer_id_list;
+
+            ExpandoObject response = new ExpandoObject();
+            foreach (var property in (IDictionary<string, object>)lecturer_id_list)
+            {
+                PhanCongGiangVienModel pcModel = new PhanCongGiangVienModel()
+                {
+                    id_giang_vien = Convert.ToInt32(property.Key),
+                    id_lop_hoc = Convert.ToInt32(courseid)
+                };
+                PhanCongGiangVienRepository pcRepo = new PhanCongGiangVienRepository();
+                ((IDictionary<string, object>)response)[property.Key] = pcRepo.InsertPhanCongGiangVien(pcModel);
+
+            }
+            return Ok(JsonConvert.SerializeObject(response));
+
         }
         [HttpGet]
         public IActionResult Information(int? courseid)
@@ -339,6 +380,11 @@ namespace CourseWebsiteDotNet.Controllers
             return View("AdministratorCourseInformation");
 
         }
+        public IActionResult getListOfSubjects()
+        {
+            return Ok(JsonConvert.SerializeObject(SQLExecutor.ExecuteQuery("SELECT * FROM mon_hoc")));
+        }
+        
         public string KiemTraTinhTrang(string ngayBatDau, string ngayKetThuc)
         {
             DateTime datetimeBatDau = DateTime.ParseExact(ngayBatDau, "d/M/yyyy", CultureInfo.InvariantCulture);
@@ -363,18 +409,7 @@ namespace CourseWebsiteDotNet.Controllers
         }
 
 
-        public IActionResult deleteCourse([FromBody] JsonDocument dataReceived)
-        {
-            dynamic obj = JsonConvert.DeserializeObject<ExpandoObject>(dataReceived.RootElement.ToString());
-            ExpandoObject response = new ExpandoObject();
-            foreach (string id_lop_hoc in obj.courses)
-            {
-                LopHocRepository lopHocRepository = new LopHocRepository();
-                ((IDictionary<string, object>)response)[id_lop_hoc] = lopHocRepository.DeleteLopHoc(Convert.ToInt32(id_lop_hoc));
-            }
-
-            return Ok(JsonConvert.SerializeObject(response));
-        }
+     
 
 
         public IActionResult getScheduleListByCourseId()
@@ -432,6 +467,34 @@ namespace CourseWebsiteDotNet.Controllers
             return Ok(JsonConvert.SerializeObject(lecturers));
 
         }
+        [HttpPost]
+        //public function updateCourse()
+        //{
+        //$courseData = json_decode(json_encode($this->request->getJSON()), true);
+        //$course = new LopModel();
+        //$course->id_lop_hoc = $courseData['id_lop_hoc'];
+        //$course->ngay_bat_dau = $courseData['ngay_bat_dau'];
+        //$course->ngay_ket_thuc = $courseData['ngay_ket_thuc'];
+        //$course->id_mon_hoc = $courseData['id_mon_hoc'];
+        //    // return $this->response->setJSON($course);
+        //    return $this->response->setJSON($course->updateLop($course));
+        //}
+        public IActionResult updateCourse([FromBody] JsonDocument dataReceived)
+        {
+            dynamic course = JsonConvert.DeserializeObject<ExpandoObject>(dataReceived.RootElement.ToString());
+            int? courseid = HttpContext.Session.GetInt32("courseid");
+            LopHocModel model = new LopHocModel()
+            {
+                id_lop_hoc = (int)courseid,
+                id_mon_hoc = (int)course.id_mon_hoc,
+                ngay_bat_dau = DateTime.ParseExact(course.ngay_bat_dau, "yyyy-MM-dd", CultureInfo.InvariantCulture),
+                ngay_ket_thuc = DateTime.ParseExact(course.ngay_ket_thuc, "yyyy-MM-dd", CultureInfo.InvariantCulture)
+            };
+
+            return Ok(JsonConvert.SerializeObject((new LopHocRepository()).UpdateLopHoc(model)));
+
+        }
+
         //public function getListOfLecturersByCourseId()
         //{
         //// $id_lop_hoc = 110;
@@ -443,6 +506,78 @@ namespace CourseWebsiteDotNet.Controllers
         //        WHERE phan_cong_giang_vien.id_lop_hoc = {$id_lop_hoc}; "
         //);
         //    return $this->response->setJSON($lecturers);
+        //}
+        [HttpPost]
+        public IActionResult deleteLecturerFromCourse(int id_giang_vien)
+        {
+            int? courseid = HttpContext.Session.GetInt32("courseid");
+            return Ok(JsonConvert.SerializeObject(
+                (new PhanCongGiangVienRepository()).DeletePhanCongGiangVien((new PhanCongGiangVienModel() { id_lop_hoc = courseid, id_giang_vien = id_giang_vien}))
+                ));
+        }
+        public IActionResult getInsertClassForm()
+        {
+            var subjectRepo = new MonHocRepository();
+            ViewData["subjects"] = subjectRepo.GetAllMonHoc();
+
+            var lecturerRepo = new GiangVienRepository();
+            ViewData["lecturers"] = lecturerRepo.GetAllGiangVien();
+
+
+            return View("InsertClassForm");
+        }
+        public IActionResult getInsertLecturerForm()
+        {
+            var lecturerRepo = new GiangVienRepository();
+            ViewData["lecturers"] = lecturerRepo.GetAllGiangVien();
+            return View("InsertLecturerIntoClassForm");
+
+        }
+       public IActionResult getInsertStudentForm()
+        {
+            var studentRepo = new HocVienRepository();
+            ViewData["students"] = studentRepo.GetAllHocVien();
+            return View("InsertStudentIntoClassForm");
+        }
+        public IActionResult deleteCourse([FromBody] JsonDocument dataReceived)
+        {
+            dynamic obj = JsonConvert.DeserializeObject<ExpandoObject>(dataReceived.RootElement.ToString());
+            ExpandoObject response = new ExpandoObject();
+            foreach (string id_lop_hoc in obj.courses)
+            {
+                LopHocRepository lopHocRepository = new LopHocRepository();
+                ((IDictionary<string, object>)response)[id_lop_hoc] = lopHocRepository.DeleteLopHoc(Convert.ToInt32(id_lop_hoc));
+            }
+
+            return Ok(JsonConvert.SerializeObject(response));
+        }
+        [HttpPost]
+        public IActionResult deleteStudentFromCourse([FromBody] JsonDocument dataReceived)
+        {
+
+        }
+        //public function deleteStudentFromCourse()
+        //{
+        //    if (!session()->has('id_user'))
+        //    {
+        //        return redirect()->to('/');
+        //    }
+        //$array = json_decode(json_encode($this->request->getJSON()), true);
+        //$dshv = $array["danh_sach_id_hoc_vien"];
+        //// $dsbh = [77320];
+        //// $dshv = [1];
+        //$id_lop_hoc = $array["id_lop_hoc"];
+        //$result = array();
+        //$model = new hoc_vien_tham_giaModel();
+        //    foreach ($dshv as $id_hoc_vien) {
+        //    $hvtg = new hoc_vien_tham_giaModel();
+        //    $hvtg->id_hoc_vien = $id_hoc_vien;
+        //    $hvtg->id_lop_hoc = $id_lop_hoc;
+        //    $result[$id_hoc_vien] = $model->deletehoc_vien_tham_gia(
+        //        $hvtg
+        //    );
+        //    }
+        //    return $this->response->setJSON($result);
         //}
     }
 }
