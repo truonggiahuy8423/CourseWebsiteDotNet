@@ -1,25 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using MySql.Data.MySqlClient;
+﻿using MySql.Data.MySqlClient;
 
 namespace CourseWebsiteDotNet.Models
 {
-    public class ViTriTepTinModel
+    // Lớp MucModel chứa các thuộc tính
+    public class MucModel
     {
         public int id_muc { get; set; }
-        public int id_tep_tin_tai_len { get; set; }
-        public DateTime? ngay_dang { get; set; }
+        public string? ten_muc { get; set; }
+        public int id_lop_hoc { get; set; }
+        public int? id_muc_cha { get; set; }
     }
 
-    public class ViTriTepTinRepository
+
+    // Lớp MucRepository chứa các hàm thao tác với cơ sở dữ liệu
+    public class MucRepository
     {
         private readonly string connectionString;
 
-        public ViTriTepTinRepository()
+        public MucRepository()
         {
             connectionString = DatabaseConnection.CONNECTION_STRING;
         }
 
+        // Hàm try catch lỗi từ database
         private Response ExecuteDatabaseOperation(Func<Response> operation)
         {
             try
@@ -46,14 +49,15 @@ namespace CourseWebsiteDotNet.Models
             }
         }
 
-        public List<ViTriTepTinModel> GetAllViTriTepTin()
+        // Trả về List<MucModel>
+        public List<MucModel> GetAllMuc()
         {
-            List<ViTriTepTinModel> viTriTepTinList = new List<ViTriTepTinModel>();
+            List<MucModel> mucList = new List<MucModel>();
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 connection.Open();
 
-                string query = "SELECT * FROM vi_tri_tep_tin";
+                string query = "SELECT * FROM muc";
 
                 using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
@@ -61,56 +65,54 @@ namespace CourseWebsiteDotNet.Models
                     {
                         while (reader.Read())
                         {
-                            ViTriTepTinModel viTriTepTin = new ViTriTepTinModel
-                            {
-                                id_muc = Convert.ToInt32(reader["id_muc"]),
-                                id_tep_tin_tai_len = Convert.ToInt32(reader["id_tep_tin_tai_len"]),
-                                ngay_dang = reader["ngay_dang"] is DBNull ? (DateTime?)null : Convert.ToDateTime(reader["ngay_dang"])
-                            };
-
-                            viTriTepTinList.Add(viTriTepTin);
+                            MucModel muc = new MucModel();
+                            muc.id_muc = Convert.ToInt32(reader["id_muc"]);
+                            muc.ten_muc = (reader["ten_muc"]) != DBNull.Value ? Convert.ToString(reader["ten_muc"]) : (string?)null;
+                            muc.id_lop_hoc = Convert.ToInt32(reader["id_lop_hoc"]);
+                            muc.id_muc_cha = (reader["id_muc_cha"]) != DBNull.Value ? Convert.ToInt32(reader["id_muc_cha"]) : (int?)null;
+                            mucList.Add(muc);
                         }
                     }
                 }
             }
 
-            return viTriTepTinList;
+            return mucList;
         }
 
-        public ViTriTepTinModel? GetViTriTepTin(int idMuc, int idTepTinTaiLen)
+        // Trả về 1 MucModel
+        public MucModel? GetMucById(int id)
         {
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 connection.Open();
 
-                string query = "SELECT * FROM vi_tri_tep_tin WHERE id_muc = @IdMuc AND id_tep_tin_tai_len = @IdTepTinTaiLen";
+                string query = "SELECT * FROM muc WHERE id_muc = @Id";
 
                 using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@IdMuc", idMuc);
-                    command.Parameters.AddWithValue("@IdTepTinTaiLen", idTepTinTaiLen);
+                    command.Parameters.AddWithValue("@Id", id);
 
                     using (MySqlDataReader reader = command.ExecuteReader())
                     {
                         if (reader.Read())
                         {
-                            return new ViTriTepTinModel
+                            return new MucModel // Trả về 1 MucModel
                             {
                                 id_muc = Convert.ToInt32(reader["id_muc"]),
-                                id_tep_tin_tai_len = Convert.ToInt32(reader["id_tep_tin_tai_len"]),
-                                ngay_dang = reader["ngay_dang"] is DBNull ? (DateTime?)null : Convert.ToDateTime(reader["ngay_dang"])
+                                ten_muc = (reader["ten_muc"]) != DBNull.Value ? Convert.ToString(reader["ten_muc"]) : (string?)null,
+                                id_lop_hoc = Convert.ToInt32(reader["id_lop_hoc"]),
+                                id_muc_cha = (reader["id_muc_cha"]) != DBNull.Value ? Convert.ToInt32(reader["id_muc_cha"]) : (int?)null
                             };
                         }
                         else
-                        {
-                            return null;
-                        }
+                            return null; // Không có trả về null
                     }
                 }
             }
         }
 
-        public Response InsertViTriTepTin(ViTriTepTinModel viTriTepTin)
+        // Trả về Response
+        public Response InsertMuc(MucModel muc)
         {
             return ExecuteDatabaseOperation(() =>
             {
@@ -118,21 +120,21 @@ namespace CourseWebsiteDotNet.Models
                 {
                     connection.Open();
 
-                    string query = "INSERT INTO vi_tri_tep_tin (id_muc, id_tep_tin_tai_len, ngay_dang) " +
-                                   "VALUES (@IdMuc, @IdTepTinTaiLen, @NgayDang);";
+                    string query = "INSERT INTO muc (ten_muc, id_lop_hoc, id_muc_cha) " +
+                                   "VALUES (@ten_muc, @id_lop_hoc, @id_muc_cha); SELECT LAST_INSERT_ID();";
 
                     using (MySqlCommand command = new MySqlCommand(query, connection))
                     {
-                        command.Parameters.AddWithValue("@IdMuc", viTriTepTin.id_muc);
-                        command.Parameters.AddWithValue("@IdTepTinTaiLen", viTriTepTin.id_tep_tin_tai_len);
-                        command.Parameters.AddWithValue("@NgayDang", viTriTepTin.ngay_dang);
+                        command.Parameters.AddWithValue("@ten_muc", muc.ten_muc);
+                        command.Parameters.AddWithValue("@id_lop_hoc", muc.id_muc);
+                        command.Parameters.AddWithValue("@id_muc_cha", muc.id_muc_cha);
 
-                        int insertedId = command.ExecuteNonQuery();
+                        int insertedId = Convert.ToInt32(command.ExecuteScalar());
 
                         return new Response
                         {
                             state = true,
-                            message = "Thêm vị trí tệp tin thành công",
+                            message = "Thêm mục thành công",
                             insertedId = insertedId,
                         };
                     }
@@ -140,7 +142,8 @@ namespace CourseWebsiteDotNet.Models
             });
         }
 
-        public Response UpdateViTriTepTin(ViTriTepTinModel viTriTepTin)
+        // Trả về Response
+        public Response UpdateMuc(MucModel muc)
         {
             return ExecuteDatabaseOperation(() =>
             {
@@ -148,21 +151,23 @@ namespace CourseWebsiteDotNet.Models
                 {
                     connection.Open();
 
-                    string query = "UPDATE vi_tri_tep_tin SET ngay_dang = @NgayDang " +
-                                   "WHERE id_muc = @IdMuc AND id_tep_tin_tai_len = @IdTepTinTaiLen";
+                    string query = "UPDATE muc SET ten_muc = @ten_muc, " +
+                                   "id_lop_hoc = @id_lop_hoc, id_muc_cha = @id_muc_cha " +
+                    "WHERE id_muc = @Id";
 
                     using (MySqlCommand command = new MySqlCommand(query, connection))
                     {
-                        command.Parameters.AddWithValue("@IdMuc", viTriTepTin.id_muc);
-                        command.Parameters.AddWithValue("@IdTepTinTaiLen", viTriTepTin.id_tep_tin_tai_len);
-                        command.Parameters.AddWithValue("@NgayDang", viTriTepTin.ngay_dang);
+                        command.Parameters.AddWithValue("@ten_muc", muc.ten_muc);
+                        command.Parameters.AddWithValue("@id_lop_hoc", muc.id_lop_hoc);
+                        command.Parameters.AddWithValue("@id_muc_cha", muc.id_muc_cha);
+                        command.Parameters.AddWithValue("@Id", muc.id_muc);
 
                         int effectedRows = command.ExecuteNonQuery();
 
                         return new Response
                         {
                             state = true,
-                            message = "Cập nhật vị trí tệp tin thành công",
+                            message = "Cập nhật thông tin mục thành công",
                             insertedId = null,
                             effectedRows = effectedRows
                         };
@@ -171,7 +176,8 @@ namespace CourseWebsiteDotNet.Models
             });
         }
 
-        public Response DeleteViTriTepTin(int idMuc, int idTepTinTaiLen)
+        // Trả về Response
+        public Response DeleteMuc(int id)
         {
             return ExecuteDatabaseOperation(() =>
             {
@@ -179,19 +185,18 @@ namespace CourseWebsiteDotNet.Models
                 {
                     connection.Open();
 
-                    string query = "DELETE FROM vi_tri_tep_tin WHERE id_muc = @IdMuc AND id_tep_tin_tai_len = @IdTepTinTaiLen;";
+                    string query = "DELETE FROM muc WHERE id_muc = @Id";
 
                     using (MySqlCommand command = new MySqlCommand(query, connection))
                     {
-                        command.Parameters.AddWithValue("@IdMuc", idMuc);
-                        command.Parameters.AddWithValue("@IdTepTinTaiLen", idTepTinTaiLen);
+                        command.Parameters.AddWithValue("@Id", id);
 
                         int effectedRows = command.ExecuteNonQuery();
 
                         return new Response
                         {
                             state = true,
-                            message = "Xóa vị trí tệp tin thành công",
+                            message = "Cập nhật thông tin mục thành công",
                             insertedId = null,
                             effectedRows = effectedRows
                         };

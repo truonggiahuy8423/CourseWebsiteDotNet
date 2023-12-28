@@ -1,0 +1,74 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    Layout = null;
+    List<MonHocModel> subjects = ViewData["subjects"] as List<MonHocModel>;
+    List<GiangVienModel> lecturers = ViewData["lecturers"] as List<GiangVienModel>;
+
+}
+
+<div class="form-container">
+    <div class="insert-class-form">
+        <div class="insert-class-form__title-section">
+            <h5 class="insert-class-form__title">Thêm khóa học</h5>
+        </div>
+        <div class="insert-class-form__date-picker-container">
+            <div style="display: inline-block; margin-right: 20%; margin-bottom: 10px;"><span style="margin-right: 2px;">Ngày bắt đầu </span><input class="insert-class-form__begin-date-picker" type="date"></div>
+            <div style="display: inline-block;"><span>Ngày kết thúc </span><input class="insert-class-form__end-date-picker" type="date"></div>
+        </div>
+        <div class="insert-class-form__subject-cbb-container">
+            <span style="margin-left: 20px; margin-right: 10px;">Môn học</span>
+            <select class="insert-class-form__subject-cbb" name="mon_hoc" size="4" id="">
+                @{
+                    for (int i = 0; i < subjects.Count; i++) {
+                        <option value="@subjects[i].id_mon_hoc">
+                             @subjects[i].id_mon_hoc.ToString().PadLeft(3, '0') - @subjects[i].ten_mon_hoc
+                        </option>
+                    }
+                }
+            </select>
+
+            <br>
+        </div>
+        <p class="error-message" style="color: red;"></p>
+        <span style="margin-left: 20px; margin-bottom: 10px;">Danh sách giảng viên</span>
+        <div class="insert-class-form__table-container">
+            <table class="insert-class-form__lecturers-table">
+                <thead>
+                    <tr style="">
+                        <th>ID</th>
+                        <th>Họ tên</th>
+                        <th>Email</th>
+                        <th>Giới tính</th>
+                        <th>Chọn</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        for (int i = 0; i < lecturers.Count; i++) {
+                            string gioi_tinh = lecturers[i].gioi_tinh == 0 ? "Nữ" : "Nam";
+
+                            <tr>
+                                <td>@lecturers[i].id_giang_vien.ToString().PadLeft(3, '0')</td>
+                                <td>@lecturers[i].ho_ten</td>
+                                <td>@lecturers[i].email</td>
+                                <td>@gioi_tinh</td>
+                                <td><input class="lecturer-checkbox" type="checkbox" value="@lecturers[i].id_giang_vien"></td>
+                            </tr>
+                        }
+                    }
+      
+
+                    <!-- Dòng 1 -->
+                    <!-- Các dòng khác tương tự -->
+                </tbody>
+            </table>
+        </div>
+        <div class="insert-class-form__btn-container">
+            <button class="insert-class-form__cancel-btn">Hủy</button>
+            <button class="insert-class-form__save-btn">Lưu thông tin</button>
+        </div>
+    </div>
+
+</div>

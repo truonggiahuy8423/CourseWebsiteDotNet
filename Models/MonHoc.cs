@@ -29,18 +29,18 @@ namespace CourseWebsiteDotNet.Models
             {
                 return new Response
                 {
-                    State = false,
-                    Message = $"Database Exception: {dbEx.Message}",
-                    InsertedId = null
+                    state = false,
+                    message = $"Database Exception: {dbEx.Message}",
+                    insertedId = null
                 };
             }
             catch (Exception ex)
             {
                 return new Response
                 {
-                    State = false,
-                    Message = $"Exception: {ex.Message}",
-                    InsertedId = null
+                    state = false,
+                    message = $"Exception: {ex.Message}",
+                    insertedId = null
                 };
             }
         }
@@ -122,13 +122,25 @@ namespace CourseWebsiteDotNet.Models
                         command.Parameters.AddWithValue("@TenMonHoc", monHoc.ten_mon_hoc);
 
                         int insertedId = Convert.ToInt32(command.ExecuteScalar());
-
-                        return new Response
+                        if (insertedId > 0)
                         {
-                            State = true,
-                            Message = "Thêm môn học thành công",
-                            InsertedId = insertedId,
-                        };
+                            return new Response
+                            {
+                                state = true,
+                                message = "Thêm môn học thành công",
+                                insertedId = insertedId,
+                            };
+                        }
+                        else
+                        {
+                            return new Response
+                            {
+                                state = false,
+                                message = "Thêm môn học thất bại",
+                                insertedId = insertedId,
+                            };
+                        }
+
                     }
                 }
             });
@@ -151,14 +163,26 @@ namespace CourseWebsiteDotNet.Models
                         command.Parameters.AddWithValue("@Id", monHoc.id_mon_hoc);
 
                         int effectedRows = command.ExecuteNonQuery();
-
-                        return new Response
+                        if (effectedRows > 0)
                         {
-                            State = true,
-                            Message = "Cập nhật thông tin môn học thành công",
-                            InsertedId = null,
-                            EffectedRows = effectedRows
-                        };
+                            return new Response
+                            {
+                                state = true,
+                                message = "Cập nhật thông tin môn học thành công",
+                                insertedId = null,
+                                effectedRows = effectedRows
+                            };
+                        }
+                        else
+                        {
+                            return new Response
+                            {
+                                state = false,
+                                message = "Cập nhật thông tin môn học thất bại",
+                                insertedId = null,
+                                effectedRows = effectedRows
+                            };
+                        }
                     }
                 }
             });
@@ -179,14 +203,27 @@ namespace CourseWebsiteDotNet.Models
                         command.Parameters.AddWithValue("@Id", id);
 
                         int effectedRows = command.ExecuteNonQuery();
-
-                        return new Response
+                        if (effectedRows > 0)
                         {
-                            State = true,
-                            Message = "Xóa môn học thành công",
-                            InsertedId = null,
-                            EffectedRows = effectedRows
-                        };
+                            return new Response
+                            {
+                                state = true,
+                                message = "Xóa môn học thành công",
+                                insertedId = null,
+                                effectedRows = effectedRows
+                            };
+                        }
+                        else
+                        {
+                            return new Response
+                            {
+                                state = false,
+                                message = "Xóa môn học thất bại",
+                                insertedId = null,
+                                effectedRows = effectedRows
+                            };
+                        }
+
                     }
                 }
             });

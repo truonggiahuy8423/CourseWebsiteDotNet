@@ -1,8 +1,34 @@
 ﻿@*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
+@using System.Data;
+
 @{
     Layout = "_AdministratorMainLayout";
+    var courses = ViewData["courses"] as DataTable;
+    string kiem_tra_tinh_trang(string ngay_bat_dau, string ngay_ket_thuc)
+    {
+        DateTime datetime_bat_dau = DateTime.ParseExact(ngay_bat_dau, "dd/MM/yyyy", null);
+        DateTime datetime_ket_thuc = DateTime.ParseExact(ngay_ket_thuc, "dd/MM/yyyy", null);
+        DateTime datetime_hien_tai = DateTime.Now;
+
+        datetime_bat_dau = datetime_bat_dau.Date;
+        datetime_ket_thuc = datetime_ket_thuc.Date.AddHours(23).AddMinutes(59).AddSeconds(59);
+
+        if (datetime_bat_dau <= datetime_hien_tai && datetime_ket_thuc >= datetime_hien_tai)
+        {
+            return "<span class=\"class__item--inprocess\">Đang diễn ra</span>";
+        }
+        else if (datetime_ket_thuc < datetime_hien_tai)
+        {
+            return "<span class=\"class__item--over\">Đã kết thúc</span>";
+        }
+        else
+        {
+            
+            return "<span class=\"class__item--upcoming\">Sắp diễn ra</span>";
+        }
+    }
 }
 
 @section Navbar {
@@ -12,7 +38,516 @@
 @section MainSection {
     @* Courses list section layout of Admin *@
     <div class="main">
-        Courses list section of admin
+        <div style="margin-bottom: 30px;" class="title w-100 text-center text-uppercase">
+            <h4>Danh sách lớp học</h4>
+        </div>
+
+        <div class="class-container">
+            <div style="height: 30px;" class="class__search me-2 d-flex justify-content-end">
+
+                <input style="border-radius: 0; height: 30px; width: 90px; z-index: 3" type="text" class="w-25 form-control search-input" placeholder="Tìm khóa học">
+                <button class="btn btn-info search-button highlight-button"><i class="fas fa-search icon-search highlight-icon" style=""></i></button>
+                <button class="add-class-btn highlight-button">
+                    <i class="fa-solid fa-plus add-class-icon highlight-icon"></i>
+                </button>
+                <button class="delete-class-btn highlight-button">
+                    <i class="fa-solid fa-trash-can highlight-icon"></i>
+                </button>
+                <div class="cancel-div">
+                    <button class="cancel-delete-class-btn highlight-button--cancel">
+                        <i class="fa-solid fa-x highlight-icon--cancel" style="font-size: 12px!important;"></i>
+                    </button>
+                </div>
+                <div class="save-div">
+                    <button class="save-delete-class-btn highlight-button--save">
+                        <i class="fa-solid fa-check highlight-icon--save" style="font-size: 12px!important;"></i>
+                    </button>
+
+                </div>
+
+            </div>
+
+            <div class="class__list p-4 border border-gray rounded-2 m-2 mt-3 shadow-inset" style="margin-top: 8px!important;">
+                <div class="row mb-4">
+                    @{
+                    for (int i = 0; i < courses.Rows.Count; i++) {
+                        string dsgv = "";
+                        int y = 0;
+                        foreach (DataRow lecturer in ((DataTable)(courses.Rows[i]["lecturers"])).Rows) {
+                            dsgv = dsgv + (y != 0 ? ", " : "") + "<a href='" + "/profile/lecturer?id=" + lecturer["id_giang_vien"] + "'>" + lecturer["ho_ten"] + "</a>" ;
+                            y++;
+                        }
+                        string status=kiem_tra_tinh_trang(courses.Rows[i]["ngay_bat_dau"].ToString(), courses.Rows[i]["ngay_ket_thuc"].ToString());
+                        string courseid = courses.Rows[i]["id_mon_hoc"].ToString().PadLeft(3, '0') + "." + courses.Rows[i]["id_lop_hoc"].ToString().PadLeft(6, '0');
+          
+                                                <div class='class__item col-4 col-xxl-4' courseid='@courses.Rows[i]["id_lop_hoc"]' >
+                                                    <div class='p-3 border border-gray rounded-2 shadow-sm class-div'>
+                                                        <div class='class__item__title mb-5'>
+                                                            <h6>@courses.Rows[i]["ten_mon_hoc"] @Html.Raw(courseid)</h6>
+                                                            <p>Giảng viên: @Html.Raw(dsgv)</p>
+                                                        </div>
+                                                        <div class='class__item__state'>
+                                                            <p>Thời gian: @courses.Rows[i]["ngay_bat_dau"] - @courses.Rows[i]["ngay_ket_thuc"]</p>
+                                                            <p>Trạng thái: @Html.Raw(status)</p>
+                                                        </div>
+                                                        <input type='checkbox' class='delete-checkbox' value='@courses.Rows[i]["id_lop_hoc"]'>
+
+
+                                                    </div>
+                                                </div>
+           
+                    }
+                    }
+
+                </div>
+            </div>
+        </div>
     </div>
+    <script>
+
+        setInterval(reloadCoursesList, 10000);
+        $(document).ready(function () {
+
+            $(`.delete-class-btn`).click(function () {
+                $(`.delete-checkbox`).css(`visibility`, `visible`);
+
+                $(`.save-div`).css(`position`, `static`);
+                $(`.save-div`).css(`z-index`, `1`);
+                $(`.cancel-div`).css(`position`, `static`);
+                $(`.cancel-div`).css(`z-index`, `1`);
+
+                let addbtn = $(`.add-class-btn`);
+                addbtn.prop(`disabled`, true);
+                addbtn.removeClass(`highlight-button`);
+                addbtn.addClass(`highlight-button--disable`);
+                let deletebtn = $(`.delete-class-btn`);
+                deletebtn.prop(`disabled`, true);
+                deletebtn.removeClass(`highlight-button`);
+                deletebtn.addClass(`highlight-button--disable`);
+            });
+            $(`.cancel-delete-class-btn`).click(function () {
+                $(`.delete-checkbox`).css(`visibility`, `hidden`);
+                $(`.delete-checkbox`).prop(`checked`, false);
+
+                $(`.save-div`).css(`position`, `absolute`);
+                $(`.save-div`).css(`z-index`, `-1`);
+                $(`.cancel-div`).css(`position`, `absolute`);
+                $(`.cancel-div`).css(`z-index`, `-1`);
+
+                let addbtn = $(`.add-class-btn`);
+                addbtn.prop(`disabled`, false);
+                addbtn.removeClass(`highlight-button--disable`);
+                addbtn.addClass(`highlight-button`);
+                let deletebtn = $(`.delete-class-btn`);
+                deletebtn.prop(`disabled`, false);
+                deletebtn.removeClass(`highlight-button--disable`);
+                deletebtn.addClass(`highlight-button`);
+            });
+            $(`.save-delete-class-btn`).click(function () {
+                // check
+                if ($(`.delete-checkbox:checked`).length == 0) {
+                    toast({
+                        title: 'Thông báo',
+                        message: 'Chưa chọn lớp học cần xóa',
+                        type: 'warning',
+                        duration: 5000
+                    });
+                } else {
+                    loadingEffect(true);
+                    let courses = [];
+                    $(`.delete-checkbox:checked`).each(function () {
+
+                        courses.push($(this).attr("value"));
+                    });
+                    console.log(courses);
+                    let jsonData = {};
+                    jsonData[`courses`] = courses;
+                    jsonData = JSON.stringify(jsonData);
+                    $.ajax({
+                        url: 'Course/deleteCourse',
+                        method: 'POST',
+                        dataType: 'json', // Kiểu dữ liệu bạn mong đợi từ phản hồi (json, html, text, vv.)
+                        contentType: 'application/json',
+                        data: // Dữ liệu bạn muốn gửi đi (nếu có)
+                            jsonData,
+                        success: function (response) {
+                            loadingEffect(false);
+                            $(`.delete-checkbox`).css(`visibility`, `hidden`);
+                            $(`.delete-checkbox`).prop(`checked`, false);
+
+                            $(`.save-div`).css(`position`, `absolute`);
+                            $(`.save-div`).css(`z-index`, `-1`);
+                            $(`.cancel-div`).css(`position`, `absolute`);
+                            $(`.cancel-div`).css(`z-index`, `-1`);
+
+                            let addbtn = $(`.add-class-btn`);
+                            addbtn.prop(`disabled`, false);
+                            addbtn.removeClass(`highlight-button--disable`);
+                            addbtn.addClass(`highlight-button`);
+                            let deletebtn = $(`.delete-class-btn`);
+                            deletebtn.prop(`disabled`, false);
+                            deletebtn.removeClass(`highlight-button--disable`);
+                            deletebtn.addClass(`highlight-button`);
+                            reloadCoursesList();
+                            for (var [id_lop_hoc, processstate] of Object.entries(response)) {
+                                if (processstate.state) {
+                                    toast({
+                                        title: "Thành công!",
+                                        message: `Xóa lớp học ${id_lop_hoc.toString().padStart(6, '0')} thành công!`,
+                                        type: "success",
+                                        duration: 100000
+                                    });
+                                    // Gọi hàm in thông báo, type: "succcess", title: "Thêm lớp thành công", content: "Lớp ${className} ${selectedSubjectId}.${processResult1.auto_increment_id} được thêm thành công"
+                                } else {
+                                    toast({
+                                        title: `Xóa lớp học ${id_lop_hoc.toString().padStart(6, '0')} thất bại!`,
+                                        message: `(${processstate.message}).`,
+                                        type: "error",
+                                        duration: 100000
+                                    });
+
+                                    // Gọi hàm in thông báo, type: "error", title: "Thêm giảng viên ${lecturer} thêm vào lớp ${selectedSubjectId}.${processResult1.auto_increment_id} thất bại", content: "processstate.message"
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+            console.log('ready');
+
+            $(document).on('click', '.class-div', function () {
+                window.location.href = `/courses/information?courseid=${$(this).parent().attr('courseid')}`;
+            });
+            $(document).on('click', '.delete-checkbox', function (event) {
+                event.stopPropagation();
+            });
+            let loadingstate = false;
+            // $(`.add-class-btn`).click(function () {
+            //     let obj = {"name": "Huy"}
+            //     $.ajax({
+            //         url: '/Course/test2',
+            //         method: 'POST',
+            //         dataType: 'text',
+            //         contentType: 'application/json',
+            //         data: JSON.stringify( { 
+            //             data: JSON.stringify(obj),
+            //             data2: 10
+            //         }),
+            //         success: function (response) { 
+            //             console.log("data received2:" + response)
+            //         }
+            //     });
+            // });
+            $(`.add-class-btn`).click(function () {
+                let obj = { "name": "Huy" }
+                $.ajax({
+                    url: '/Course/test4',
+                    method: 'GET',
+                    dataType: 'text',
+                    data: {
+                        name: JSON.stringify(obj),
+                        id: 10
+                    },
+                    success: function (response) {
+                        console.log("data received4:" + response)
+                    }
+                });
+            });
+            // $(`.add-class-btn`).click(function () {
+            //     let obj = { "name": "Huy" }
+            //     $.ajax({
+            //         url: '/Course/test3?id=10',
+            //         method: 'POST',
+            //         dataType: 'text',
+            //         contentType: 'application/json',
+            //         data: JSON.stringify({
+            //             data: JSON.stringify(obj),
+            //             data2: 10
+            //         }),
+            //         success: function (response) {
+            //             console.log("data received3:" + response)
+            //         }
+            //     });
+            // });
+            $(`.add-class-btn`).click(function () {
+                console.log('OK');
+                loadingEffect(true);
+
+                // Use jQuery.ajax for the AJAX request
+                $.ajax({
+                    url: '/Course/getInsertClassForm',
+                    method: 'GET',
+                    success: function (response) {
+                        loadingEffect(false);
+                        $('body').append(response);
+                        // Add event handler
+                        $(`.insert-class-form__cancel-btn`).click(function () {
+                            $('.form-container').remove();
+                        });
+                        $(`.insert-class-form__save-btn`).click(function () {
+                            loadingEffect(true);
+                            $(`.insert-class-form .error-message`).html(``);
+                            // Get data from html
+                            var selectedSubjectId = $('.insert-class-form__subject-cbb option:selected').val();
+                            var beginDate = $('.insert-class-form__begin-date-picker').val();
+                            var endDate = $('.insert-class-form__end-date-picker').val();
+                            var selectedLecturers = {};
+                            $(`.insert-class-form__lecturers-table .lecturer-checkbox:checked`).each(function () {
+                                selectedLecturers[$(this).val() + ""] = $(this).parent().parent().find(`td`).eq(1).text();
+                            });
+                            // object -> json
+                            var obj = {
+                                id_mon_hoc: selectedSubjectId,
+                                ngay_bat_dau: beginDate,
+                                ngay_ket_thuc: endDate,
+                            }
+                            console.log($('.insert-class-form__subject-cbb').html());
+                            var jsonData = JSON.stringify(obj);
+                            console.log(jsonData + "Here");
+                            // Send insert request with data(Converted to JSON)
+                            $.ajax({
+                                url: 'Course/insertCourse', // Đường dẫn tới API hoặc resource bạn muốn gọi
+                                method: 'POST', // Phương thức HTTP (GET, POST, PUT, DELETE, vv.)
+                                contentType: 'application/json',
+                                dataType: 'json', // Kiểu dữ liệu bạn mong đợi từ phản hồi (json, html, text, vv.)
+                                data: // Dữ liệu bạn muốn gửi đi (nếu có)
+                                    jsonData ,
+                                success: function (response) {
+                                    console.log("here");
+                                    console.log(response);
+                                    var processResult1 = (response);
+                                    console.log("huy");
+                                    if (processResult1.state) {
+                                        // Insert class succesfully
+                                        // Prepare data
+                                        var obj = {
+                                            id_lop_hoc: processResult1.auto_increment_id,
+                                            lecturer_id_list: selectedLecturers
+                                        }
+                                        var jsonData = JSON.stringify(obj);
+                                        // Insert list of lecturers's id into phanconggiangvien
+                                        $.ajax({
+                                            url: 'Course/insertLecturersIntoClass',
+                                            method: 'POST',
+                                            contentType: 'application/json', // Đặt kiểu dữ liệu của yêu cầu là JSON
+                                            dataType: 'json',
+                                            data:
+                                                jsonData ,
+                                            success: function (response) {
+                                                // Xử lý in ra thông báo khi request thêm danh sách giảng viên vào lớp
+                                                var className = $(`.insert-class-form__subject-cbb`).find(':selected').text();
+                                                console.log(className);
+                                                className = className.trim();
+                                                className = className.substring(6, className.length);
+                                                console.log(className);
+
+                                                var processResult = (response);
+                                                loadingEffect(false);
+                                                $('.form-container').remove();
+                                                toast({
+                                                    title: "Thành công!",
+                                                    message: `Lớp ${className} ${selectedSubjectId.toString().padStart(3, '0')}.${processResult1.auto_increment_id.toString().padStart(6, '0')} được thêm thành công`,
+                                                    type: "success",
+                                                    duration: 100000
+                                                });
+                                                // Gọi hàm in thông báo, type: "succcess", title: "Thêm lớp thành công", content: "Lớp ${className} ${selectedSubjectId}.${processResult1.auto_increment_id} được thêm thành công"
+                                                for (var [lecturer, processstate] of Object.entries(processResult)) { // có vấn đề
+                                                    if (processstate.state) {
+                                                        toast({
+                                                            title: "Thành công!",
+                                                            message: `Thêm giảng viên(ID ${lecturer}) vào lớp ${className} ${selectedSubjectId.toString().padStart(3, '0')}.${processResult1.auto_increment_id.toString().padStart(6, '0')} thành công`,
+                                                            type: "success",
+                                                            duration: 100000
+                                                        });
+                                                        // Gọi hàm in thông báo, type: "succcess", title: "Thêm lớp thành công", content: "Lớp ${className} ${selectedSubjectId}.${processResult1.auto_increment_id} được thêm thành công"
+                                                    } else {
+                                                        toast({
+                                                            title: "Thất bại!",
+                                                            message: `Thêm giảng viên(ID ${lecturer}) vào lớp ${className} ${selectedSubjectId.toString().padStart(3, '0')}.${processResult1.auto_increment_id.toString().padStart(6, '0')} thất bại(${processstate.message}).`,
+                                                            type: "error",
+                                                            duration: 100000
+                                                        });
+
+                                                        // Gọi hàm in thông báo, type: "error", title: "Thêm giảng viên ${lecturer} thêm vào lớp ${selectedSubjectId}.${processResult1.auto_increment_id} thất bại", content: "processstate.message"
+                                                    }
+                                                }
+                                                reloadCoursesList();
+                                                // Xử lý phản hồi từ máy chủ khi thành công
+                                                console.log('Server response:', response);
+                                            },
+                                            error: function (xhr, status, error) {
+                                                // Xử lý lỗi khi gửi yêu cầu
+                                                console.error('Error:', status, error);
+                                            }
+                                        });
+                                    } else {
+                                        loadingEffect(false);
+                                        // Error
+                                        $(`.insert-class-form .error-message`).html(processstate.message);
+                                    }
+                                },
+                                error: function (xhr, status, error) {
+                                    // Xử lý lỗi ở đây
+                                    console.error('Error:', status, error);
+                                }
+                            });
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        loadingEffect(false);
+                        console.error('Lỗi yêu cầu:', status, error);
+                    },
+                    complete: function () {
+                        loadingEffect(false);
+                    }
+                });
+            });
+        });
+
+        function reloadCoursesList() {
+            console.log("kkk");
+            $.ajax({
+                url: '/Course/getListOfCourses',
+                method: 'GET',
+                contentType: 'application/json', // Đặt kiểu dữ liệu của yêu cầu là JSON
+                data: null,
+                dataType: 'json',
+                success: function (response) { // Trả về mảng
+                    // jquery từ html tạo mảng current(id-ngaybd) gồm các khóa đang hiển thị
+                    console.log("kkk2");
+                    console.log(response);
+                    // console.log(response[0]['lecturers']);
+                    let current = [];
+                    let toDelete = [];
+                    let toAdd = [];
+                    $(`.class__list .class__item`).each(function () {
+                        current.push({
+                            "id_lop_hoc": `${$(this).attr(`courseid`)}`,
+                            // "id_lop_hoc": `1`,
+
+                        });
+                    })
+                    console.log('current: ');
+                    console.log(current.length)
+                    console.log('current: ');
+
+                    // duyệt từng phần tử ở mảng current so với mảng response, phần tử nào không có(đã xóa) hoặc có nhưng không trùng ngày thì xóa khỏi mảng current và thêm vào mảng toDelete
+                    for (let i = 0; i < current.length; i++) {
+                        let isAppear = false;
+                        for (let j = 0; j < response.length; j++) {
+                            console.log(response[j][`id_lop_hoc`] + " " + current[i][`id_lop_hoc`])
+                            if (response[j][`id_lop_hoc`] == current[i][`id_lop_hoc`]) {
+                                isAppear = true;
+                                break;
+                            }
+                        }
+                        if (!isAppear) {
+                            toDelete.push(i);
+                            console.log(current[i][`id_lop_hoc`]);
+                        }
+                    }
+                    console.log('current: ');
+                    console.log(current);
+                    console.log('current: ');
+                    console.log("todel:" + toDelete)
+                    for (let i = toDelete.length - 1; i >= 0; i--) {
+                        current.splice(toDelete[i], 1);
+                        $(`.class__list .class__item`).eq(i).remove();
+                    }
+                    console.log('current: ' + current);
+
+                    // duyệt từng phần tử ở mảng response, phần tử nào không có id ở mảng current thì thêm vào mảng toAdd
+                    for (let i = 0; i < response.length; i++) {
+                        let isAppear = false;
+                        for (let j = 0; j < current.length; j++) {
+                            if (response[i][`id_lop_hoc`] == current[j][`id_lop_hoc`]) {
+                                isAppear = true;
+                                break;
+                            }
+                        }
+                        if (!isAppear) {
+                            let dsgv = "";
+                            let y = 0;
+                            response[i]['lecturers'].forEach((lecturer) => {
+                                dsgv += (y !== 0 ? ', ' : '') + '<a href="/profile/lecturer?id=' + lecturer.id_giang_vien + '">' + lecturer.ho_ten + '</a>';
+                                y++;
+                            });
+
+                            let status = kiem_tra_tinh_trang(response[i]["ngay_bat_dau"], response[i]["ngay_ket_thuc"]);
+                            let courseid = String(response[i].id_mon_hoc).padStart(3, '0') + "." + String(response[i].id_lop_hoc).padStart(6, '0');
+                            $(`.class__list .class__item`).eq(i).before(
+                                `
+                                    <div class='class__item col-4 col-xxl-4' courseid='${response[i]["id_lop_hoc"]}' >
+                                        <div class='p-3 border border-gray rounded-2 shadow-sm class-div' style="animation: newClassEffect ease 3s">
+                                            <div class='class__item__title mb-5'>
+                                                <h6>${response[i]["ten_mon_hoc"]} ${courseid}</h6>
+                                                <p>Giảng viên: ${dsgv}</p>
+                                            </div>
+                                            <div class='class__item__state'>
+                                                <p>Thời gian: ${response[i]['ngay_bat_dau']} - ${response[i]["ngay_ket_thuc"]}</p>
+                                                <p>Trạng thái: ${status}</p>
+                                            </div>
+                                            <input type='checkbox' class='delete-checkbox' value='${response[i].id_lop_hoc}'>
+
+                                        </div>
+                                    </div>
+                            `
+                            );
+                            console.log(`
+                                            <div class='class__item col-4 col-xxl-4' courseid='${response[i]["id_lop_hoc"]}' >
+                                                <div class='p-3 border border-gray rounded-2 shadow-sm class-div' style="animation: newClassEffect ease 3s">
+                                                    <div class='class__item__title mb-5'>
+                                                        <h6>${response[i]["ten_mon_hoc"]} ${courseid}</h6>
+                                                        <p>Giảng viên: ${dsgv}</p>
+                                                    </div>
+                                                    <div class='class__item__state'>
+                                                        <p>Thời gian: ${response[i]['ngay_bat_dau']} - ${response[i]["ngay_ket_thuc"]}</p>
+                                                        <p>Trạng thái: ${status}</p>
+                                                    </div>
+                                                    <input type='checkbox' class='delete-checkbox' value='${response[i].id_lop_hoc}'>
+
+                                                </div>
+                                            </div>
+                                    `)
+
+                        }
+                    }
+                    //
+                    // Với mỗi
+                }
+            })
+        }
+
+
+        function kiem_tra_tinh_trang(ngay_bat_dau, ngay_ket_thuc) {
+            // Chuyển đổi chuỗi ngày thành đối tượng Date
+            let datetime_bat_dau = chuyenChuoiThanhDate(ngay_bat_dau);
+            let datetime_ket_thuc = chuyenChuoiThanhDate(ngay_ket_thuc);
+            let datetime_hien_tai = new Date();
+
+            // Đặt giờ, phút và giây về cuối ngày
+            datetime_bat_dau.setHours(0, 0, 0, 0);
+            datetime_ket_thuc.setHours(23, 59, 59, 999);
+
+            if (datetime_bat_dau <= datetime_hien_tai && datetime_ket_thuc >= datetime_hien_tai) {
+                return '<span class="class__item--inprocess">Đang diễn ra</span>';
+            } else if (datetime_ket_thuc < datetime_hien_tai) {
+                return '<span class="class__item--over">Đã kết thúc</span>';
+            } else {
+                return '<span class="class__item--upcoming">Sắp diễn ra</span>';
+            }
+        }
+
+        // Hàm chuyển đổi chuỗi ngày thành đối tượng Date
+        function chuyenChuoiThanhDate(chuoiNgay) {
+            let parts = chuoiNgay.split('/');
+            return new Date(parts[2], parts[1] - 1, parts[0]);
+        }
+
+
+        function appendElements(selector, element) {
+            $(`${selector}`).html(`${$(`${selector}`).html() + element}`)
+        }
+    </script>
 
 }

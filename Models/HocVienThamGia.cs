@@ -1,25 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using MySql.Data.MySqlClient;
+﻿using MySql.Data.MySqlClient;
 
 namespace CourseWebsiteDotNet.Models
 {
-    public class ViTriTepTinModel
+    // Lớp HocVienThamGiaModel chứa các thuộc tính
+    public class HocVienThamGiaModel
     {
-        public int id_muc { get; set; }
-        public int id_tep_tin_tai_len { get; set; }
-        public DateTime? ngay_dang { get; set; }
+        public int id_hoc_vien { get; set; }
+        public int id_lop_hoc { get; set; }
     }
 
-    public class ViTriTepTinRepository
+
+    // Lớp HocVienThamGiaRepository chứa các hàm thao tác với cơ sở dữ liệu
+    public class HocVienThamGiaRepository
     {
         private readonly string connectionString;
 
-        public ViTriTepTinRepository()
+        public HocVienThamGiaRepository()
         {
             connectionString = DatabaseConnection.CONNECTION_STRING;
         }
 
+        // Hàm try catch lỗi từ database
         private Response ExecuteDatabaseOperation(Func<Response> operation)
         {
             try
@@ -46,14 +47,15 @@ namespace CourseWebsiteDotNet.Models
             }
         }
 
-        public List<ViTriTepTinModel> GetAllViTriTepTin()
+        // Trả về List<HocVienThamGiaModel>
+        public List<HocVienThamGiaModel> GetAllHocVienThamGia()
         {
-            List<ViTriTepTinModel> viTriTepTinList = new List<ViTriTepTinModel>();
+            List<HocVienThamGiaModel> hocVienThamGiaList = new List<HocVienThamGiaModel>();
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 connection.Open();
 
-                string query = "SELECT * FROM vi_tri_tep_tin";
+                string query = "SELECT * FROM hoc_vien_tham_gia";
 
                 using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
@@ -61,56 +63,50 @@ namespace CourseWebsiteDotNet.Models
                     {
                         while (reader.Read())
                         {
-                            ViTriTepTinModel viTriTepTin = new ViTriTepTinModel
-                            {
-                                id_muc = Convert.ToInt32(reader["id_muc"]),
-                                id_tep_tin_tai_len = Convert.ToInt32(reader["id_tep_tin_tai_len"]),
-                                ngay_dang = reader["ngay_dang"] is DBNull ? (DateTime?)null : Convert.ToDateTime(reader["ngay_dang"])
-                            };
-
-                            viTriTepTinList.Add(viTriTepTin);
+                            HocVienThamGiaModel hocVienThamGia = new HocVienThamGiaModel();
+                            hocVienThamGia.id_hoc_vien = Convert.ToInt32(reader["id_hoc_vien"]);
+                            hocVienThamGia.id_lop_hoc = Convert.ToInt32(reader["id_lop_hoc"]);
+                            hocVienThamGiaList.Add(hocVienThamGia);
                         }
                     }
                 }
             }
 
-            return viTriTepTinList;
+            return hocVienThamGiaList;
         }
 
-        public ViTriTepTinModel? GetViTriTepTin(int idMuc, int idTepTinTaiLen)
+        // Trả về 1 HocVienThamGiaModel
+        public HocVienThamGiaModel? GetHocVienThamGiaById(int id)
         {
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 connection.Open();
 
-                string query = "SELECT * FROM vi_tri_tep_tin WHERE id_muc = @IdMuc AND id_tep_tin_tai_len = @IdTepTinTaiLen";
+                string query = "SELECT * FROM hoc_vien_tham_gia WHERE id_hoc_vien = @Id";
 
                 using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@IdMuc", idMuc);
-                    command.Parameters.AddWithValue("@IdTepTinTaiLen", idTepTinTaiLen);
+                    command.Parameters.AddWithValue("@Id", id);
 
                     using (MySqlDataReader reader = command.ExecuteReader())
                     {
                         if (reader.Read())
                         {
-                            return new ViTriTepTinModel
+                            return new HocVienThamGiaModel // Trả về 1 HocVienThamGiaModel
                             {
-                                id_muc = Convert.ToInt32(reader["id_muc"]),
-                                id_tep_tin_tai_len = Convert.ToInt32(reader["id_tep_tin_tai_len"]),
-                                ngay_dang = reader["ngay_dang"] is DBNull ? (DateTime?)null : Convert.ToDateTime(reader["ngay_dang"])
+                                id_hoc_vien = Convert.ToInt32(reader["id_hoc_vien"]),
+                                id_lop_hoc = Convert.ToInt32(reader["id_lop_hoc"])
                             };
                         }
                         else
-                        {
-                            return null;
-                        }
+                            return null; // Không có trả về null
                     }
                 }
             }
         }
 
-        public Response InsertViTriTepTin(ViTriTepTinModel viTriTepTin)
+        // Trả về Response
+        public Response InsertHocVienThamGia(HocVienThamGiaModel hocVienThamGia)
         {
             return ExecuteDatabaseOperation(() =>
             {
@@ -118,21 +114,19 @@ namespace CourseWebsiteDotNet.Models
                 {
                     connection.Open();
 
-                    string query = "INSERT INTO vi_tri_tep_tin (id_muc, id_tep_tin_tai_len, ngay_dang) " +
-                                   "VALUES (@IdMuc, @IdTepTinTaiLen, @NgayDang);";
+                    string query = "INSERT INTO hoc_vien_tham_gia (id_lop_hoc) " +
+                                   "VALUES (@id_lop_hoc); SELECT LAST_INSERT_ID();";
 
                     using (MySqlCommand command = new MySqlCommand(query, connection))
                     {
-                        command.Parameters.AddWithValue("@IdMuc", viTriTepTin.id_muc);
-                        command.Parameters.AddWithValue("@IdTepTinTaiLen", viTriTepTin.id_tep_tin_tai_len);
-                        command.Parameters.AddWithValue("@NgayDang", viTriTepTin.ngay_dang);
+                        command.Parameters.AddWithValue("@id_lop_hoc", hocVienThamGia.id_lop_hoc);
 
-                        int insertedId = command.ExecuteNonQuery();
+                        int insertedId = Convert.ToInt32(command.ExecuteScalar());
 
                         return new Response
                         {
                             state = true,
-                            message = "Thêm vị trí tệp tin thành công",
+                            message = "Thêm thông tin học viên tham gia thành công",
                             insertedId = insertedId,
                         };
                     }
@@ -140,7 +134,8 @@ namespace CourseWebsiteDotNet.Models
             });
         }
 
-        public Response UpdateViTriTepTin(ViTriTepTinModel viTriTepTin)
+        // Trả về Response
+        public Response UpdateHocVienThamGia(HocVienThamGiaModel hocVienThamGia)
         {
             return ExecuteDatabaseOperation(() =>
             {
@@ -148,21 +143,19 @@ namespace CourseWebsiteDotNet.Models
                 {
                     connection.Open();
 
-                    string query = "UPDATE vi_tri_tep_tin SET ngay_dang = @NgayDang " +
-                                   "WHERE id_muc = @IdMuc AND id_tep_tin_tai_len = @IdTepTinTaiLen";
+                    string query = "UPDATE hoc_vien_tham_gia SET id_lop_hoc = @id_lop_hoc WHERE id_hoc_vien = @Id";
 
                     using (MySqlCommand command = new MySqlCommand(query, connection))
                     {
-                        command.Parameters.AddWithValue("@IdMuc", viTriTepTin.id_muc);
-                        command.Parameters.AddWithValue("@IdTepTinTaiLen", viTriTepTin.id_tep_tin_tai_len);
-                        command.Parameters.AddWithValue("@NgayDang", viTriTepTin.ngay_dang);
+                        command.Parameters.AddWithValue("@id_lop_hoc", hocVienThamGia.id_lop_hoc);
+                        command.Parameters.AddWithValue("@Id", hocVienThamGia.id_hoc_vien);
 
                         int effectedRows = command.ExecuteNonQuery();
 
                         return new Response
                         {
                             state = true,
-                            message = "Cập nhật vị trí tệp tin thành công",
+                            message = "Cập nhật thông tin học viên tham gia thành công",
                             insertedId = null,
                             effectedRows = effectedRows
                         };
@@ -171,7 +164,8 @@ namespace CourseWebsiteDotNet.Models
             });
         }
 
-        public Response DeleteViTriTepTin(int idMuc, int idTepTinTaiLen)
+        // Trả về Response
+        public Response DeleteHocVienThamGia(int id)
         {
             return ExecuteDatabaseOperation(() =>
             {
@@ -179,19 +173,18 @@ namespace CourseWebsiteDotNet.Models
                 {
                     connection.Open();
 
-                    string query = "DELETE FROM vi_tri_tep_tin WHERE id_muc = @IdMuc AND id_tep_tin_tai_len = @IdTepTinTaiLen;";
+                    string query = "DELETE FROM hoc_vien_tham_gia WHERE id_hoc_vien = @Id";
 
                     using (MySqlCommand command = new MySqlCommand(query, connection))
                     {
-                        command.Parameters.AddWithValue("@IdMuc", idMuc);
-                        command.Parameters.AddWithValue("@IdTepTinTaiLen", idTepTinTaiLen);
+                        command.Parameters.AddWithValue("@Id", id);
 
                         int effectedRows = command.ExecuteNonQuery();
 
                         return new Response
                         {
                             state = true,
-                            message = "Xóa vị trí tệp tin thành công",
+                            message = "Cập nhật thông tin học viên tham gia thành công",
                             insertedId = null,
                             effectedRows = effectedRows
                         };

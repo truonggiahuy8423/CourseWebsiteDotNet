@@ -1,6 +1,8 @@
 ﻿
 
 
+using Microsoft.AspNetCore.Mvc.Controllers;
+
 namespace CourseWebsiteDotNet.Middleware
 {
 
@@ -29,16 +31,40 @@ namespace CourseWebsiteDotNet.Middleware
             }
             else
             {
-                if (context.Session.GetString("user_id") == null)
+                if (IsRequestToLogout(context))
                 {
                     await _next(context);
                 }
                 else
                 {
-                    context.Response.Redirect("/courses");
+                    if (context.Session.GetString("user_id") == null)
+                    {
+                        await _next(context);
+                    }
+                    else
+                    {
+                        context.Response.Redirect("/courses");
+                    }
                 }
             }
         }
+        private bool IsRequestToLogout(HttpContext context)
+        {
+            // Lấy thông tin về phương thức, controller và action của HttpRequest
+            var actionDescriptor = context.GetEndpoint()?.Metadata.GetMetadata<ControllerActionDescriptor>();
+
+            if (actionDescriptor != null)
+            {
+                var controllerName = actionDescriptor.ControllerName;
+                var actionName = actionDescriptor.ActionName;
+
+                // Kiểm tra xem controller có phải là "UserController" hay không
+                return string.Equals(controllerName, "Authentication", StringComparison.OrdinalIgnoreCase) && string.Equals(actionName, "Logout", StringComparison.OrdinalIgnoreCase);
+            }
+
+            return false;
+        }
+
         private bool IsRequestToUserController(HttpContext context)
         {
             // Kiểm tra thông tin định tuyến để xem yêu cầu có được gửi đến UserController không
