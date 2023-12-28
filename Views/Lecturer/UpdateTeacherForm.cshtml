@@ -1,6 +1,25 @@
-﻿@*
+﻿@using System.Data
+@*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
+@{
+    Layout = null;
+    var lecturer = ViewData["lecturer"] as DataTable;
+    var phancongs = ViewData["phancongs"] as DataTable;
+    var notphancongs = ViewData["notphancongs"] as DataTable;
+
+    string ngaySinh = convertDate(Convert.ToString(lecturer.Rows[0]["ngay_sinh"]));
+
+    string convertDate(string dateString)
+    {
+        // Convert the string to a DateTime object
+        DateTime date = DateTime.Parse(dateString);
+
+        // Format the date as "YYYY-MM-DD"
+        string formattedDate = date.ToString("yyyy-MM-dd");
+        return formattedDate;
+    }
+}
 @{
     <div class="form-container">
         <div class="update-teacher-form bg-white h-75 overflow-auto" style="width: 70%;">
@@ -15,7 +34,7 @@
                     <button class="update-teacher-form__save-btn btn btn-light border border-gray me-3 shadow-sm">
                         <i class="fas fa-check" style="color: #333;"></i>
                     </button>
-                    <button class="update-teacher-form__profile-btn btn btn-light border border-gray shadow-sm" teacherID="<?php echo isset($lecturer->id_giang_vien) ? $lecturer->id_giang_vien: '' ?>">
+                    <button class="update-teacher-form__profile-btn btn btn-light border border-gray shadow-sm" teacherID="@lecturer.Rows[0]["id_giang_vien"]">
                         <i class="far fa-user-circle" style="color: #333;"></i>
                     </button>
                 </div>
@@ -25,21 +44,33 @@
                 <div class="update-teacher-form__info-container row mb-3">
                     <div class="col-6 mb-5 text-center">
                         <label class="me-3">Họ và tên</label>
-                        <input type="text" class="update-teacher-form__fullname" value="<?php echo isset($lecturer->ho_ten) ? $lecturer->ho_ten: 'Error' ?>">
+                        <input type="text" class="update-teacher-form__fullname" value="@lecturer.Rows[0]["ho_ten"]">
                     </div>
                     <div class="col-6 mb-5 text-center">
                         <label class="me-3">Ngày sinh</label>
-                        <input type="date" class="update-teacher-form__dob" value="<?php echo isset($lecturer->ngay_sinh) ? $lecturer->ngay_sinh: '' ?>">
+                        <input type="date" class="update-teacher-form__dob" value="@ngaySinh">
                     </div>
                     <div class="col-6 text-center">
                         <label class="me-3">Email</label>
-                        <input type="text" class="update-teacher-form__email" value="<?php echo isset($lecturer->email) ? $lecturer->email: 'Error' ?>">
+                        <input type="text" class="update-teacher-form__email" value="@lecturer.Rows[0]["email"]">
                     </div>
                     <div class="col-6 text-center">
                         <label class="me-3">Giới tính</label>
                         <select name="gioitinh" class="update-teacher-form__sex">
-                            <option value="1" <?php echo (isset($lecturer->gioi_tinh) && $lecturer->gioi_tinh == 1) ? ' selected="selected"' : '' ?>>Nam</option>
-                            <option value="0" <?php echo (isset($lecturer->gioi_tinh) && $lecturer->gioi_tinh == 0) ? ' selected="selected"' : '' ?>>Nữ</option>
+                        
+                            @{
+                                if (@lecturer.Rows[0]["gioi_tinh"] == "1")
+                                {
+                                    <option value="1" selected="selected">Nam</option>
+                                    <option value="0" >Nữ</option>
+                                }
+                                else
+                                {
+                                    <option value="1">Nam</option>
+                                    <option value="0" selected="selected">Nữ</option>
+                                }
+                            }
+                        
                         </select>
                     </div>
                 </div>
@@ -56,18 +87,18 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <?php
-                            for($i = 0; $i < count($phancongs); $i++){
-                                $courseid = str_pad($phancongs[$i]->id_mon_hoc, 3, "0", STR_PAD_LEFT) . "." . str_pad($phancongs[$i]->id_lop_hoc, 6, "0", STR_PAD_LEFT);
-                                echo "<tr>
-                                        <th scope='row'>{$courseid}</th>
-                                        <td>{$phancongs[$i]->ten_mon_hoc}</td>
-                                        <td>{$phancongs[$i]->ngay_bat_dau}</td>
-                                        <td>{$phancongs[$i]->ngay_ket_thuc}</td>
-                                        <td><input type='checkbox' class='deleteTeachingCourse' value='{$phancongs[$i]->id_lop_hoc}'></td>
-                                    </tr>";
+                        @{
+                            for (int i = 0; i < phancongs.Rows.Count; i++) {
+                                var courseid = phancongs.Rows[i]["id_mon_hoc"].ToString().PadLeft(3, '0') + "." + phancongs.Rows[i]["id_lop_hoc"].ToString().PadLeft(3, '0');
+                                <tr>
+                                    <th scope="row">@courseid</th>
+                                    <td>@phancongs.Rows[i]["ten_mon_hoc"]</td>
+                                    <td>@convertDate(Convert.ToString(@phancongs.Rows[i]["ngay_bat_dau"]))</td>
+                                    <td>@convertDate(Convert.ToString(@phancongs.Rows[i]["ngay_ket_thuc"]))</td>
+                                    <td><input type="checkbox" class="deleteTeachingCourse" value="@phancongs.Rows[i]["id_lop_hoc"]"></td>
+                                </tr>
                             }
-                        ?>
+                        }
                     </tbody>
                 </table>
                 <hr>
@@ -83,22 +114,22 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <?php
-                            for($i = 0; $i < count($notphancongs); $i++){
-                                $courseid = str_pad($notphancongs[$i]->id_mon_hoc, 3, "0", STR_PAD_LEFT) . "." . str_pad($notphancongs[$i]->id_lop_hoc, 6, "0", STR_PAD_LEFT);
-                                echo "<tr>
-                                        <th scope='row'>{$courseid}</th>
-                                        <td>{$notphancongs[$i]->ten_mon_hoc}</td>
-                                        <td>{$notphancongs[$i]->ngay_bat_dau}</td>
-                                        <td>{$notphancongs[$i]->ngay_ket_thuc}</td>
-                                        <td><input type='checkbox' class='addClasses' value='{$notphancongs[$i]->id_lop_hoc}'></td>
-                                    </tr>";
+                        @{
+                            for (int i = 0; i < notphancongs.Rows.Count; i++)
+                            {
+                                var courseid = notphancongs.Rows[i]["id_mon_hoc"].ToString().PadLeft(3, '0') + "." + notphancongs.Rows[i]["id_lop_hoc"].ToString().PadLeft(3, '0');
+                                <tr>
+                                    <th scope="row">@courseid</th>
+                                    <td>@notphancongs.Rows[i]["ten_mon_hoc"]</td>
+                                    <td>@convertDate(Convert.ToString(@notphancongs.Rows[i]["ngay_bat_dau"]))</td>
+                                    <td>@convertDate(Convert.ToString(@notphancongs.Rows[i]["ngay_ket_thuc"]))</td>
+                                    <td><input type="checkbox" class="addClasses" value="@notphancongs.Rows[i]["id_lop_hoc"]"></td>
+                                </tr>
                             }
-                        ?>
+                        }
                     </tbody>
                 </table>
                 <hr>
-            
             </div>
         </div>
     </div>

@@ -44,16 +44,16 @@
                 <div class="teacher__list row mb-4">
                     @{
                         for (int i = 0; i < teachers.Rows.Count; i++ ) {
-                            <div class='col-6 mb-3 teacherCard' teacherid='@teachers.Rows[i]["id_giang_vien"]'>
-                                <div class='p-3 card shadow-sm'>
-                                    <div class='card-body'>
-                                        <h3 class='card-title fs-4'><b>@teachers.Rows[i]["ho_ten"]</b> - @teachers.Rows[i]["id_giang_vien"]</h3>
-                                        <div class='my-5'></div>
-                                        <p class='card-subtitle fs-5'><b>Email:</b> @teachers.Rows[i]["email"]</p>
+                                    <div class='col-6 mb-3 teacherCard' teacherid='@teachers.Rows[i]["id_giang_vien"]'>
+                                        <div class='p-3 card shadow-sm'>
+                                            <div class='card-body'>
+                                                <h3 class='card-title fs-4'><b>@teachers.Rows[i]["ho_ten"]</b> - @teachers.Rows[i]["id_giang_vien"]</h3>
+                                                <div class='my-5'></div>
+                                                <p class='card-subtitle fs-5'><b>Email:</b> @teachers.Rows[i]["email"]</p>
+                                            </div>
+                                            <input type='checkbox' class='delete-checkbox' value='@teachers.Rows[i]["id_giang_vien"]'>
+                                        </div>
                                     </div>
-                                    <input type='checkbox' class='delete-checkbox' value='@teachers.Rows[i]["id_giang_vien"]'>
-                                </div>
-                            </div>
                         }
                     }
                 </div>
@@ -66,7 +66,7 @@
                 console.log('add-teacher-btn');
                 loadingEffect(true);
                 $.ajax({
-                    url: '@Url.Action("LecturerController", "getInsertForm")',
+                    url: '/Lecturer/getInsertForm',
                     type: 'GET',
                     success: function (response) {
                         loadingEffect(false);
@@ -94,7 +94,7 @@
                             var jsonData = JSON.stringify(obj);
 
                             $.ajax({
-                                url: '@Url.Action("LecturerController", "insertTeacher")',
+                                url: '/Lecturer/insertTeacher',
                                 type: 'POST',
                                 contentType: 'application/json',
                                 data: jsonData,
@@ -107,15 +107,18 @@
                                         type: "success",
                                         duration: 5000
                                     });
+
+                                    var jsonResponse = JSON.parse(response);
+
                                     $('.teacher__list').append(`
-                                                    <div class='col-6 mb-3 teacherCard' teacherid='${response.auto_increment_id}'>
+                                                            <div class='col-6 mb-3 teacherCard' teacherid='${jsonResponse.auto_increment_id}'>
                                                         <div class='p-3 card shadow-sm'>
                                                             <div class='card-body'>
-                                                                <h3 class='card-title fs-4'>${obj.ho_ten} - ${response.auto_increment_id}</h3>
+                                                                        <h3 class='card-title fs-4'>${obj.ho_ten} - ${jsonResponse.auto_increment_id}</h3>
                                                                 <div class='my-5'></div>
                                                                 <p class='card-subtitle fs-5'><b>Email:</b> ${obj.email}</p>
                                                             </div>
-                                                            <input type='checkbox' class='delete-checkbox' value='${response.auto_increment_id}'>
+                                                                    <input type='checkbox' class='delete-checkbox' value='${jsonResponse.auto_increment_id}'>
                                                         </div>
                                                     </div>
                                                 `);
@@ -202,34 +205,57 @@
                     jsonData = JSON.stringify(jsonData);
                     console.log(jsonData);
                     $.ajax({
-                        url: '<?php echo base_url(); ?>/Admin/LecturerController/deleteTeacher',
+                        url: '/Lecturer/deleteTeacher',
                         method: 'POST',
-                        dataType: 'json',
+                        contentType: 'application/json',
                         data: jsonData,
                         success: function (response) {
+                            var jsonRepsonse = JSON.parse(response);
+                            console.log(jsonRepsonse);
                             loadingEffect(false);
-                            for (var [id_giang_vien, processState] of Object.entries(response)) {
-                                if (processState.state) {
+                            jsonRepsonse.forEach((item) => {
+                                if (item.processState.state) {
                                     $('.delete-checkbox:checked').each(function () {
                                         $(this).parent().parent().remove();
                                     });
                                     toast({
                                         title: "Thành công!",
-                                        message: `Xóa giảng viên ${id_giang_vien.toString().padStart(6, '0')} thành công!`,
+                                        message: `Xóa giảng viên ${item.id_giang_vien.toString().padStart(6, '0')} thành công!`,
                                         type: "success",
                                         duration: 100000
                                     });
 
                                 } else {
                                     toast({
-                                        title: `Xóa giảng viên ${id_giang_vien.toString().padStart(6, '0')} thất bại!`,
-                                        message: `(${processState.message}).`,
+                                        title: `Xóa giảng viên ${item.id_giang_vien.toString().padStart(6, '0')} thất bại!`,
+                                        message: `(${item.processState.message}).`,
                                         type: "error",
                                         duration: 100000
                                     });
                                 }
+                            })
+                            // for (var [id_giang_vien, processState] of Object.entries(response)) {
+                            //     if (processState.state) {
+                            //         $('.delete-checkbox:checked').each(function () {
+                            //             $(this).parent().parent().remove();
+                            //         });
+                            //         toast({
+                            //             title: "Thành công!",
+                            //             message: `Xóa giảng viên ${id_giang_vien.toString().padStart(6, '0')} thành công!`,
+                            //             type: "success",
+                            //             duration: 100000
+                            //         });
 
-                            }
+                            //     } else {
+                            //         toast({
+                            //             title: `Xóa giảng viên ${id_giang_vien.toString().padStart(6, '0')} thất bại!`,
+                            //             message: `(${processState.message}).`,
+                            //             type: "error",
+                            //             duration: 100000
+                            //         });
+                            //     }
+
+                            // }
 
                             $(`.delete-checkbox`).css(`visibility`, `hidden`);
                             $(`.delete-checkbox`).prop(`checked`, false);
@@ -277,12 +303,15 @@
                     loadingEffect(true);
                     console.log($(this).attr("teacherid"));
                     var teacherID = $(this).attr("teacherid");
+                    var obj = {
+                        teacherID: teacherID,
+                    }
+                    var jsonData = JSON.stringify(obj);
                     $.ajax({
-                        url: '@Url.Action("LecturerController", "getUpdateForm")',
-                        type: 'GET',
-                        data: {
-                            teacherID: teacherID
-                        },
+                        url: '/Lecturer/getUpdateForm' ,
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: jsonData,
                         success: function (response) {
                             loadingEffect(false);
                             $('body').append(response);
@@ -293,7 +322,7 @@
 
                             $('.update-teacher-form__save-btn').click(function () {
                                 console.log('update-teacher-form__save-btn');
-                                loadingEffect(true);
+                                //loadingEffect(true);
                                 var fullName = $('.update-teacher-form__fullname').val();
                                 var dob = $('.update-teacher-form__dob').val();
                                 var sex = $('.update-teacher-form__sex option:selected').val();
@@ -308,126 +337,145 @@
                                 }
 
                                 var jsonData = JSON.stringify(obj);
-
+                                console.log(obj);
+                                console.log(jsonData);
                                 $.ajax({
-                                    url: '@Url.Action("LecturerController", "updateTeacher")',
+                                    url: '/Lecturer/updateTeacher',
                                     type: 'POST',
                                     contentType: 'application/json',
                                     data: jsonData,
                                     success: function (response) {
-                                        if (response.state) {
-                                            loadingEffect(false);
-                                            $(`[teacherid = ${obj.id_giang_vien}]`).html('');
-                                            $(`[teacherid = ${obj.id_giang_vien}]`).append(`
-                                                                <div class='p-3 card shadow-sm'>
-                                                                    <div class='card-body'>
-                                                                        <h3 class='card-title fs-4'><b>${obj.ho_ten}</b> - ${obj.id_giang_vien}</h3>
-                                                                        <div class='my-5'></div>
-                                                                        <p class='card-subtitle fs-5'><b>Email:</b> ${obj.email}</p>
-                                                                    </div>
-                                                                    <input type='checkbox' class='delete-checkbox' value='${obj.id_giang_vien}'>
-                                                                </div>`);
+                                        //loadingEffect(false);
+                                        $(`[teacherid = ${obj.id_giang_vien}]`).html('');
+                                        $(`[teacherid = ${obj.id_giang_vien}]`).append(`
+                                                            <div class='p-3 card shadow-sm'>
+                                                                <div class='card-body'>
+                                                                    <h3 class='card-title fs-4'><b>${obj.ho_ten}</b> - ${obj.id_giang_vien}</h3>
+                                                                    <div class='my-5'></div>
+                                                                    <p class='card-subtitle fs-5'><b>Email:</b> ${obj.email}</p>
+                                                                </div>
+                                                                <input type='checkbox' class='delete-checkbox' value='${obj.id_giang_vien}'>
+                                                            </div>`);
 
-                                            // Thêm lớp học đang có vào danh sách giảng dạy
-                                            var list_id_lop_hoc = {};
-                                            $('.addClassTable .addClasses:checked').each(function () {
-                                                list_id_lop_hoc[$(this).val() + ""] = $(this).parent().parent().find('td').eq(0).text();
-                                            })
-                                            if (Object.keys(list_id_lop_hoc).length > 0) {
-                                                var objPc = {
-                                                    id_giang_vien: teacherID,
-                                                    list_id_lop_hoc: list_id_lop_hoc
-                                                }
-                                                var jsonDataPC = JSON.stringify(objPc);
-                                                console.log(objPc);
-                                                console.log(jsonDataPC);
-                                                $.ajax({
-                                                    url: '@Url.Action("LecturerController", "addClassesIntoListOfTeachingCourses")',
-                                                    type: 'POST',
-                                                    contentType: 'application/json',
-                                                    data: jsonDataPC,
-                                                    success: function (response) {
-                                                        for (var [course, processState] of Object.entries(response)) {
-                                                            if (processState.state) {
-                                                                toast({
-                                                                    title: "Thành công!",
-                                                                    message: `Thêm lớp ${course} vào danh sách giảng dạy thành công`,
-                                                                    type: "success",
-                                                                    duration: 100000
-                                                                });
-                                                            } else {
-                                                                toast({
-                                                                    title: "Thất bại!",
-                                                                    message: `Thêm lớp ${course} vào danh sách giảng dạy thành công thất bại(${processState.message}).`,
-                                                                    type: "error",
-                                                                    duration: 100000
-                                                                });
-                                                            }
-                                                        }
-                                                    },
-                                                    error: function (xhr, status, error) {
-                                                        console.error('Error:', status, error);
-                                                    }
-                                                });
+                                        // Thêm lớp học đang có vào danh sách giảng dạy
+                                        var list_id_lop_hoc = [];
+                                        $('.addClassTable .addClasses:checked').each(function () {
+                                            var itemId = $(this).val();
+                                            var itemValue = $(this).parent().parent().find('td').eq(0).text();
+                                            var jsonData = {
+                                                idLopHoc: itemId,
+                                                tenLopHoc: itemValue
                                             }
 
-                                            // Xóa lớp học khỏi danh sách giảng dạy
-                                            var list_id_delete_lop_hoc = {}
-
-                                            $('.deleteClassTable .deleteTeachingCourse:checked').each(function () {
-                                                list_id_delete_lop_hoc[$(this).val() + ""] = $(this).parent().parent().find('td').eq(0).text();
-                                            })
-
-                                            if (Object.keys(list_id_delete_lop_hoc).length > 0) {
-                                                var objDeletePc = {
-                                                    id_giang_vien: teacherID,
-                                                    list_id_lop_hoc: list_id_delete_lop_hoc
-                                                }
-
-                                                var jsonDataDeletePC = JSON.stringify(objDeletePc);
-                                                // console.log(objDeletePc);
-                                                // console.log(jsonDataDeletePC);
-                                                $.ajax({
-                                                    url: '@Url.Action("LecturerController", "deleteClassesFromListOfTeachingCourses")',
-                                                    type: 'POST',
-                                                    dataType: 'json',
-                                                    data: jsonDataDeletePC,
-                                                    success: function (response) {
-                                                        loadingEffect(false);
-                                                        for (var [course, processState] of Object.entries(response)) {
-                                                            if (processState.state) {
-                                                                toast({
-                                                                    title: "Thành công!",
-                                                                    message: `Xóa ${course} khỏi danh sách giảng dạy thành công!`,
-                                                                    type: "success",
-                                                                    duration: 100000
-                                                                });
-                                                            } else {
-                                                                toast({
-                                                                    title: `Xóa ${course} thất bại!`,
-                                                                    message: `(${processState.message}).`,
-                                                                    type: "error",
-                                                                    duration: 100000
-                                                                });
-                                                            }
-                                                        }
-                                                    },
-                                                    error: function (xhr, status, error) {
-                                                        loadingEffect(false);
-                                                        console.error('Lỗi yêu cầu:', status, error);
-                                                    }
-                                                });
+                                            console.log("jsonData");
+                                            console.log(jsonData);
+                                            list_id_lop_hoc.push(jsonData);
+                                        })
+                                        if (Object.keys(list_id_lop_hoc).length > 0) {
+                                            var objPc = {
+                                                id_giang_vien: teacherID,
+                                                list_id_lop_hoc: list_id_lop_hoc
                                             }
-                                            toast({
-                                                title: "Thành công!",
-                                                message: `Cập nhật giáo viên thành công`,
-                                                type: "success",
-                                                duration: 5000
+                                            var jsonDataPC = JSON.stringify(objPc);
+                                            console.log(objPc);
+                                            console.log(jsonDataPC);
+                                            $.ajax({
+                                                url: 'Lecturer/addClassesIntoListOfTeachingCourses',
+                                                type: 'POST',
+                                                contentType: 'application/json',
+                                                data: jsonDataPC,
+                                                success: function (response) {
+                                                    var jsonRepsonse = JSON.parse(response);
+                                                    jsonRepsonse.forEach((item) =>{
+                                                        if (item.processState.state) {
+                                                            toast({
+                                                                title: "Thành công!",
+                                                                message: `Thêm lớp ${item.course} vào danh sách giảng dạy thành công`,
+                                                                type: "success",
+                                                                duration: 100000
+                                                            });
+                                                        } else {
+                                                            toast({
+                                                                title: "Thất bại!",
+                                                                message: `Thêm lớp ${item.course} vào danh sách giảng dạy thành công thất bại(${item.processState.message}).`,
+                                                                type: "error",
+                                                                duration: 100000
+                                                            });
+                                                        }
+                                                    })
+                                                },
+                                                error: function (xhr, status, error) {
+                                                    console.error('Error:', status, error);
+                                                }
                                             });
-                                            $('.form-container').remove();
                                         }
+
+                                        // Xóa lớp học khỏi danh sách giảng dạy
+                                        var list_id_delete_lop_hoc = [];
+                                        $('.deleteClassTable .deleteTeachingCourse:checked').each(function () {
+                                            var itemId = $(this).val();
+                                            var itemValue = $(this).parent().parent().find('td').eq(0).text();
+                                            var jsonData = {
+                                                idLopHoc: itemId,
+                                                tenLopHoc: itemValue
+                                            }
+                                            console.log("jsonData");
+                                            console.log(jsonData);
+                                            list_id_delete_lop_hoc.push(jsonData);
+                                        })
+
+                                        if (Object.keys(list_id_delete_lop_hoc).length > 0) {
+                                            var objDeletePc = {
+                                                id_giang_vien: teacherID,
+                                                list_id_lop_hoc: list_id_delete_lop_hoc
+                                            }
+
+                                            var jsonDataDeletePC = JSON.stringify(objDeletePc);
+                                            console.log(objDeletePc);
+                                            console.log(jsonDataDeletePC);
+                                            $.ajax({
+                                                url: '/Lecturer/deleteClassesFromListOfTeachingCourses',
+                                                type: 'POST',
+                                                contentType: 'application/json',
+                                                data: jsonDataDeletePC,
+                                                success: function (response) {
+                                                    loadingEffect(false);
+                                                    var jsonResponse = JSON.parse(response);
+                                                    jsonResponse.forEach((item) =>{
+                                                        if (item.processState.state) {
+                                                            toast({
+                                                                title: "Thành công!",
+                                                                message: `Xóa ${item.course} khỏi danh sách giảng dạy thành công!`,
+                                                                type: "success",
+                                                                duration: 100000
+                                                            });
+                                                        } else {
+                                                            toast({
+                                                                title: `Xóa ${item.course} thất bại!`,
+                                                                message: `(${item.processState.message}).`,
+                                                                type: "error",
+                                                                duration: 100000
+                                                            });
+                                                        }
+                                                    })
+                                                },
+                                                error: function (xhr, status, error) {
+                                                    loadingEffect(false);
+                                                    console.error('Lỗi yêu cầu:', status, error);
+                                                }
+                                            });
+                                        }
+                                        toast({
+                                            title: "Thành công!",
+                                            message: `Cập nhật giáo viên thành công`,
+                                            type: "success",
+                                            duration: 5000
+                                        });
+                                        $('.form-container').remove();
+                                        
                                     },
                                     error: function (xhr, status, error) {
+
                                         console.error('Error:', status, error);
                                     }
                                 });
@@ -446,13 +494,18 @@
             
             $('.search-input').keyup(function () {
                 var input = $(this).val();
+                var obj = {
+                    input: input
+                };
+                var jsonData = JSON.stringify(obj);
                 $.ajax({
-                    url: '@Url.Action("LecturerController", "liveSearch")',
+                    url: '/Lecturer/liveSearch',
                     type: 'POST',
-                    data: {
-                        input: input
-                    },
+                    data: jsonData,
+                    dataType: 'html',
+                    contentType: 'application/json',
                     success: function (response) {
+                        console.log(response);
                         $('.teacher__list').html('');
                         $('.teacher__list').append(response);
                     },

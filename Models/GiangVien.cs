@@ -212,6 +212,5 @@ namespace CourseWebsiteDotNet.Models
                 });
             }
         }
-    }
 }
 
