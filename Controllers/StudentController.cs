@@ -77,10 +77,10 @@ namespace CourseWebsiteDotNet.Controllers
         }
 
         [HttpGet]
-        public IActionResult getStudentInfo(int id)
+        public IActionResult getStudentInfo(int id_hoc_vien)
         {
             HocVienRepository studentRepo = new HocVienRepository();
-            HocVienModel student = studentRepo.GetHocVienById(Convert.ToInt32(id));
+            HocVienModel student = studentRepo.GetHocVienById(Convert.ToInt32(id_hoc_vien));
             if (student != null)
             {
                 // Return the student data as JSON
@@ -97,7 +97,7 @@ namespace CourseWebsiteDotNet.Controllers
                 // Return a response indicating that the student is not found
                 return Json(new
                 {
-                    error = $"Student not found {id}"
+                    error = $"Student not found {id_hoc_vien}"
                 });
             }
         }
