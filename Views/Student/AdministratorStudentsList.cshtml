@@ -74,23 +74,6 @@
             </div>
         </div>
         <br>
-@*         <nav aria-label="Page navigation example">
-            <ul class="pagination justify-content-center">
-                <li class="page-item @(currentPage <= 1 ? "disabled" : "")">
-                    <a class="page-link" href="?page=@(currentPage - 1)" tabindex="-1" aria-disabled="true">Trang trước</a>
-                </li>
-                @for (int i = 1; i <= totalPages; i++)
-                {
-                    <li class="page-item @(i == currentPage ? "active" : "")">
-                        <a class="page-link" href="?page=@i">@i</a>
-                    </li>
-                }
-                <li class="page-item @(currentPage >= totalPages ? "disabled" : "")">
-                    <a class="page-link" href="?page=@(currentPage + 1)">Trang sau</a>
-                </li>
-            </ul>
-        </nav> *@
-
     </div>
 
     @* Insert Form *@
@@ -135,7 +118,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Sửa Thông Tin Học Viên</h5>
+                    <h5 class="modal-title d-flex justify-content-between" id="exampleModalLabel">Sửa Thông Tin Học Viên</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -253,17 +236,22 @@
         var currentStudentId;
         function sua(id) {
             $('#SuaStudentForm').modal('show');
-            currentStudentId = id;
+            
+            currentStudentId = id * 1;
+            //currentStudentId *= 1;
+            console.log("id: " + id);
             $.ajax({
-                url: 'Student/getStudentInfo/',
+                url: 'Student/getStudentInfo',
                 method: 'GET',
-                data: { id_hoc_vien: id },
+                dataType: 'json',
+                data: { id_hoc_vien: currentStudentId },
                 success: function (response) {
                     // Populate the form fields with the fetched data
                     $('#hoTenSua').val(response.ho_ten);
                     $('#ngaySinhSua').val(response.ngay_sinh);
                     $('#gioiTinhSua').val(response.gioi_tinh);
                     $('#emailSua').val(response.email);
+                    console.log(response);
                 },
                 error: function (xhr, status, error) {
                     console.error('Error fetching student information:', status, error);

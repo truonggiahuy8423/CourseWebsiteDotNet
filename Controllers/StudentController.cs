@@ -2,12 +2,19 @@
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Dynamic;
+using System.Text;
 using System.Text.Json;
 
 namespace CourseWebsiteDotNet.Controllers
 {
     public class StudentController : Controller
     {
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public StudentController(IHttpContextAccessor httpContextAccessor)
+        {
+            _httpContextAccessor = httpContextAccessor;
+        }
         public IActionResult Index()
         {
             ViewData["chosenItem"] = 3;
@@ -33,21 +40,6 @@ namespace CourseWebsiteDotNet.Controllers
                 ViewData["students"] = SQLExecutor.ExecuteQuery(
                         "SELECT hoc_vien.id_hoc_vien,  hoc_vien.ho_ten,  DATE_FORMAT(hoc_vien.ngay_sinh, '%d/%m/%Y') as ngay_sinh, hoc_vien.gioi_tinh, hoc_vien.email FROM hoc_vien order by hoc_vien.id_hoc_vien asc"
                     );
-
-                //var repository = new HocVienRepository();
-                //int recordsPerPage = 20;
-                //int currentPage = int.TryParse(Request.Query["page"], out int page) ? page : 1;
-
-                //string query = "SELECT hoc_vien.id_hoc_vien, hoc_vien.ho_ten, hoc_vien.gioi_tinh, " +
-                //               "DATE_FORMAT(hoc_vien.ngay_sinh, '%d/%m/%Y') as ngay_sinh, hoc_vien.email FROM hoc_vien";
-
-                //var students = repository.ExecuteCustomQueryWithPagination(query, recordsPerPage, currentPage);
-
-                //int totalStudents = repository.ExecuteCustomQuery("SELECT COUNT(*) as total FROM hoc_vien")[0]["total"];
-                //int totalPages = (int)Math.Ceiling((double)totalStudents / recordsPerPage);
-
-                //ViewBag.CurrentPage = currentPage;
-                //ViewBag.TotalPages = totalPages;
 
                 return View("AdministratorStudentsList");
             }
@@ -88,13 +80,12 @@ namespace CourseWebsiteDotNet.Controllers
         public IActionResult getStudentInfo(int id)
         {
             HocVienRepository studentRepo = new HocVienRepository();
-            var student = studentRepo.GetHocVienById(Convert.ToInt32(id));
+            HocVienModel student = studentRepo.GetHocVienById(Convert.ToInt32(id));
             if (student != null)
             {
                 // Return the student data as JSON
                 return Json(new
                 {
-                    id_hoc_vien = student.id_hoc_vien,
                     ho_ten = student.ho_ten,
                     ngay_sinh = student.ngay_sinh,
                     gioi_tinh = student.gioi_tinh,
@@ -106,7 +97,7 @@ namespace CourseWebsiteDotNet.Controllers
                 // Return a response indicating that the student is not found
                 return Json(new
                 {
-                    error = "Student not found"
+                    error = $"Student not found {id}"
                 });
             }
         }
@@ -117,8 +108,7 @@ namespace CourseWebsiteDotNet.Controllers
             dynamic obj = JsonConvert.DeserializeObject<ExpandoObject>(dataReceived.RootElement.ToString());
             
             HocVienRepository studentRepo = new HocVienRepository();
-            HocVienModel studentModel = studentRepo.GetHocVienById(obj.id_hoc_vien);
-            studentModel.id_hoc_vien = Convert.ToInt32(obj.id_hoc_vien);
+            HocVienModel studentModel = studentRepo.GetHocVienById(Convert.ToInt32(obj.id_hoc_vien));
             studentModel.ho_ten = Convert.ToString(obj.ho_ten);
             studentModel.ngay_sinh = DateTime.Parse(obj.ngay_sinh);
             studentModel.gioi_tinh = Convert.ToInt32(obj.gioi_tinh);
