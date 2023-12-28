@@ -216,7 +216,7 @@
             console.log('ready');
 
             $(document).on('click', '.class-div', function () {
-                window.location.href = `<?php echo base_url(); ?>/courses/information?courseid=${$(this).parent().attr('courseid')}`;
+                window.location.href = `/courses/information?courseid=${$(this).parent().attr('courseid')}`;
             });
             $(document).on('click', '.delete-checkbox', function (event) {
                 event.stopPropagation();

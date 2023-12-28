@@ -1,5 +1,6 @@
 ﻿using CourseWebsiteDotNet.Models;
 using Humanizer;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Razor.Language.Intermediate;
 using Newtonsoft.Json;
@@ -7,6 +8,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Dynamic;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace CourseWebsiteDotNet.Controllers
 {
@@ -56,7 +58,7 @@ namespace CourseWebsiteDotNet.Controllers
                             "FROM phan_cong_giang_vien INNER JOIN giang_vien ON phan_cong_giang_vien.id_giang_vien = giang_vien.id_giang_vien " +
                             $"WHERE phan_cong_giang_vien.id_lop_hoc = {row["id_lop_hoc"]};"
                             );
-                        
+
                     }
 
 
@@ -126,7 +128,7 @@ namespace CourseWebsiteDotNet.Controllers
         //    }
         //}
         [HttpPost]
-        public IActionResult test4(string name,  int id)
+        public IActionResult test4(string name, int id)
         {
 
             // Xử lý dữ liệu từ phần thân của yêu cầu (POST) và query string (GET)
@@ -139,7 +141,7 @@ namespace CourseWebsiteDotNet.Controllers
         {
             //var data = _httpContextAccessor.HttpContext.Request.Query["data"];
             //var idGiangVien = _httpContextAccessor.HttpContext.Request.Query["data2"];
-            var data = dataRe.data; 
+            var data = dataRe.data;
             return Ok(data);
         }
         public IActionResult getListOfCourses()
@@ -215,7 +217,76 @@ namespace CourseWebsiteDotNet.Controllers
 
             return View("InsertClassForm");
         }
+        [HttpGet]
+        public IActionResult Information(int? courseid)
+        {
+            if (courseid == null)
+            {
+                return Index();
+            }
+            //if (!int.TryParse(courseid.ToString(), out int cid))
+            //{
+            //    ViewData["ExceptionMessage"] = "Hành động không xác định";
+            //    return View("ExceptionPage");
+            //}
+            DataTable courses = SQLExecutor.ExecuteQuery(
+                " SELECT lop_hoc.id_lop_hoc,  DATE_FORMAT(lop_hoc.ngay_bat_dau, '%d/%m/%Y') as ngay_bat_dau,  DATE_FORMAT(lop_hoc.ngay_ket_thuc, '%d/%m/%Y') as ngay_ket_thuc, mon_hoc.id_mon_hoc, mon_hoc.ten_mon_hoc, COUNT(hoc_vien_tham_gia.id_hoc_vien) as so_luong_hoc_vien "
+              + " FROM lop_hoc"
+            + " INNER JOIN mon_hoc ON lop_hoc.id_mon_hoc = mon_hoc.id_mon_hoc " +
+            " LEFT JOIN hoc_vien_tham_gia ON lop_hoc.id_lop_hoc = hoc_vien_tham_gia.id_lop_hoc " +
+            $" WHERE lop_hoc.id_lop_hoc = {(int)courseid} " +
+            " GROUP BY lop_hoc.id_lop_hoc, lop_hoc.ngay_bat_dau, lop_hoc.ngay_ket_thuc, lop_hoc.id_mon_hoc, mon_hoc.ten_mon_hoc; ");
+            if (courses.Rows.Count <= 0)
+            {
+                ViewData["ExceptionMessage"] = "Lớp học không tồn tại";
+                return View("ExceptionPage");
+            }
 
+            HttpContext.Session.SetInt32("course", (int)courseid);
+
+            int? userId = HttpContext.Session.GetInt32("user_id");
+            int? role = HttpContext.Session.GetInt32("role");
+            int? roleId = HttpContext.Session.GetInt32("role_id");
+            if (role == 1)
+            {
+                var dataTable = SQLExecutor.ExecuteQuery(
+                    "SELECT ad.ho_ten, users.anh_dai_dien FROM users INNER JOIN ad ON users.id_ad = ad.id_ad WHERE users.id_user = " + userId
+                );
+
+                if (dataTable.Rows.Count > 0)
+                {
+                    // Retrieve data from DataTable
+                    string? username = dataTable.Rows[0]["ho_ten"].ToString();
+                    byte[]? avatarData = (byte[])dataTable.Rows[0]["anh_dai_dien"];
+
+                    // Set data to ViewData
+                    // Navbar data
+                    ViewData["username"] = username;
+                    ViewData["role"] = "Administrator";
+                    ViewData["avatar_data"] = avatarData;
+
+                    // MainSection
+
+
+                    // Layout data
+                    ViewData["class_name"] = "";
+                    // Mainsection
+                    return View("AdministratorCourseInformation");
+                }
+            }
+            else if (role == 2)
+            {
+                return View("LecturerCourseInformation");
+
+            }
+            else if (role == 3)
+            {
+                return View("AdministratorCourseInformation");
+
+            }
+            return View("AdministratorCourseInformation");
+
+        }
         public IActionResult deleteCourse([FromBody] JsonDocument dataReceived)
         {
             dynamic obj = JsonConvert.DeserializeObject<ExpandoObject>(dataReceived.RootElement.ToString());
