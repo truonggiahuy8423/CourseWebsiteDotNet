@@ -104,42 +104,14 @@ function loadingEffect(state) {
 $(document).ready(function () {
   setInterval(function () {
     var url = window.location.hostname;
-
-    // Tạo đối tượng URL từ URL hiện tại
-
-    // Lấy tên miền
-    var currentDate = new Date();
-
-    // Tạo các biến để lưu giữ giờ, phút, giây
-    var hours = currentDate.getHours();
-    var minutes = currentDate.getMinutes();
-    var seconds = currentDate.getSeconds();
-
-    // Định dạng các giá trị để đảm bảo đều có 2 chữ số
-    hours = (hours < 10) ? "0" + hours : hours;
-    minutes = (minutes < 10) ? "0" + minutes : minutes;
-    seconds = (seconds < 10) ? "0" + seconds : seconds;
-
-    // Lấy ngày, tháng, năm
-    var year = currentDate.getFullYear();
-    var month = (currentDate.getMonth() + 1); // Tháng bắt đầu từ 0
-    var day = currentDate.getDate();
-
-    // Định dạng ngày, tháng, năm để đảm bảo đều có 2 chữ số
-    month = (month < 10) ? "0" + month : month;
-    day = (day < 10) ? "0" + day : day;
-
-    // Tạo chuỗi theo định dạng "Y-m-d H:i:s"
-    var formattedDate = year + "-" + month + "-" + day + " " + hours + ":" + minutes + ":" + seconds;
-
+    console.log("active")
     $.ajax({
-      url: `${window.location.protocol}//${window.location.hostname}/Admin/CoursesController/active`,
-      method: 'POST',
-      contentType: 'text', // Đặt kiểu dữ liệu của yêu cầu là JSON
-      data: null,
-      success: function (response) {
-        console.log(response);
-       }
+        url: `${window.location.protocol}//${window.location.hostname}:${window.location.port}/Authentication/Active`,
+        method: 'POST',
+        success: function (response) {
+            console.log("active")
+            console.log("response: " + response);
+        }
     })
   }, 10000);
 })

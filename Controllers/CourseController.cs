@@ -3,10 +3,15 @@ using Humanizer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Razor.Language.Intermediate;
+using MySqlX.XDevAPI.Common;
 using Newtonsoft.Json;
+using Org.BouncyCastle.Asn1.X509;
+using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Tls.Crypto;
 using System.Data;
 using System.Diagnostics;
 using System.Dynamic;
+using System.Globalization;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
@@ -242,7 +247,7 @@ namespace CourseWebsiteDotNet.Controllers
                 return View("ExceptionPage");
             }
 
-            HttpContext.Session.SetInt32("course", (int)courseid);
+            HttpContext.Session.SetInt32("courseid", (int)courseid);
 
             int? userId = HttpContext.Session.GetInt32("user_id");
             int? role = HttpContext.Session.GetInt32("role");
@@ -266,12 +271,57 @@ namespace CourseWebsiteDotNet.Controllers
                     ViewData["avatar_data"] = avatarData;
 
                     // MainSection
+                    courses.Columns.Add("so_luong_giang_vien");
+                    courses.Columns.Add("so_luong_buoi_hoc");
+                    courses.Columns.Add("so_luong_buoi_hoc_da_hoc");
+
+                    courses.Rows[0]["so_luong_giang_vien"] = Convert.ToInt32(SQLExecutor.ExecuteQuery(
+                        $@"
+                            SELECT COUNT(phan_cong_giang_vien.id_giang_vien) as slgv FROM lop_hoc LEFT JOIN phan_cong_giang_vien ON lop_hoc.id_lop_hoc = phan_cong_giang_vien.id_lop_hoc
+                            WHERE lop_hoc.id_lop_hoc = {courseid}
+                            GROUP BY lop_hoc.id_lop_hoc
+                        "
+                     ).Rows[0]["slgv"]);
+
+                    courses.Rows[0]["so_luong_buoi_hoc"] = Convert.ToInt32(SQLExecutor.ExecuteQuery(
+                       $@"
+                            SELECT COUNT(buoi_hoc.id_buoi_hoc) as slbh FROM lop_hoc LEFT JOIN buoi_hoc ON lop_hoc.id_lop_hoc = buoi_hoc.id_lop_hoc
+                            WHERE lop_hoc.id_lop_hoc = {courseid}
+                            GROUP BY lop_hoc.id_lop_hoc
+                        "
+                    ).Rows[0]["slbh"]);
+
+                    courses.Rows[0]["so_luong_buoi_hoc_da_hoc"] = Convert.ToInt32(SQLExecutor.ExecuteQuery(
+                       $@"
+                            SELECT COUNT(buoi_hoc.id_buoi_hoc) as slbh FROM lop_hoc LEFT JOIN buoi_hoc ON lop_hoc.id_lop_hoc = buoi_hoc.id_lop_hoc and buoi_hoc.trang_thai = 2
+                            WHERE lop_hoc.id_lop_hoc = {courseid}
+                            GROUP BY lop_hoc.id_lop_hoc
+                        "
+                    ).Rows[0]["slbh"]);
+                    ViewData["subject_name"] = courses.Rows[0]["ten_mon_hoc"];
+                    ViewData["subjectid"] = Convert.ToInt32(courses.Rows[0]["id_mon_hoc"]);
+                    ViewData["slbh"] = Convert.ToInt32(courses.Rows[0]["so_luong_buoi_hoc"]);
+                    ViewData["slbhdh"] = Convert.ToInt32(courses.Rows[0]["so_luong_buoi_hoc_da_hoc"]);
+                    ViewData["slgv"] = Convert.ToInt32(courses.Rows[0]["so_luong_giang_vien"]);
+                    ViewData["ngbd"] = courses.Rows[0]["ngay_bat_dau"];
+                    ViewData["ngkt"] = courses.Rows[0]["ngay_ket_thuc"];
+
+                    //string? class_name = ViewData["class_name"] as string;
+                    //int? student_quantity = ViewData["student_quantity"] as int?;
+                    //string? state = ViewData["state"] as string;
+                    //int? courseid = ViewData["courseid"] as int?;
+                    //int? subjectid = ViewData["subjectid"] as int?;
+                    //string? subjectName = ViewData["subject_name"] as string;
+                    //int? slbh = ViewData["slbh"] as int?;
+                    //int? slbhdh = ViewData["slbhdh"] as int?;
+
 
                     // Layout data
                     ViewData["class_name"] = $"{courses.Rows[0]["ten_mon_hoc"]} {courses.Rows[0]["id_mon_hoc"].ToString().PadLeft(3, '0')}.{courses.Rows[0]["id_lop_hoc"].ToString().PadLeft(6, '0')}";
-                    //ViewData["class_name"] = courses.ToString();
-
+                    ViewData["state"] = KiemTraTinhTrang((string)courses.Rows[0]["ngay_bat_dau"], (string)courses.Rows[0]["ngay_ket_thuc"]);
+                    ViewData["courseid"] = Convert.ToInt32(courses.Rows[0]["id_lop_hoc"]);
                     ViewData["student_quantity"] = Convert.ToInt32(courses.Rows[0]["so_luong_hoc_vien"]);
+                    
                     // Mainsection
                     return View("AdministratorCourseInformation");
                 }
@@ -289,6 +339,30 @@ namespace CourseWebsiteDotNet.Controllers
             return View("AdministratorCourseInformation");
 
         }
+        public string KiemTraTinhTrang(string ngayBatDau, string ngayKetThuc)
+        {
+            DateTime datetimeBatDau = DateTime.ParseExact(ngayBatDau, "d/M/yyyy", CultureInfo.InvariantCulture);
+            DateTime datetimeKetThuc = DateTime.ParseExact(ngayKetThuc, "d/M/yyyy", CultureInfo.InvariantCulture);
+            DateTime datetimeHienTai = DateTime.Now;
+
+            datetimeBatDau = datetimeBatDau.Date;
+            datetimeKetThuc = datetimeKetThuc.Date.Add(new TimeSpan(23, 59, 59)); // Set time to end of the day
+
+            if (datetimeBatDau <= datetimeHienTai && datetimeKetThuc >= datetimeHienTai)
+            {
+                return "<span class=\"class__item--inprocess\">Đang diễn ra</span>";
+            }
+            else if (datetimeKetThuc < datetimeHienTai)
+            {
+                return "<span class=\"class__item--over\">Đã kết thúc</span>";
+            }
+            else
+            {
+                return "<span class=\"class__item--upcoming\">Sắp diễn ra</span>";
+            }
+        }
+
+
         public IActionResult deleteCourse([FromBody] JsonDocument dataReceived)
         {
             dynamic obj = JsonConvert.DeserializeObject<ExpandoObject>(dataReceived.RootElement.ToString());
@@ -301,5 +375,74 @@ namespace CourseWebsiteDotNet.Controllers
 
             return Ok(JsonConvert.SerializeObject(response));
         }
+
+
+        public IActionResult getScheduleListByCourseId()
+        {
+            int? courseid = HttpContext.Session.GetInt32("courseid");
+            var rs = SQLExecutor.ExecuteQuery(
+               $@"
+                    SELECT buoi_hoc.id_buoi_hoc, buoi_hoc.trang_thai, buoi_hoc.id_phong, DATE_FORMAT(buoi_hoc.ngay, '%d/%m/%Y') AS ngay, DAYOFWEEK(buoi_hoc.ngay) AS thu,
+                    ca.id_ca, ca.thoi_gian_bat_dau, ca.thoi_gian_ket_thuc, a.id_lop_hoc, a.id_mon_hoc, a.ten_mon_hoc
+                    FROM buoi_hoc INNER JOIN ca ON buoi_hoc.id_ca = ca.id_ca
+                    LEFT JOIN (
+                        SELECT lop_hoc.id_lop_hoc, mon_hoc.id_mon_hoc, mon_hoc.ten_mon_hoc
+                        FROM lop_hoc INNER JOIN mon_hoc ON lop_hoc.id_mon_hoc = mon_hoc.id_mon_hoc
+                    ) AS a ON a.id_lop_hoc = buoi_hoc.id_lop_hoc
+                    WHERE buoi_hoc.id_lop_hoc = {courseid}
+                    ORDER BY buoi_hoc.ngay ASC"
+            );
+            return Ok(JsonConvert.SerializeObject(rs));
+        }
+
+        public IActionResult getListOfStudentsByCourseId()
+        {
+            int? courseid = HttpContext.Session.GetInt32("courseid");
+            DataTable students = SQLExecutor.ExecuteQuery(
+                $@"
+                    SELECT hoc_vien.*, DATE_FORMAT(hoc_vien.ngay_sinh, '%d/%m/%Y') as ngay_sinh_hv FROM hoc_vien_tham_gia INNER JOIN hoc_vien on hoc_vien.id_hoc_vien = hoc_vien_tham_gia.id_hoc_vien
+                    WHERE hoc_vien_tham_gia.id_lop_hoc = {courseid};
+                "
+            );
+
+            students.Columns.Add("so_buoi_vang", typeof(int));
+
+            for (int i = 0; i < students.Rows.Count; i++) {
+                students.Rows[i]["so_buoi_vang"] = Convert.ToInt32(SQLExecutor.ExecuteQuery(
+                    $@"SELECT COUNT(buoi_hoc.id_buoi_hoc) as so_buoi_vang FROM buoi_hoc INNER JOIN diem_danh ON buoi_hoc.id_buoi_hoc = diem_danh.id_buoi_hoc
+                WHERE buoi_hoc.id_lop_hoc = {courseid}
+                AND diem_danh.id_hoc_vien = {students.Rows[i]["id_hoc_vien"]}
+                AND buoi_hoc.trang_thai = 2 AND diem_danh.co_mat = 0; "
+                ).Rows[0]["so_buoi_vang"]);
+            }
+            return Ok(JsonConvert.SerializeObject(students));
+
+        }
+        
+        public IActionResult getListOfLecturersByCourseId()
+        {
+            int? courseid = HttpContext.Session.GetInt32("courseid");
+            DataTable lecturers = SQLExecutor.ExecuteQuery(
+                $@"
+                    SELECT giang_vien.id_giang_vien, giang_vien.ho_ten, giang_vien.email
+                    FROM phan_cong_giang_vien INNER JOIN giang_vien ON phan_cong_giang_vien.id_giang_vien = giang_vien.id_giang_vien
+                    WHERE phan_cong_giang_vien.id_lop_hoc = {courseid}; 
+                "    
+            );
+            return Ok(JsonConvert.SerializeObject(lecturers));
+
+        }
+        //public function getListOfLecturersByCourseId()
+        //{
+        //// $id_lop_hoc = 110;
+        //$id_lop_hoc = $this->request->getVar("id");
+        //$model = new GiangVienModel();
+        //$lecturers = $model->executeCustomQuery(
+        //    "SELECT giang_vien.id_giang_vien, giang_vien.ho_ten, giang_vien.email
+        //        FROM phan_cong_giang_vien INNER JOIN giang_vien ON phan_cong_giang_vien.id_giang_vien = giang_vien.id_giang_vien
+        //        WHERE phan_cong_giang_vien.id_lop_hoc = {$id_lop_hoc}; "
+        //);
+        //    return $this->response->setJSON($lecturers);
+        //}
     }
 }

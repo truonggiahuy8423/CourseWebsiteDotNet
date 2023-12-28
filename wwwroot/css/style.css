@@ -414,7 +414,7 @@ img {
     display: flex!important;
     justify-content: center!important;
     align-items: center!important;
-    width: 35px!important;
+    width: 35px;
     border-radius: 0;
     transition: 0.4s;
 }

@@ -4,6 +4,8 @@
 @{
     string? class_name = ViewData["class_name"] as string;
     int? student_quantity = ViewData["student_quantity"] as int?;
+    string? state = ViewData["state"] as string;
+    int? courseid = ViewData["courseid"] as int?;
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -25,7 +27,7 @@
     <link rel="stylesheet" href="~/css/style.css">
 
     <link rel="stylesheet" type="text/css" href="~/css/toast.css">
-    <script src="~/script.js"></script>
+    <script src="~/js/script.js"></script>
 </head>
 
 <body>
@@ -46,13 +48,13 @@
                 <div>
                     <h5 class="class-infor-section__class-name">@class_name</h5>
                     <p style="font-size: 13px; line-height: 16px;">Thành viên: <span class="class-infor-section__members-quantity">@student_quantity</span></p>
-                    <p style="font-size: 13px; line-height: 16px;">Trạng thái: <?php echo $state ?></p>
+                    <p style="font-size: 13px; line-height: 16px;">Trạng thái:@Html.Raw(state)</p>
                 </div>
             </div>
-            <a href="<?php echo base_url().' /information?id ="'?><?php echo $id_lop_hoc;?>">Thông tin lớp học</a>
-            <a href="<?php echo base_url().' /attendance?id ="'?><?php echo $id_lop_hoc;?>">Điểm danh</a>
-            <a href="<?php echo base_url().' /resourses?id ="'?><?php echo $id_lop_hoc;?>">Tài nguyên</a>
-            <a href="<?php echo base_url().' /chat?id ="'?><?php echo $id_lop_hoc;?>">Kênh chat</a>
+            <a href="/courses/information?courseid=@courseid">Thông tin lớp học</a>
+            <a href="/courses/attendance?courseid=@courseid">Điểm danh</a>
+            <a href="/courses/resourses?courseid=@courseid">Tài nguyên</a>
+            <a href="/courses/chat?courseid=@courseid">Kênh chat</a>
         </div>
 
         <script>

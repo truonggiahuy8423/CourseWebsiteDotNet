@@ -31,7 +31,7 @@ namespace CourseWebsiteDotNet.Middleware
             }
             else
             {
-                if (IsRequestToLogout(context))
+                if (IsRequestToLogout(context) || IsRequestToActive(context))
                 {
                     await _next(context);
                 }
@@ -60,6 +60,22 @@ namespace CourseWebsiteDotNet.Middleware
 
                 // Kiểm tra xem controller có phải là "UserController" hay không
                 return string.Equals(controllerName, "Authentication", StringComparison.OrdinalIgnoreCase) && string.Equals(actionName, "Logout", StringComparison.OrdinalIgnoreCase);
+            }
+
+            return false;
+        }
+        private bool IsRequestToActive(HttpContext context)
+        {
+            // Lấy thông tin về phương thức, controller và action của HttpRequest
+            var actionDescriptor = context.GetEndpoint()?.Metadata.GetMetadata<ControllerActionDescriptor>();
+
+            if (actionDescriptor != null)
+            {
+                var controllerName = actionDescriptor.ControllerName;
+                var actionName = actionDescriptor.ActionName;
+
+                // Kiểm tra xem controller có phải là "UserController" hay không
+                return string.Equals(controllerName, "Authentication", StringComparison.OrdinalIgnoreCase) && string.Equals(actionName, "Active", StringComparison.OrdinalIgnoreCase);
             }
 
             return false;

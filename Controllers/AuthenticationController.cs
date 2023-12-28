@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using CourseWebsiteDotNet.Models;
 using Microsoft.AspNetCore.Http;
+using MySqlX.XDevAPI.Common;
+using Newtonsoft.Json;
 
 namespace CourseWebsiteDotNet.Controllers
 {
@@ -30,6 +32,38 @@ namespace CourseWebsiteDotNet.Controllers
 
             return RedirectToAction("Index");
         }
+        public IActionResult Active() { 
+            int? userid = HttpContext.Session.GetInt32("user_id");
+            TimeZoneInfo vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Ho_Chi_Minh");
+            DateTime currentDateTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
+
+            // Format the current date and time to match the SQL format
+            string currentDateTimeFormatted = currentDateTime.ToString("yyyy-MM-dd HH:mm:ss");
+
+            var rs = SQLExecutor.ExecuteDML(
+                $"UPDATE users SET thoi_gian_dang_nhap_gan_nhat = '{currentDateTimeFormatted}' where users.id_user = {userid}"
+                );
+            return Ok(JsonConvert.SerializeObject(rs));
+        }
+        //public function active()
+        //{
+        //    if (!session()->has('id_user'))
+        //    {
+        //        return redirect()->to('/');
+        //    }
+        //$id = session()->get('id_user');
+        //$model = new UserModel();
+        //    date_default_timezone_set('Asia/Ho_Chi_Minh');
+
+        //// Lấy thời gian hiện tại
+        //$current_time = date('Y-m-d H:i:s');
+        //$result = $model->executeCustomDDL(
+        //    "UPDATE users SET thoi_gian_dang_nhap_gan_nhat = '{$current_time}' where users.id_user = $id"
+        //);
+        //    return $this->response->setJSON($result);
+
+        //}
+
         public IActionResult Login()
         {
             string userAccount = HttpContext.Request.Form["account"];

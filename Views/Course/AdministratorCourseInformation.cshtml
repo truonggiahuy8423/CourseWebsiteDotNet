@@ -5,6 +5,17 @@
     Layout = null;
     Layout = "_AdministratorCourseDetailLayout";
 
+    string? class_name = ViewData["class_name"] as string;
+    int? student_quantity = ViewData["student_quantity"] as int?;
+    string? state = ViewData["state"] as string;
+    int? courseid = ViewData["courseid"] as int?;
+    int? subjectid = ViewData["subjectid"] as int?;
+    string? subjectName = ViewData["subject_name"] as string;
+    int? slbh = ViewData["slbh"] as int?;
+    int? slbhdh = ViewData["slbhdh"] as int?;
+    int? slgv = ViewData["slgv"] as int?;
+    string? ngbd = ViewData["ngbd"] as string;
+    string? ngkt = ViewData["ngkt"] as string;
 }
 
 @section Navbar {
@@ -36,39 +47,39 @@
             <tbody>
                 <tr>
                     <td>Mã lớp</td>
-                    <td><?php echo str_pad($id_lop_hoc, 6, "0", STR_PAD_LEFT) ?></td>
+                    <td>@courseid.ToString().PadLeft(6, '0')</td>
                 </tr>
                 <tr>
                     <td>Mã môn học</td>
-                    <td><?php echo str_pad($id_mon_hoc, 3, "0", STR_PAD_LEFT) ?></td>
+                    <td>@subjectid.ToString().PadLeft(3, '0')</td>
                 </tr>
                 <tr>
                     <td>Tên môn học</td>
-                    <td><?php echo $ten_mon_hoc ?></td>
+                    <td>@subjectName</td>
                 </tr>
                 <tr>
                     <td>Ngày bắt đầu</td>
-                    <td><?php echo $ngay_bat_dau ?></td>
+                    <td>@ngbd</td>
                 </tr>
                 <tr>
                     <td>Ngày kết thúc</td>
-                    <td><?php echo $ngay_ket_thuc ?></td>
+                    <td>@ngkt</td>
                 </tr>
                 <tr>
                     <td>Tổng số buổi</td>
-                    <td><?php echo $so_luong_buoi_hoc ?></td>
+                    <td>@slbh</td>
                 </tr>
                 <tr>
                     <td>Số buổi đã học</td>
-                    <td><?php echo $so_luong_buoi_hoc_da_hoc ?></td>
+                    <td>@slbhdh</td>
                 </tr>
                 <tr>
                     <td>SL thành viên</td>
-                    <td><?php echo $so_luong_hoc_vien ?></td>
+                    <td>@student_quantity</td>
                 </tr>
                 <tr>
                     <td>SL giảng viên</td>
-                    <td><?php echo $so_luong_giang_vien ?></td>
+                    <td>@slgv</td>
                 </tr>
             </tbody>
         </table>
@@ -163,7 +174,6 @@
             </tbody>
         </table>
     </div>
-    <!-- <script src="<?php echo base_url('assets/script.js'); ?>"></script> -->
 
     <script>
         var id_lop_hoc = $(`.class-infor-table tr`).eq(0).find(`td`).eq(1).text() * 1;
@@ -172,13 +182,9 @@
         function reloadSchedule() {
             loadingEffect(true);
             $.ajax({
-                url: `${window.location.protocol}//${window.location.hostname}/Admin/CoursesController/getScheduleListByLCourseId`,
+                url: `${window.location.protocol}//${window.location.hostname}:${window.location.port}/Course/getScheduleListByCourseId`,
                 method: 'GET',
-                contentType: "text",
                 dataType: "json",
-                data: {
-                    id: id_lop_hoc * 1
-                },
                 success: function (response) {
                     loadingEffect(false);
                     listOfSchedule = response;
@@ -246,13 +252,9 @@
         function reloadStudentList() {
             loadingEffect(true);
             $.ajax({
-                url: `${window.location.protocol}//${window.location.hostname}/Admin/CoursesController/getListOfStudentsByCourseId`,
+                url: `${window.location.protocol}//${window.location.hostname}:${window.location.port}/Course/getListOfStudentsByCourseId`,
                 method: 'GET',
-                contentType: "text",
                 dataType: "json",
-                data: {
-                    id: id_lop_hoc * 1
-                },
                 success: function (response) {
                     loadingEffect(false);
                     listOfStudents = response;
@@ -302,12 +304,8 @@
         function reloadLecturerList() {
             loadingEffect(true);
             $.ajax({
-                url: `${window.location.protocol}//${window.location.hostname}/Admin/CoursesController/getListOfLecturersByCourseId`,
+                url: `${window.location.protocol}//${window.location.hostname}:${window.location.port}/Course/getListOfLecturersByCourseId`,
                 method: 'GET',
-                contentType: "text",
-                data: {
-                    id: id_lop_hoc * 1
-                },
                 dataType: "json",
                 success: function (response) {
                     loadingEffect(false);
