@@ -54,6 +54,7 @@ namespace CourseWebsiteDotNet.Controllers
             return Json(danhSachMonHoc, new System.Text.Json.JsonSerializerOptions());
 
         }
+
         [HttpPost]
         public IActionResult ThemMonHoc(string name)
         {
