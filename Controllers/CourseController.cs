@@ -269,7 +269,9 @@ namespace CourseWebsiteDotNet.Controllers
 
                     // Layout data
                     ViewData["class_name"] = $"{courses.Rows[0]["ten_mon_hoc"]} {courses.Rows[0]["id_mon_hoc"].ToString().PadLeft(3, '0')}.{courses.Rows[0]["id_lop_hoc"].ToString().PadLeft(6, '0')}";
-                    ViewData["student_quantity"] = courses.Rows[0]["so_luong_hoc_vien"];
+                    //ViewData["class_name"] = courses.ToString();
+
+                    ViewData["student_quantity"] = Convert.ToInt32(courses.Rows[0]["so_luong_hoc_vien"]);
                     // Mainsection
                     return View("AdministratorCourseInformation");
                 }
