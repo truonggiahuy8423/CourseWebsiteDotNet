@@ -554,30 +554,103 @@ namespace CourseWebsiteDotNet.Controllers
         [HttpPost]
         public IActionResult deleteStudentFromCourse([FromBody] JsonDocument dataReceived)
         {
+            dynamic obj = JsonConvert.DeserializeObject<ExpandoObject>(dataReceived.RootElement.ToString());
+            int? courseid = HttpContext.Session.GetInt32("courseid");
+            ExpandoObject response = new ExpandoObject();
+            foreach (long id_hoc_vien in obj.danh_sach_id_hoc_vien)
+            {
+                HocVienThamGiaRepository repo = new HocVienThamGiaRepository();
+                HocVienThamGiaModel m = new HocVienThamGiaModel()
+                {
+                    id_lop_hoc = (int)courseid,
+                    id_hoc_vien = Convert.ToInt32(id_hoc_vien)
+                };
+                ((IDictionary<string, object>)response)[Convert.ToString(id_hoc_vien)] = repo.DeleteHocVienThamGia(m);
+            }
+            return Ok(JsonConvert.SerializeObject(response));
+        }
+        public IActionResult getInsertScheduleForm()
+        {
+            ViewData["rooms"] = new PhongRepository().GetAllPhong();
+            ViewData["shifts"] = new CaRepository().GetAllCa();
+            return View("InsertScheduleIntoClassForm");
+        }
+        [HttpPost]
+        public IActionResult getScheduleList([FromBody] JsonDocument dataReceived)
+        {
+            dynamic obj = JsonConvert.DeserializeObject<ExpandoObject>(dataReceived.RootElement.ToString());
+            string ca = (Convert.ToInt32(obj.id_ca) == -1 ? "" : $"AND buoi_hoc.id_ca = {obj.id_ca}");
+            string phong = (Convert.ToInt32(obj.id_phong) == -1 ? "" : $"AND buoi_hoc.id_phong = {obj.id_phong}");
+            string thu = (Convert.ToInt32(obj.thu_trong_tuan) == -1 ? "" : $"AND DAYOFWEEK(buoi_hoc.ngay) = {obj.thu_trong_tuan}");
+            DataTable dt = SQLExecutor.ExecuteQuery(
+                $@"
+                    SELECT buoi_hoc.id_buoi_hoc, buoi_hoc.trang_thai, buoi_hoc.id_phong, DATE_FORMAT(buoi_hoc.ngay, '%d/%m/%Y') AS ngay, DAYOFWEEK(buoi_hoc.ngay) AS thu, 
+            ca.id_ca, ca.thoi_gian_bat_dau, ca.thoi_gian_ket_thuc, a.id_lop_hoc, a.id_mon_hoc, a.ten_mon_hoc
+            FROM buoi_hoc INNER JOIN ca ON buoi_hoc.id_ca = ca.id_ca
+            LEFT JOIN(
+                SELECT lop_hoc.id_lop_hoc, mon_hoc.id_mon_hoc, mon_hoc.ten_mon_hoc
+                FROM lop_hoc INNER JOIN mon_hoc ON lop_hoc.id_mon_hoc = mon_hoc.id_mon_hoc
+            ) AS a ON a.id_lop_hoc = buoi_hoc.id_lop_hoc
+            WHERE buoi_hoc.ngay >= '{obj.ngay_bat_dau}' AND buoi_hoc.ngay <= '{obj.ngay_ket_thuc}' {ca}
+            {phong}
+            {thu}
+                ORDER BY buoi_hoc.ngay ASC, buoi_hoc.id_phong ASC, buoi_hoc.id_ca ASC
+                "
+                );
+
+            return Ok(JsonConvert.SerializeObject(dt));
+        }
+        [HttpPost]
+        public IActionResult insertScheduleIntoClass([FromBody] JsonDocument dataReceived)
+        {
+            int? courseid = HttpContext.Session.GetInt32("courseid");
+            List<int> obj = JsonConvert.DeserializeObject<List<int>>(dataReceived.RootElement.ToString());
+
+            ExpandoObject response = new ExpandoObject();
+
+            for (int i = 0; i < obj.Count; i++)
+            {
+
+                ((IDictionary<string, object>)response)[Convert.ToString(obj[i])] = SQLExecutor.ExecuteDML(
+                    $@"UPDATE buoi_hoc SET id_lop_hoc = {courseid} where id_buoi_hoc = {obj[i]}"
+                    );
+            }
+            return Ok(JsonConvert.SerializeObject(response));
 
         }
-        //public function deleteStudentFromCourse()
-        //{
-        //    if (!session()->has('id_user'))
-        //    {
-        //        return redirect()->to('/');
-        //    }
-        //$array = json_decode(json_encode($this->request->getJSON()), true);
-        //$dshv = $array["danh_sach_id_hoc_vien"];
-        //// $dsbh = [77320];
-        //// $dshv = [1];
-        //$id_lop_hoc = $array["id_lop_hoc"];
-        //$result = array();
-        //$model = new hoc_vien_tham_giaModel();
-        //    foreach ($dshv as $id_hoc_vien) {
-        //    $hvtg = new hoc_vien_tham_giaModel();
-        //    $hvtg->id_hoc_vien = $id_hoc_vien;
-        //    $hvtg->id_lop_hoc = $id_lop_hoc;
-        //    $result[$id_hoc_vien] = $model->deletehoc_vien_tham_gia(
-        //        $hvtg
-        //    );
-        //    }
-        //    return $this->response->setJSON($result);
-        //}
+
+
+        [HttpPost]
+        public IActionResult deleteScheduleFromCourse([FromBody] JsonDocument dataReceived)
+        {
+            int? courseid = HttpContext.Session.GetInt32("courseid");
+            List<int> obj = JsonConvert.DeserializeObject<List<int>>(dataReceived.RootElement.ToString());
+
+            ExpandoObject response = new ExpandoObject();
+
+            for (int i = 0; i < obj.Count; i++)
+            {
+
+                ((IDictionary<string, object>)response)[Convert.ToString(obj[i])] = SQLExecutor.ExecuteDML(
+                    $@"UPDATE buoi_hoc SET id_lop_hoc = null where id_buoi_hoc = {obj[i]}"
+                    );
+            }
+            return Ok(JsonConvert.SerializeObject(response));
+
+        }
+
     }
+    //public function insertScheduleIntoClass()
+    //{
+    //$data = json_decode($this->request->getVar("json"), true);
+    //$id_lop_hoc = json_decode($this->request->getVar("id"), true);
+
+    //$result = array();
+    //$model = new BuoiHocModel();
+    //    foreach ($data as $id_buoi_hoc) {
+    //    $result["{$id_buoi_hoc}"] = $model->updateIdLopHoc($id_lop_hoc, $id_buoi_hoc);
+    //    }
+    //    return $this->response->setJSON($result);
+    //}
+
 }

@@ -422,7 +422,7 @@
             $(`.add-schedule-into-class-btn`).click(function () {
                 loadingEffect(true);
                 $.ajax({
-                    url: `${window.location.protocol}//${window.location.hostname}/Admin/CoursesController/getInsertScheduleForm`,
+                    url: `${window.location.protocol}//${window.location.hostname}:${window.location.port}/Course/getInsertScheduleForm`,
                     method: 'GET',
                     success: function (response) {
                         loadingEffect(false);
@@ -522,9 +522,9 @@
                 console.log(student_id_list);
                 console.log(id_lop_hoc);
                 $.ajax({
-                    url: "<?php echo base_url() ?>/Admin/CoursesController/deleteStudentFromCourse",
+                    url: `${window.location.protocol}//${window.location.hostname}:${window.location.port}/Course/deleteStudentFromCourse`,
                     method: "POST",
-                    contentType: "json",
+                    contentType: "application/json",
                     dataType: "json",
                     data: JSON.stringify({
                         danh_sach_id_hoc_vien: student_id_list
@@ -532,11 +532,11 @@
                     success: function (response) {
                         loadingEffect(false);
                         reloadStudentList();
-                        for (var [schedule, processState] of Object.entries(response)) { // có vấn đề
+                        for (var [student, processState] of Object.entries(response)) { // có vấn đề
                             if (processState.state) {
                                 toast({
                                     title: "Thành công!",
-                                    message: `Xóa học viên ${schedule.toString().padStart(6, '0')} khỏi lớp học thành công`,
+                                    message: `Xóa học viên ${student.toString().padStart(6, '0')} khỏi lớp học thành công`,
                                     type: "success",
                                     duration: 100000
                                 });
@@ -575,14 +575,12 @@
                 })
 
                 $.ajax({
-                    url: "<?php echo base_url() ?>/Admin/CoursesController/deleteScheduleFromCourse",
+                    url: `${window.location.protocol}//${window.location.hostname}:${window.location.port}/Course/deleteScheduleFromCourse`,
                     method: "POST",
-                    contentType: "json",
+                    contentType: "application/json",
                     dataType: "json",
-                    data: JSON.stringify({
-                        id_lop_hoc: id_lop_hoc,
-                        danh_sach_id_buoi_hoc: schedule_id_list
-                    }),
+                    data: JSON.stringify(schedule_id_list
+                    ),
                     success: function (response) {
                         loadingEffect(false);
                         reloadSchedule();

@@ -1,21 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using MySql.Data.MySqlClient;
+﻿using MySql.Data.MySqlClient;
 
 namespace CourseWebsiteDotNet.Models
 {
-    public class CaModel
+    public class BuoiHocModel
     {
-        public int id_ca { get; set; }
-        public TimeSpan? thoi_gian_bat_dau { get; set; }
-        public TimeSpan? thoi_gian_ket_thuc { get; set; }
+        public int? id_buoi_hoc { get; set; }
+        public int? trang_thai { get; set; }
+        public DateTime? ngay { get; set; }
+        public int? id_lop_hoc { get; set; }
+        public int? id_ca { get; set; }
+        public int? id_phong { get; set; }
     }
-
-    public class CaRepository
+    public class BuoiHocRepository
     {
         private readonly string connectionString;
 
-        public CaRepository()
+        public BuoiHocRepository()
         {
             connectionString = DatabaseConnection.CONNECTION_STRING;
         }
@@ -46,14 +46,14 @@ namespace CourseWebsiteDotNet.Models
             }
         }
 
-        public List<CaModel> GetAllCa()
+        public List<BuoiHocModel> GetAllBuoiHoc()
         {
-            List<CaModel> caList = new List<CaModel>();
+            List<BuoiHocModel> buoiHocList = new List<BuoiHocModel>();
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 connection.Open();
 
-                string query = "SELECT * FROM ca";
+                string query = "SELECT * FROM buoi_hoc";
 
                 using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
@@ -61,33 +61,31 @@ namespace CourseWebsiteDotNet.Models
                     {
                         while (reader.Read())
                         {
-                            CaModel ca = new CaModel
+                            BuoiHocModel buoiHoc = new BuoiHocModel
                             {
-                                id_ca = Convert.ToInt32(reader["id_ca"]),
-                                thoi_gian_bat_dau = reader["thoi_gian_bat_dau"] != DBNull.Value
-                                    ? (TimeSpan)reader["thoi_gian_bat_dau"]
-                                    : (TimeSpan?)null,
-                                thoi_gian_ket_thuc = reader["thoi_gian_ket_thuc"] != DBNull.Value
-                                    ? (TimeSpan)reader["thoi_gian_ket_thuc"]
-                                    : (TimeSpan?)null
+                                id_buoi_hoc = reader["id_buoi_hoc"] != DBNull.Value ? Convert.ToInt32(reader["id_buoi_hoc"]) : (int?)null,
+                                trang_thai = reader["trang_thai"] != DBNull.Value ? Convert.ToInt32(reader["trang_thai"]) : (int?)null,
+                                ngay = reader["ngay"] != DBNull.Value ? Convert.ToDateTime(reader["ngay"]) : (DateTime?)null,
+                                id_lop_hoc = reader["id_lop_hoc"] != DBNull.Value ? Convert.ToInt32(reader["id_lop_hoc"]) : (int?)null,
+                                id_ca = reader["id_ca"] != DBNull.Value ? Convert.ToInt32(reader["id_ca"]) : (int?)null,
+                                id_phong = reader["id_phong"] != DBNull.Value ? Convert.ToInt32(reader["id_phong"]) : (int?)null
                             };
-
-                            caList.Add(ca);
+                            buoiHocList.Add(buoiHoc);
                         }
                     }
                 }
             }
 
-            return caList;
+            return buoiHocList;
         }
 
-        public CaModel? GetCaById(int id)
+        public BuoiHocModel? GetBuoiHocById(int id)
         {
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 connection.Open();
 
-                string query = "SELECT * FROM ca WHERE id_ca = @Id";
+                string query = "SELECT * FROM buoi_hoc WHERE id_buoi_hoc = @Id";
 
                 using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
@@ -97,14 +95,14 @@ namespace CourseWebsiteDotNet.Models
                     {
                         if (reader.Read())
                         {
-                            return new CaModel
+                            return new BuoiHocModel
                             {
-                                thoi_gian_bat_dau = reader["thoi_gian_bat_dau"] != DBNull.Value
-                                    ? (TimeSpan)reader["thoi_gian_bat_dau"]
-                                    : (TimeSpan?)null,
-                                thoi_gian_ket_thuc = reader["thoi_gian_ket_thuc"] != DBNull.Value
-                                    ? (TimeSpan)reader["thoi_gian_ket_thuc"]
-                                    : (TimeSpan?)null
+                                id_buoi_hoc = reader["id_buoi_hoc"] != DBNull.Value ? Convert.ToInt32(reader["id_buoi_hoc"]) : (int?)null,
+                                trang_thai = reader["trang_thai"] != DBNull.Value ? Convert.ToInt32(reader["trang_thai"]) : (int?)null,
+                                ngay = reader["ngay"] != DBNull.Value ? Convert.ToDateTime(reader["ngay"]) : (DateTime?)null,
+                                id_lop_hoc = reader["id_lop_hoc"] != DBNull.Value ? Convert.ToInt32(reader["id_lop_hoc"]) : (int?)null,
+                                id_ca = reader["id_ca"] != DBNull.Value ? Convert.ToInt32(reader["id_ca"]) : (int?)null,
+                                id_phong = reader["id_phong"] != DBNull.Value ? Convert.ToInt32(reader["id_phong"]) : (int?)null
                             };
                         }
                         else
@@ -116,7 +114,7 @@ namespace CourseWebsiteDotNet.Models
             }
         }
 
-        public Response InsertCa(CaModel ca)
+        public Response InsertBuoiHoc(BuoiHocModel buoiHoc)
         {
             return ExecuteDatabaseOperation(() =>
             {
@@ -124,20 +122,23 @@ namespace CourseWebsiteDotNet.Models
                 {
                     connection.Open();
 
-                    string query = "INSERT INTO ca (thoi_gian_bat_dau, thoi_gian_ket_thuc) " +
-                                   "VALUES (@ThoiGianBatDau, @ThoiGianKetThuc); SELECT LAST_INSERT_ID();";
+                    string query = "INSERT INTO buoi_hoc (trang_thai, ngay, id_lop_hoc, id_ca, id_phong) " +
+                                   "VALUES (@trang_thai, @ngay, @id_lop_hoc, @id_ca, @id_phong); SELECT LAST_INSERT_ID();";
 
                     using (MySqlCommand command = new MySqlCommand(query, connection))
                     {
-                        command.Parameters.AddWithValue("@ThoiGianBatDau", ca.thoi_gian_bat_dau);
-                        command.Parameters.AddWithValue("@ThoiGianKetThuc", ca.thoi_gian_ket_thuc);
+                        command.Parameters.AddWithValue("@trang_thai", buoiHoc.trang_thai);
+                        command.Parameters.AddWithValue("@ngay", buoiHoc.ngay);
+                        command.Parameters.AddWithValue("@id_lop_hoc", buoiHoc.id_lop_hoc);
+                        command.Parameters.AddWithValue("@id_ca", buoiHoc.id_ca);
+                        command.Parameters.AddWithValue("@id_phong", buoiHoc.id_phong);
 
                         int insertedId = Convert.ToInt32(command.ExecuteScalar());
 
                         return new Response
                         {
                             state = true,
-                            message = "Thêm ca thành công",
+                            message = "Thêm buổi học thành công",
                             insertedId = insertedId,
                         };
                     }
@@ -145,7 +146,7 @@ namespace CourseWebsiteDotNet.Models
             });
         }
 
-        public Response UpdateCa(CaModel ca)
+        public Response UpdateBuoiHoc(BuoiHocModel buoiHoc)
         {
             return ExecuteDatabaseOperation(() =>
             {
@@ -153,22 +154,25 @@ namespace CourseWebsiteDotNet.Models
                 {
                     connection.Open();
 
-                    string query = "UPDATE ca SET thoi_gian_bat_dau = @ThoiGianBatDau, " +
-                                   "thoi_gian_ket_thuc = @ThoiGianKetThuc " +
-                                   "WHERE id_ca = @Id";
+                    string query = "UPDATE buoi_hoc SET trang_thai = @trang_thai, " +
+                                   "ngay = @ngay, id_lop_hoc = @id_lop_hoc, id_ca = @id_ca, id_phong = @id_phong " +
+                                   "WHERE id_buoi_hoc = @Id";
 
                     using (MySqlCommand command = new MySqlCommand(query, connection))
                     {
-                        command.Parameters.AddWithValue("@ThoiGianBatDau", ca.thoi_gian_bat_dau);
-                        command.Parameters.AddWithValue("@ThoiGianKetThuc", ca.thoi_gian_ket_thuc);
-                        command.Parameters.AddWithValue("@Id", ca.id_ca);
+                        command.Parameters.AddWithValue("@trang_thai", buoiHoc.trang_thai);
+                        command.Parameters.AddWithValue("@ngay", buoiHoc.ngay);
+                        command.Parameters.AddWithValue("@id_lop_hoc", buoiHoc.id_lop_hoc);
+                        command.Parameters.AddWithValue("@id_ca", buoiHoc.id_ca);
+                        command.Parameters.AddWithValue("@id_phong", buoiHoc.id_phong);
+                        command.Parameters.AddWithValue("@Id", buoiHoc.id_buoi_hoc);
 
                         int effectedRows = command.ExecuteNonQuery();
 
                         return new Response
                         {
                             state = true,
-                            message = "Cập nhật thông tin ca thành công",
+                            message = "Cập nhật thông tin buổi học thành công",
                             insertedId = null,
                             effectedRows = effectedRows
                         };
@@ -177,7 +181,7 @@ namespace CourseWebsiteDotNet.Models
             });
         }
 
-        public Response DeleteCa(int id)
+        public Response DeleteBuoiHoc(int id)
         {
             return ExecuteDatabaseOperation(() =>
             {
@@ -185,7 +189,7 @@ namespace CourseWebsiteDotNet.Models
                 {
                     connection.Open();
 
-                    string query = "DELETE FROM ca WHERE id_ca = @Id";
+                    string query = "DELETE FROM buoi_hoc WHERE id_buoi_hoc = @Id";
 
                     using (MySqlCommand command = new MySqlCommand(query, connection))
                     {
@@ -196,7 +200,7 @@ namespace CourseWebsiteDotNet.Models
                         return new Response
                         {
                             state = true,
-                            message = "Xóa ca thành công",
+                            message = "Xóa buổi học thành công",
                             insertedId = null,
                             effectedRows = effectedRows
                         };
@@ -205,4 +209,5 @@ namespace CourseWebsiteDotNet.Models
             });
         }
     }
+
 }
