@@ -168,7 +168,7 @@ namespace CourseWebsiteDotNet.Models
         }
 
         // Trả về Response
-        public Response DeletePhanCongGiangVien(int id)
+        public Response DeletePhanCongGiangVien(PhanCongGiangVienModel pc)
         {
             return ExecuteDatabaseOperation(() =>
             {
@@ -176,11 +176,15 @@ namespace CourseWebsiteDotNet.Models
                 {
                     connection.Open();
 
-                    string query = "DELETE FROM phan_cong_giang_vien WHERE id_giang_vien = @Id";
+                    string query = "DELETE " +
+                                   "FROM phan_cong_giang_vien " +
+                                   "WHERE id_giang_vien = @id_giang_vien " +
+                                   "AND id_lop_hoc = @id_lop_hoc";
 
                     using (MySqlCommand command = new MySqlCommand(query, connection))
                     {
-                        command.Parameters.AddWithValue("@Id", id);
+                        command.Parameters.AddWithValue("@id_giang_vien", pc.id_giang_vien);
+                        command.Parameters.AddWithValue("@id_lop_hoc", pc.id_lop_hoc);
 
                         int effectedRows = command.ExecuteNonQuery();
 
