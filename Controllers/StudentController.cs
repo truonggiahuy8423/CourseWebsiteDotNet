@@ -97,7 +97,7 @@ namespace CourseWebsiteDotNet.Controllers
                 // Return a response indicating that the student is not found
                 return Json(new
                 {
-                    error = $"Student not found {id_hoc_vien}"
+                    error = $"Student {id_hoc_vien} not found "
                 });
             }
         }

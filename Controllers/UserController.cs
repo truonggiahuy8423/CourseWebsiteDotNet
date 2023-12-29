@@ -27,10 +27,30 @@ namespace CourseWebsiteDotNet.Controllers
                 ViewData["role"] = "Administrator";
                 ViewData["avatar_data"] = avatarData;
 
+                ViewData["users"] = SQLExecutor.ExecuteQuery(
+                        "SELECT users.*, COALESCE(ad.ho_ten, giang_vien.ho_ten, hoc_vien.ho_ten) AS ho_ten  " +
+                        "FROM users LEFT JOIN ad ON users.id_ad = ad.id_ad LEFT JOIN giang_vien ON users.id_giang_vien = giang_vien.id_giang_vien LEFT JOIN hoc_vien ON users.id_hoc_vien = hoc_vien.id_hoc_vien;"
+                    );
+
                 return View("AdministratorUsersList");
             }
             ViewData["ExceptionMessage"] = "Đã có lỗi xảy ra";
             return View("~/Views/Shared/ExeptionPage");
+        }
+
+        [HttpGet]
+        public IActionResult getInsertUserForm()
+        {
+            var userRepo = new UserRepository();
+            ViewData["users"] = userRepo.GetAllUsers();
+
+            var lecturerRepo = new GiangVienRepository();
+            ViewData["lecturers"] = lecturerRepo.GetAllGiangVien();
+
+            var studentRepo = new HocVienRepository();
+            ViewData["students"] = studentRepo.GetAllHocVien();
+
+            return View("InsertUserForm");
         }
     }
 }

@@ -1,8 +1,8 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model IEnumerable<CourseWebsiteDotNet.Models.UserModel>
+@using System.Data;
 @{
     Layout = "_AdministratorMainLayout";
+    var users = ViewData["users"] as DataTable;
 }
 
 @section Navbar {
@@ -11,6 +11,182 @@
 
 @section MainSection {
     <div class="main">
-        Users list section of admin
+        <div style="margin-bottom: 30px;" class="title w-100 text-center text-uppercase">
+            <h4>Danh sách user hệ thống</h4>
+        </div>
+
+        <div class="class-container">
+            <div style="height: 30px; margin-bottom: 8px;" class="class__search me-2 d-flex justify-content-end">
+                <input style="border-radius: 0; height: 30px; width: 90px; z-index: 3" type="text" class="w-25 form-control search-input" placeholder="Tìm kiếm user">
+                <button class="btn btn-info search-button highlight-button"><i class="fas fa-search icon-search highlight-icon" style=""></i></button>
+                <button class="add-user-btn highlight-button">
+                    <i class="fa-solid fa-plus add-class-icon highlight-icon"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="class__list p-4 border border-gray rounded-2 m-2 mt-3 shadow-inset" style="margin-top: 8px!important;">
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered user-table">
+                    <thead style="top: -1px">
+                        <tr>
+                            <th class="text-center text-white bg-dark">Mã user</th>
+                            <th class="text-center text-white bg-dark">Họ tên</th>
+                            <th class="text-center text-white bg-dark">Tài khoản</th>
+                            <th class="text-center text-white bg-dark">Mật khẩu</th>
+                            <th class="text-center text-white bg-dark">Đăng nhập gần nhất</th>
+                            <th class="text-center text-white bg-dark">Vai trò</th>
+                            <th class="text-center text-white bg-dark"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            for (int i = 0; i < users.Rows.Count; i++)
+                            {
+                                    <tr>
+                                        <td>
+                                            @users.Rows[i]["id_user"]
+                                        </td>
+                                        <td>
+                                            @{
+                                            var anhDaiDien = users.Rows[i]["anh_dai_dien"];
+                                            if (Convert.IsDBNull(anhDaiDien))
+                                            {
+                                                        <img src="/img/avatar_blank.jpg" alt="" style="height: 20px; border-radius: 100px;">
+                                            }
+                                            else
+                                            {
+                                                var imageBytes = (byte[])users.Rows[i]["anh_dai_dien"];
+                                                var base64String = Convert.ToBase64String(imageBytes);
+                                                var imgSrc = $"data:image/jpeg;base64,{base64String}";
+                                                        <img src="@imgSrc" alt="" style="height: 20px; border-radius: 100px;">
+                                            }
+
+                                            }
+                                            @users.Rows[i]["ho_ten"]
+                                        </td>
+                                        <td>
+                                            @users.Rows[i]["tai_khoan"]
+                                        </td>
+                                        <td>
+                                            @users.Rows[i]["mat_khau"]
+                                        </td>
+                                        <td>
+                                            @users.Rows[i]["thoi_gian_dang_nhap_gan_nhat"]
+                                        </td>
+                                        <td>
+                                            @{
+                                            if (users.Rows[i]["id_ad"] != DBNull.Value)
+                                            {
+                                                var rs = users.Rows[i]["id_ad"].ToString().PadLeft(3, '0');
+                                                        @($"Quản trị viên({rs})")
+                                            }
+                                            else if (users.Rows[i]["id_giang_vien"] != DBNull.Value)
+                                            {
+                                                var rs = users.Rows[i]["id_giang_vien"].ToString().PadLeft(6, '0');
+                                                        @($"Giảng viên({rs})")
+                                            }
+                                            else
+                                            {
+                                                var rs = users.Rows[i]["id_hoc_vien"].ToString().PadLeft(6, '0');
+                                                        @($"Học viên({rs})")
+                                            }
+                                            }
+                                        </td>
+                                        <td class="text-center">
+                                            <button class="btn-link text-primary border-0 btn-sm" style="background-color: transparent;"
+                                                    onclick="sua(@users.Rows[i]["id_user"])">
+                                                Sửa
+                                            </button>
+                                            <button class="btn-link text-primary border-0 btn-sm" style="background-color: transparent;" onclick="xoa(@users.Rows[i]["id_user"])">Xóa</button>
+                                        </td>
+                                    </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
+
+    <div class="modal fade" id="themUserModal" tabindex="-1" aria-labelledby="themHocVienModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Tạo mới user</h5>
+                </div>
+                <div class="modal-body">
+
+                        <div class="grid-2-column user-form__input-container">
+                            <div class="center-div">
+                                <div class="uploaded-ava-container">
+                                    <img class="uploaded-ava" src="<?php base_url() ?>/assets/img/avatar_blank.jpg" alt="">
+                                    <input id="fileInput" class="file-upload-input" type="file">
+                                    <label for="fileInput" class="custom-file-input img-input"><i class="fa-solid fa-upload"></i></label>
+                                </div>
+                            </div>
+                            <div style="min-width: 210px;">
+                                <span>Tài khoản</span> <br>
+                                <input class="account-field" type="text" autocomplete="off"> <br>
+                                <span>Vai trò</span> <br>
+                                <select name="" id="" class="role-cbb">
+                                    <option value="0">Adminstrator</option>
+                                    <option value="1">Giảng viên</option>
+                                    <option value="2">Học viên</option>
+                                </select>
+                            </div>
+                            <div style="min-width: 210px;">
+                                <span>Mật khẩu</span>
+                                <br>
+                                <input class="password-field" type="password" autocomplete="new-password"> <br>
+                                <span>Nhập lại mật khẩu</span><br>
+                                <input class="confirmed-password-field" type="password" autocomplete="off"> <br>
+                            </div>
+                        </div>
+
+                        <div class="upload-avatar-btn-container">
+                        </div>
+
+                        <div class="insert-lecturer-form__search-bar-container">
+                            <input style="border-radius: 0; height: 30px; width: 90px; z-index: 3" type="text" class="w-25 form-control search-lecturer-input" placeholder="Tìm kiếm">
+                            <button class="btn btn-info search-lecturer-button highlight-button"><i class="fas fa-search icon-search highlight-icon" style=""></i></button>
+                        </div>
+
+                        <div class="insert-student-form__students-table-container">
+                            <table class="insert-student-form__students-table table-list">
+                                <thead>
+                                    <tr>
+                                        <td>Mã admin</td>
+                                        <td>Họ tên</td>
+                                        <td>Email</td>
+                                        <td>Chọn</td>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                        <div class="insert-student-form__btn-container">
+                            <button class="insert-student-form__cancel-btn insert-user-form__cancel-btn">Hủy</button>
+                            <button class="insert-student-form__save-btn insert-user-form__save-btn">Lưu thông tin</button>
+                        </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            $(`.add-user-btn`).click(function () {
+                $.ajax({
+                    url: '/User/getInsertUserForm',
+                    method: 'GET',
+                    success: function (response) {
+                        loadingEffect(false);
+                        $('body').append(response);
+                    }
+                });
+            });
+        });
+    </script>
 }
