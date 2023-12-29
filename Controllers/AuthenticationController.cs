@@ -127,13 +127,16 @@ namespace CourseWebsiteDotNet.Controllers
 
         }
 
-
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
         [HttpPost]
         public IActionResult ForgotPassword(string email)
         {
             UserRepository _userRepo = new UserRepository();
             var user =  _userRepo.GetUserByEmail(email);
-            if (user == null ||  (user.Email == null && user.id_user == null)) return Json(new { result = 0 });
+            if (user == null ||  (user.Email == null && user.id_user == null)) return Json(new Response { state = false,message ="Email không tồn tại trong hệ thống vui lòng kiểm tra lại"});
 
             var codeToken = GenerateRandomCode(6);
           
@@ -202,11 +205,11 @@ namespace CourseWebsiteDotNet.Controllers
             {
 
 
-                return Json(new { result = 1 });//Gửi mail thành công
+                return Json(new  Response{ state = false, message = "Quên mật khẩu thành công !, mật khẩu mới đã được gửi đến email của bạn" });
             }
             else
             {
-                return Json(new { result = 2 });//Gửi không thành công
+                return Json(new Response { state = false, message = "Quên mật khẩu thất bại vui lòng thử lại sau !" });//Gửi không thành công
             }
         }
         private string GenerateRandomCode(int length)
@@ -221,8 +224,8 @@ namespace CourseWebsiteDotNet.Controllers
         {
             try
             {
-                string fromEmail = "cateringmanagement2023@gmail.com";
-                string password = "hqlo uqlv qjmb wzzm";
+                string fromEmail = "nhom8aspcoremvc@gmail.com";
+                string password = "xshx hhni bsme zfyq";
                 MailMessage message = new MailMessage();
                 message.From = new MailAddress(fromEmail);
                 message.Subject = subject;
@@ -247,6 +250,7 @@ namespace CourseWebsiteDotNet.Controllers
                 {
                     user.mat_khau = passnew;
 
+                    _userRepo.UpdateUser(user);
                 }
                 else
                 {

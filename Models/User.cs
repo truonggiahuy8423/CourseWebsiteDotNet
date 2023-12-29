@@ -143,7 +143,7 @@ namespace CourseWebsiteDotNet.Models
             {
                 connection.Open();
 
-                string query = $@"COALESCE(gv.email, hv.email) AS Email , u.id_user,u.tai_khoan
+                string query = $@"SELECT COALESCE(gv.email, hv.email) AS Email , u.id_user,u.tai_khoan
                                 FROM users u LEFT JOIN giang_vien gv
                                 on u.id_giang_vien = gv.id_giang_vien LEFT JOIN hoc_vien hv
                                 on u.id_hoc_vien = hv.id_hoc_vien
