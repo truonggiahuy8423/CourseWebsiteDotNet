@@ -31,9 +31,10 @@ namespace CourseWebsiteDotNet.Controllers
         public IActionResult Index()
         {
             ViewData["chosenItem"] = 1;
+            LoadNavbar();
+            int? userId = HttpContext.Session.GetInt32("user_id");
             int? role = HttpContext.Session.GetInt32("role");
-            LoadNavbar(); 
-
+            int? roleId = HttpContext.Session.GetInt32("role_id");
             if (role == 1)
             {
                 // Mainsection
@@ -49,23 +50,54 @@ namespace CourseWebsiteDotNet.Controllers
                         "FROM phan_cong_giang_vien INNER JOIN giang_vien ON phan_cong_giang_vien.id_giang_vien = giang_vien.id_giang_vien " +
                         $"WHERE phan_cong_giang_vien.id_lop_hoc = {row["id_lop_hoc"]};"
                         );
-
                 }
 
-
                 return View("AdministratorCoursesList");
-
-
             }
             else if (role == 2)
             {
-                return View("StudentCoursesList");
+                // Mainsection
+                ViewData["courses"] = SQLExecutor.ExecuteQuery(
+                        $@"SELECT lop_hoc.id_lop_hoc,  DATE_FORMAT(lop_hoc.ngay_bat_dau, '%d/%m/%Y') as ngay_bat_dau,  DATE_FORMAT(lop_hoc.ngay_ket_thuc, '%d/%m/%Y') as ngay_ket_thuc, mon_hoc.id_mon_hoc, mon_hoc.ten_mon_hoc
+                            FROM lop_hoc 
+                            INNER JOIN mon_hoc on lop_hoc.id_mon_hoc = mon_hoc.id_mon_hoc 
+                            where lop_hoc.id_lop_hoc in (select phan_cong_giang_vien.id_lop_hoc from phan_cong_giang_vien where phan_cong_giang_vien.id_giang_vien = {(int)roleId}) order by lop_hoc.ngay_bat_dau desc
+            "
+                    );
+                (ViewData["courses"] as DataTable).Columns.Add("lecturers", typeof(DataTable));
 
+                foreach (DataRow row in (ViewData["courses"] as DataTable).Rows)
+                {
+                    row["lecturers"] = SQLExecutor.ExecuteQuery(
+                        "SELECT giang_vien.id_giang_vien, giang_vien.ho_ten " +
+                        "FROM phan_cong_giang_vien INNER JOIN giang_vien ON phan_cong_giang_vien.id_giang_vien = giang_vien.id_giang_vien " +
+                        $"WHERE phan_cong_giang_vien.id_lop_hoc = {row["id_lop_hoc"]};"
+                        );
+                }
+
+                return View("LecturerCoursesList");
             }
             else if (role == 3)
             {
-                return View("LecturerCoursesList");
+                // Mainsection
+                ViewData["courses"] = SQLExecutor.ExecuteQuery(
+                    $@"SELECT lop_hoc.id_lop_hoc,  DATE_FORMAT(lop_hoc.ngay_bat_dau, '%d/%m/%Y') as ngay_bat_dau,  DATE_FORMAT(lop_hoc.ngay_ket_thuc, '%d/%m/%Y') as ngay_ket_thuc, mon_hoc.id_mon_hoc, mon_hoc.ten_mon_hoc
+                        FROM lop_hoc 
+                        INNER JOIN mon_hoc on lop_hoc.id_mon_hoc = mon_hoc.id_mon_hoc 
+                        where lop_hoc.id_lop_hoc in (select hoc_vien_tham_gia.id_lop_hoc from hoc_vien_tham_gia where hoc_vien_tham_gia.id_hoc_vien = {(int)roleId}) order by lop_hoc.ngay_bat_dau desc"
+                );
+                (ViewData["courses"] as DataTable).Columns.Add("lecturers", typeof(DataTable));
 
+                foreach (DataRow row in (ViewData["courses"] as DataTable).Rows)
+                {
+                    row["lecturers"] = SQLExecutor.ExecuteQuery(
+                        "SELECT giang_vien.id_giang_vien, giang_vien.ho_ten " +
+                        "FROM phan_cong_giang_vien INNER JOIN giang_vien ON phan_cong_giang_vien.id_giang_vien = giang_vien.id_giang_vien " +
+                        $"WHERE phan_cong_giang_vien.id_lop_hoc = {row["id_lop_hoc"]};"
+                        );
+                }
+
+                return View("StudentCoursesList");
             }
 
             ViewData["ExceptionMessage"] = "Đã có lỗi xảy ra";
@@ -150,6 +182,93 @@ namespace CourseWebsiteDotNet.Controllers
             }
             return Ok(JsonConvert.SerializeObject(courses));
         }
+        public IActionResult getListOfCoursesForTeacher()
+        {
+            int? roleId = HttpContext.Session.GetInt32("role_id");
+            
+            var courses = SQLExecutor.ExecuteQuery(
+                            $@"SELECT lop_hoc.id_lop_hoc,  DATE_FORMAT(lop_hoc.ngay_bat_dau, '%d/%m/%Y') as ngay_bat_dau,  DATE_FORMAT(lop_hoc.ngay_ket_thuc, '%d/%m/%Y') as ngay_ket_thuc, mon_hoc.id_mon_hoc, mon_hoc.ten_mon_hoc
+                            FROM lop_hoc 
+                            INNER JOIN mon_hoc on lop_hoc.id_mon_hoc = mon_hoc.id_mon_hoc 
+                            where lop_hoc.id_lop_hoc in (select phan_cong_giang_vien.id_lop_hoc from phan_cong_giang_vien where phan_cong_giang_vien.id_giang_vien = {(int)roleId})
+            ");
+            courses.Columns.Add("lecturers", typeof(DataTable));
+
+            foreach (DataRow row in courses.Rows)
+            {
+                row["lecturers"] = SQLExecutor.ExecuteQuery(
+                    "SELECT giang_vien.id_giang_vien, giang_vien.ho_ten " +
+                    "FROM phan_cong_giang_vien INNER JOIN giang_vien ON phan_cong_giang_vien.id_giang_vien = giang_vien.id_giang_vien " +
+                    $"WHERE phan_cong_giang_vien.id_lop_hoc = {row["id_lop_hoc"]};"
+                    );
+
+            }
+            return Ok(JsonConvert.SerializeObject(courses));
+        }
+
+        public IActionResult getListOfCoursesForStudent()
+        {
+            int? roleId = HttpContext.Session.GetInt32("role_id");
+
+            var courses = SQLExecutor.ExecuteQuery(
+$@"SELECT lop_hoc.id_lop_hoc,  DATE_FORMAT(lop_hoc.ngay_bat_dau, '%d/%m/%Y') as ngay_bat_dau,  DATE_FORMAT(lop_hoc.ngay_ket_thuc, '%d/%m/%Y') as ngay_ket_thuc, mon_hoc.id_mon_hoc, mon_hoc.ten_mon_hoc
+                        FROM lop_hoc 
+                        INNER JOIN mon_hoc on lop_hoc.id_mon_hoc = mon_hoc.id_mon_hoc 
+                        where lop_hoc.id_lop_hoc in (select hoc_vien_tham_gia.id_lop_hoc from hoc_vien_tham_gia where hoc_vien_tham_gia.id_hoc_vien = {(int)roleId})");
+            courses.Columns.Add("lecturers", typeof(DataTable));
+
+            foreach (DataRow row in courses.Rows)
+            {
+                row["lecturers"] = SQLExecutor.ExecuteQuery(
+                    "SELECT giang_vien.id_giang_vien, giang_vien.ho_ten " +
+                    "FROM phan_cong_giang_vien INNER JOIN giang_vien ON phan_cong_giang_vien.id_giang_vien = giang_vien.id_giang_vien " +
+                    $"WHERE phan_cong_giang_vien.id_lop_hoc = {row["id_lop_hoc"]};"
+                    );
+
+            }
+            return Ok(JsonConvert.SerializeObject(courses));
+        }
+        //public function getListOfCoursesForTeacher()
+        //{
+        //$id_giang_vien = session()->get('id_role');
+
+        //$model = new LopModel();
+        //$courses = $model->executeCustomQuery(
+        //    "SELECT lop_hoc.id_lop_hoc,  DATE_FORMAT(lop_hoc.ngay_bat_dau, '%d/%m/%Y') as ngay_bat_dau,  DATE_FORMAT(lop_hoc.ngay_ket_thuc, '%d/%m/%Y') as ngay_ket_thuc, mon_hoc.id_mon_hoc, mon_hoc.ten_mon_hoc
+        //    FROM lop_hoc
+        //    INNER JOIN mon_hoc on lop_hoc.id_mon_hoc = mon_hoc.id_mon_hoc where lop_hoc.id_lop_hoc in (select phan_cong_giang_vien.id_lop_hoc from phan_cong_giang_vien where phan_cong_giang_vien.id_giang_vien = $id_giang_vien)"
+        //);
+        //    for ($i = 0; $i < count($courses); $i++) {
+        //    $courses[$i]['lecturers'] = $model->executeCustomQuery(
+        //        "SELECT giang_vien.id_giang_vien, giang_vien.ho_ten
+        //        FROM phan_cong_giang_vien INNER JOIN giang_vien ON phan_cong_giang_vien.id_giang_vien = giang_vien.id_giang_vien
+        //        WHERE phan_cong_giang_vien.id_lop_hoc = {$courses[$i]['id_lop_hoc']}; "
+        //        );
+        //    }
+        //    usort($courses, [$this, 'compareCoursesByBeginDate']);
+        //    return $this->response->setJSON($courses);
+        //}
+        //public function getListOfCoursesForStudent()
+        //{
+        //$id_hoc_vien = session()->get('id_role');
+
+        //$model = new LopModel();
+        //$courses = $model->executeCustomQuery(
+        //    "SELECT lop_hoc.id_lop_hoc,  DATE_FORMAT(lop_hoc.ngay_bat_dau, '%d/%m/%Y') as ngay_bat_dau,  DATE_FORMAT(lop_hoc.ngay_ket_thuc, '%d/%m/%Y') as ngay_ket_thuc, mon_hoc.id_mon_hoc, mon_hoc.ten_mon_hoc
+        //        FROM lop_hoc
+        //        INNER JOIN mon_hoc on lop_hoc.id_mon_hoc = mon_hoc.id_mon_hoc where lop_hoc.id_lop_hoc in (select hoc_vien_tham_gia.id_lop_hoc from hoc_vien_tham_gia where hoc_vien_tham_gia.id_hoc_vien = $id_hoc_vien)"
+        //    );
+        //    for ($i = 0; $i < count($courses); $i++) {
+        //    $courses[$i]['lecturers'] = $model->executeCustomQuery(
+        //        "SELECT giang_vien.id_giang_vien, giang_vien.ho_ten
+        //        FROM phan_cong_giang_vien INNER JOIN giang_vien ON phan_cong_giang_vien.id_giang_vien = giang_vien.id_giang_vien
+        //        WHERE phan_cong_giang_vien.id_lop_hoc = {$courses[$i]['id_lop_hoc']}; "
+        //        );
+        //    }
+        //    usort($courses, [$this, 'compareCoursesByBeginDate']);
+        //    return $this->response->setJSON($courses);
+        //}
+
         [HttpPost]
         public IActionResult insertCourse([FromBody] JsonDocument dataReceived)
         {
@@ -255,7 +374,7 @@ namespace CourseWebsiteDotNet.Controllers
                    "SELECT ad.ho_ten, users.anh_dai_dien FROM users INNER JOIN ad ON users.id_ad = ad.id_ad WHERE users.id_user = " + userId
                 );
                 string? username = dataTable.Rows[0]["ho_ten"].ToString();
-                byte[]? avatarData = (byte[])dataTable.Rows[0]["anh_dai_dien"];
+                byte[]? avatarData = dataTable.Rows[0]["anh_dai_dien"] != DBNull.Value ? dataTable.Rows[0]["anh_dai_dien"] as byte[] : null;
 
                 // Set data to ViewData
                 // Navbar data
@@ -272,7 +391,7 @@ namespace CourseWebsiteDotNet.Controllers
                     WHERE users.id_user = {userId}"
                 );
                 string? username = dataTable.Rows[0]["ho_ten"].ToString();
-                byte[]? avatarData = (byte[])dataTable.Rows[0]["anh_dai_dien"];
+                byte[]? avatarData = dataTable.Rows[0]["anh_dai_dien"] != DBNull.Value ? dataTable.Rows[0]["anh_dai_dien"] as byte[] : null;
 
                 // Set data to ViewData
                 // Navbar data
@@ -289,7 +408,7 @@ namespace CourseWebsiteDotNet.Controllers
                 WHERE users.id_user = {userId}"
                 );
                 string? username = dataTable.Rows[0]["ho_ten"].ToString();
-                byte[]? avatarData = (byte[])dataTable.Rows[0]["anh_dai_dien"];
+                byte[]? avatarData = dataTable.Rows[0]["anh_dai_dien"] != DBNull.Value ? dataTable.Rows[0]["anh_dai_dien"] as byte[] : null;
 
                 // Set data to ViewData
                 // Navbar data
@@ -365,15 +484,6 @@ namespace CourseWebsiteDotNet.Controllers
                 ViewData["ngbd"] = courses.Rows[0]["ngay_bat_dau"];
                 ViewData["ngkt"] = courses.Rows[0]["ngay_ket_thuc"];
 
-                //string? class_name = ViewData["class_name"] as string;
-                //int? student_quantity = ViewData["student_quantity"] as int?;
-                //string? state = ViewData["state"] as string;
-                //int? courseid = ViewData["courseid"] as int?;
-                //int? subjectid = ViewData["subjectid"] as int?;
-                //string? subjectName = ViewData["subject_name"] as string;
-                //int? slbh = ViewData["slbh"] as int?;
-                //int? slbhdh = ViewData["slbhdh"] as int?;
-
 
                 // Layout data
                 ViewData["class_name"] = $"{courses.Rows[0]["ten_mon_hoc"]} {courses.Rows[0]["id_mon_hoc"].ToString().PadLeft(3, '0')}.{courses.Rows[0]["id_lop_hoc"].ToString().PadLeft(6, '0')}";
@@ -387,6 +497,52 @@ namespace CourseWebsiteDotNet.Controllers
             }
             else if (role == 2)
             {
+                LoadNavbar();
+                HttpContext.Session.SetInt32("courseid", (int)courseid);
+                // MainSection
+                courses.Columns.Add("so_luong_giang_vien");
+                courses.Columns.Add("so_luong_buoi_hoc");
+                courses.Columns.Add("so_luong_buoi_hoc_da_hoc");
+
+                courses.Rows[0]["so_luong_giang_vien"] = Convert.ToInt32(SQLExecutor.ExecuteQuery(
+                    $@"
+                            SELECT COUNT(phan_cong_giang_vien.id_giang_vien) as slgv FROM lop_hoc LEFT JOIN phan_cong_giang_vien ON lop_hoc.id_lop_hoc = phan_cong_giang_vien.id_lop_hoc
+                            WHERE lop_hoc.id_lop_hoc = {courseid}
+                            GROUP BY lop_hoc.id_lop_hoc
+                        "
+                 ).Rows[0]["slgv"]);
+
+                courses.Rows[0]["so_luong_buoi_hoc"] = Convert.ToInt32(SQLExecutor.ExecuteQuery(
+                   $@"
+                            SELECT COUNT(buoi_hoc.id_buoi_hoc) as slbh FROM lop_hoc LEFT JOIN buoi_hoc ON lop_hoc.id_lop_hoc = buoi_hoc.id_lop_hoc
+                            WHERE lop_hoc.id_lop_hoc = {courseid}
+                            GROUP BY lop_hoc.id_lop_hoc
+                        "
+                ).Rows[0]["slbh"]);
+
+                courses.Rows[0]["so_luong_buoi_hoc_da_hoc"] = Convert.ToInt32(SQLExecutor.ExecuteQuery(
+                   $@"
+                            SELECT COUNT(buoi_hoc.id_buoi_hoc) as slbh FROM lop_hoc LEFT JOIN buoi_hoc ON lop_hoc.id_lop_hoc = buoi_hoc.id_lop_hoc and buoi_hoc.trang_thai = 2
+                            WHERE lop_hoc.id_lop_hoc = {courseid}
+                            GROUP BY lop_hoc.id_lop_hoc
+                        "
+                ).Rows[0]["slbh"]);
+                ViewData["subject_name"] = courses.Rows[0]["ten_mon_hoc"];
+                ViewData["subjectid"] = Convert.ToInt32(courses.Rows[0]["id_mon_hoc"]);
+                ViewData["slbh"] = Convert.ToInt32(courses.Rows[0]["so_luong_buoi_hoc"]);
+                ViewData["slbhdh"] = Convert.ToInt32(courses.Rows[0]["so_luong_buoi_hoc_da_hoc"]);
+                ViewData["slgv"] = Convert.ToInt32(courses.Rows[0]["so_luong_giang_vien"]);
+                ViewData["ngbd"] = courses.Rows[0]["ngay_bat_dau"];
+                ViewData["ngkt"] = courses.Rows[0]["ngay_ket_thuc"];
+
+
+                // Layout data
+                ViewData["class_name"] = $"{courses.Rows[0]["ten_mon_hoc"]} {courses.Rows[0]["id_mon_hoc"].ToString().PadLeft(3, '0')}.{courses.Rows[0]["id_lop_hoc"].ToString().PadLeft(6, '0')}";
+                ViewData["state"] = KiemTraTinhTrang((string)courses.Rows[0]["ngay_bat_dau"], (string)courses.Rows[0]["ngay_ket_thuc"]);
+                ViewData["courseid"] = Convert.ToInt32(courses.Rows[0]["id_lop_hoc"]);
+                ViewData["student_quantity"] = Convert.ToInt32(courses.Rows[0]["so_luong_hoc_vien"]);
+
+                // Mainsection
                 return View("LecturerCourseInformation");
 
             }
@@ -401,8 +557,9 @@ namespace CourseWebsiteDotNet.Controllers
         {
             return Ok(JsonConvert.SerializeObject(SQLExecutor.ExecuteQuery("SELECT * FROM mon_hoc")));
         }
+       
 
-        public string KiemTraTinhTrang(string ngayBatDau, string ngayKetThuc)
+            public string KiemTraTinhTrang(string ngayBatDau, string ngayKetThuc)
         {
             DateTime datetimeBatDau = DateTime.ParseExact(ngayBatDau, "d/M/yyyy", CultureInfo.InvariantCulture);
             DateTime datetimeKetThuc = DateTime.ParseExact(ngayKetThuc, "d/M/yyyy", CultureInfo.InvariantCulture);

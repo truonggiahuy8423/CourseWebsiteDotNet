@@ -7,6 +7,7 @@ using System.Data;
 using System.Dynamic;
 using System.Globalization;
 using System.Reflection;
+using System.Text.Json;
 
 namespace CourseWebsiteDotNet.Controllers
 {
@@ -34,7 +35,7 @@ namespace CourseWebsiteDotNet.Controllers
                    "SELECT ad.ho_ten, users.anh_dai_dien FROM users INNER JOIN ad ON users.id_ad = ad.id_ad WHERE users.id_user = " + userId
                 );
                 string? username = dataTable.Rows[0]["ho_ten"].ToString();
-                byte[]? avatarData = (byte[])dataTable.Rows[0]["anh_dai_dien"];
+                byte[]? avatarData = dataTable.Rows[0]["anh_dai_dien"] != DBNull.Value ? dataTable.Rows[0]["anh_dai_dien"] as byte[] : null;
 
                 // Set data to ViewData
                 // Navbar data
@@ -51,7 +52,7 @@ namespace CourseWebsiteDotNet.Controllers
                     WHERE users.id_user = {userId}"
                 );
                 string? username = dataTable.Rows[0]["ho_ten"].ToString();
-                byte[]? avatarData = (byte[])dataTable.Rows[0]["anh_dai_dien"];
+                byte[]? avatarData = dataTable.Rows[0]["anh_dai_dien"] != DBNull.Value ? dataTable.Rows[0]["anh_dai_dien"] as byte[] : null;
 
                 // Set data to ViewData
                 // Navbar data
@@ -68,7 +69,7 @@ namespace CourseWebsiteDotNet.Controllers
                 WHERE users.id_user = {userId}"
                 );
                 string? username = dataTable.Rows[0]["ho_ten"].ToString();
-                byte[]? avatarData = (byte[])dataTable.Rows[0]["anh_dai_dien"];
+                byte[]? avatarData = dataTable.Rows[0]["anh_dai_dien"] != DBNull.Value ? dataTable.Rows[0]["anh_dai_dien"] as byte[] : null;
 
                 // Set data to ViewData
                 // Navbar data
@@ -78,6 +79,7 @@ namespace CourseWebsiteDotNet.Controllers
             }
 
         }
+
         public string KiemTraTinhTrang(string ngayBatDau, string ngayKetThuc)
         {
             DateTime datetimeBatDau = DateTime.ParseExact(ngayBatDau, "d/M/yyyy", CultureInfo.InvariantCulture);
@@ -133,6 +135,7 @@ namespace CourseWebsiteDotNet.Controllers
                 HttpContext.Session.SetInt32("courseid", (int)courseid);
 
 
+
                 // Layout data
                 ViewData["class_name"] = $"{courses.Rows[0]["ten_mon_hoc"]} {courses.Rows[0]["id_mon_hoc"].ToString().PadLeft(3, '0')}.{courses.Rows[0]["id_lop_hoc"].ToString().PadLeft(6, '0')}";
                 ViewData["state"] = KiemTraTinhTrang((string)courses.Rows[0]["ngay_bat_dau"], (string)courses.Rows[0]["ngay_ket_thuc"]);
@@ -142,8 +145,19 @@ namespace CourseWebsiteDotNet.Controllers
                 return View("AdministratorCourseResource");
             } else if (role == 2)
             {
+                HttpContext.Session.SetInt32("courseid", (int)courseid);
 
-            } else if (role == 3)
+
+                // Layout data
+                ViewData["class_name"] = $"{courses.Rows[0]["ten_mon_hoc"]} {courses.Rows[0]["id_mon_hoc"].ToString().PadLeft(3, '0')}.{courses.Rows[0]["id_lop_hoc"].ToString().PadLeft(6, '0')}";
+                ViewData["state"] = KiemTraTinhTrang((string)courses.Rows[0]["ngay_bat_dau"], (string)courses.Rows[0]["ngay_ket_thuc"]);
+                ViewData["student_quantity"] = Convert.ToInt32(courses.Rows[0]["so_luong_hoc_vien"]);
+                ViewData["courseid"] = Convert.ToInt32(courseid);
+
+                return View("LecturerCourseResource");
+
+            }
+            else if (role == 3)
             {
 
             }
@@ -198,16 +212,52 @@ namespace CourseWebsiteDotNet.Controllers
             return Ok(JsonConvert.SerializeObject(result));
         }
         [HttpPost]
-        public IActionResult GetFile(int fileId)
+        public IActionResult GetFile(int? fileId)
         {
-            TepTinTaiLenModel fileData = (new TepTinTaiLenRepository().GetTepTinTaiLenById(fileId));
+            if (fileId == 0 || fileId == null)
+            {
+                var notFoundResponse = new
+                {
+                    state = false,
+                    message = "Tệp tin không tồn tại."
+                };
+                return Json(notFoundResponse);
+            }
+            // Validate permission
+            int? courseid = HttpContext.Session.GetInt32("courseid");
+
+            DataTable file = SQLExecutor.ExecuteQuery($@"                
+                SELECT vi_tri_tep_tin.id_tep_tin_tai_len FROM lop_hoc INNER JOIN muc on lop_hoc.id_lop_hoc = muc.id_lop_hoc 
+                INNER JOIN vi_tri_tep_tin on muc.id_muc = vi_tri_tep_tin.id_muc WHERE lop_hoc.id_lop_hoc = {courseid} and vi_tri_tep_tin.id_tep_tin_tai_len = {fileId};
+            ");
+
+            if (file.Rows.Count == 0)
+            {
+                var notFoundResponse = new
+                {
+                    state = false,
+                    message = "Bạn không có quyền truy cập tài nguyên này."
+                };
+                return Json(notFoundResponse);
+            }
+
+
+            TepTinTaiLenModel fileData = (new TepTinTaiLenRepository().GetTepTinTaiLenById((int)fileId));
+
+            // Validate is file exist in DB
+            if (fileData == null) {
+                var notFoundResponse = new
+                {
+                    state = false,
+                    message = "Tệp tin không tồn tại."
+                };
+                return Json(notFoundResponse);
+            }
+
             string binPath = Directory.GetCurrentDirectory();
-            //string projectPath = Path.GetFullPath(Path.Combine(binPath, "..", ".."));
             var filePath = binPath + $"\\UserFiles\\{fileData.decoded}.{fileData.extension}";
             try
             {
-                
-
                 if (System.IO.File.Exists(filePath))
                 {
                     var fileBytes = System.IO.File.ReadAllBytes(filePath);
@@ -233,7 +283,7 @@ namespace CourseWebsiteDotNet.Controllers
                     var notFoundResponse = new
                     {
                         state = false,
-                        message = "Tệp tin không tồn tại." + filePath
+                        message = "Tệp tin không tồn tại."
                     };
                     return Json(notFoundResponse);
                 }
@@ -244,62 +294,54 @@ namespace CourseWebsiteDotNet.Controllers
                 var errorResponse = new
                 {
                     state = false,
-                    message = ex.Message + filePath
+                    message = ex.Message
                 };
                 return Json(errorResponse);
             }
         }
+        [HttpPost]
+        public IActionResult removeResource([FromBody] JsonDocument dataReceived)
+        {
+            dynamic data = JsonConvert.DeserializeObject<ExpandoObject>(dataReceived.RootElement.ToString());
+            int? courseid = HttpContext.Session.GetInt32("courseid");
+            int id = Convert.ToInt32(data.id);
+            int id_muc = Convert.ToInt32(data.id_muc);
+            string type = data.type;
 
-        //public function getResources()
-        //{
-        //    if (!session()->has('id_user'))
-        //    {
-        //        return redirect()->to('/');
-        //    }
-        //$id_lop_hoc = $this->request->getPost('id_lop_hoc');
-        //    if (!is_numeric($id_lop_hoc))
-        //    {
-        //        // Xử lý lỗi hoặc trả về kết quả không hợp lệ
-        //        return $this->response->setJSON(['error' => 'Invalid id_lop_hoc']);
-        //    }
-        //$mucModel = new MucModel();
-        //$rs = array();
-        //$rs['folders'] = $mucModel->getMucByIdLopHoc($id_lop_hoc);
+            MucModel muc = (new MucRepository().GetMucById(id_muc));
+            if (muc != null && muc.id_lop_hoc == courseid)
+            {
+                switch (type)
+                {
+                    case "file":
+                        return Ok(JsonConvert.SerializeObject(new ViTriTepTinRepository().DeleteViTriTepTin(id_muc, id)));
+                        break;
+                    case "noti":
+                        return Ok(JsonConvert.SerializeObject(new ThongBaoRepository().DeleteThongBao(id)));
+                        break;
+                    case "link":
+                        return Ok(JsonConvert.SerializeObject(new DuongLinkRepository().DeleteDuongLink(id)));
+                        break;
+                    case "asssignment":
+                        return Ok(JsonConvert.SerializeObject(new BaiTapRepository().DeleteBaiTap(id)));
+                        break;
+                }
+            }
+            dynamic response = new
+            {
+                state = false,
+                message = "Đã có lỗi xảy ra!"
 
-        //$thongBaoModel = new ThongBaoModel();
-        //$rs['notis'] = $thongBaoModel->getThongBaoByCourseId($id_lop_hoc);
+            };
+            return Ok(JsonConvert.SerializeObject(response));
 
-        //$linkModel = new LinkModel();
-        //$rs['links'] = $linkModel->getAllLinksByCourseId($id_lop_hoc);
+        }
+        
+        public IActionResult getAddResourceIntoCourseForm()
+        {
+            return View("AddResourceIntoClassForm");
+        }
 
-        //$viTriTepModel = new vi_tri_tep_tinModel();
-        //$rs['files'] = $viTriTepModel->executeCustomQuery(
-        //    "SELECT 
-        //    v.*,
-        //    m.id_muc,
-        //    g.id_giang_vien,
-        //    g.ho_ten,
-        //    t.*
-        //FROM
-        //    vi_tri_tep_tin v
-        //INNER JOIN
-        //    muc m ON v.id_muc = m.id_muc
-        //INNER JOIN
-        //    tep_tin_tai_len t ON t.id_tep_tin_tai_len = v.id_tep_tin_tai_len
-        //INNER JOIN
-        //    users u ON u.id_user = t.id_user
-        //INNER JOIN
-        //    giang_vien g ON g.id_giang_vien = u.id_giang_vien
-        //WHERE
-        //    m.id_lop_hoc = {$id_lop_hoc}
-        //ORDER BY
-        //    v.ngay_dang ASC;
-        //    "
-        //);
 
-        //$baiTapModel = new BaiTapModel();
-        //$rs["assignments"] = $baiTapModel->getBaiTapByIdLopHoc($id_lop_hoc);
-        //    return $this->response->setJSON($rs);
-        //}
     }
 }
