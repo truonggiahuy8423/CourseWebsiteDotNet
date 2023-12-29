@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using MySql.Data.MySqlClient;
 
 namespace CourseWebsiteDotNet.Models
@@ -48,7 +49,31 @@ namespace CourseWebsiteDotNet.Models
                 };
             }
         }
+        public DataTable GetLinksByCourseId(int id)
+        {
+            DataTable dataTable = new DataTable();
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
+                string query = $@"SELECT duong_link.*, giang_vien.ho_ten 
+                FROM duong_link inner join muc on duong_link.id_muc = muc.id_muc inner join giang_vien on giang_vien.id_giang_vien = duong_link.id_giang_vien 
+                where muc.id_lop_hoc = @Id order by duong_link.ngay_dang ASC
+                ";
 
+                using (MySqlCommand command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Id", id);
+
+
+                    using (MySqlDataReader reader = command.ExecuteReader())
+                    {
+                        dataTable.Load(reader);
+                    }
+                }
+            }
+
+            return dataTable;
+        }
         public List<DuongLinkModel> GetAllDuongLink()
         {
             List<DuongLinkModel> duongLinkList = new List<DuongLinkModel>();

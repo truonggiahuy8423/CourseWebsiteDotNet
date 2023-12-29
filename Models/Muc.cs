@@ -110,6 +110,35 @@ namespace CourseWebsiteDotNet.Models
                 }
             }
         }
+        public List<MucModel> GetMucByCourseId(int id) { 
+            List<MucModel> mucList = new List<MucModel>();
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
+
+                string query = "SELECT * FROM muc where id_lop_hoc = @Id";
+
+                using (MySqlCommand command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Id", id);
+
+                    using (MySqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            MucModel muc = new MucModel();
+                            muc.id_muc = Convert.ToInt32(reader["id_muc"]);
+                            muc.ten_muc = (reader["ten_muc"]) != DBNull.Value ? Convert.ToString(reader["ten_muc"]) : (string?)null;
+                            muc.id_lop_hoc = Convert.ToInt32(reader["id_lop_hoc"]);
+                            muc.id_muc_cha = (reader["id_muc_cha"]) != DBNull.Value ? Convert.ToInt32(reader["id_muc_cha"]) : (int?)null;
+                            mucList.Add(muc);
+                        }
+                    }
+                }
+            }
+
+            return mucList;
+        }
 
         // Trả về Response
         public Response InsertMuc(MucModel muc)

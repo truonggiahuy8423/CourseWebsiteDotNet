@@ -62,6 +62,11 @@ namespace CourseWebsiteDotNet
                     defaults: new { controller = "Course", action = "Information" }
                 );
                 endpoints.MapControllerRoute(
+                    name: "courses/resource",
+                    pattern: "courses/resource",
+                    defaults: new { controller = "CourseResource", action = "Resource" }
+                );
+                endpoints.MapControllerRoute(
                     name: "lecturers",
                     pattern: "lecturers",
                     defaults: new { controller = "Lecturer", action = "Index" }

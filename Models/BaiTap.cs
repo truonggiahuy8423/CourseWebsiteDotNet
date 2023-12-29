@@ -1,4 +1,5 @@
 ﻿using MySql.Data.MySqlClient;
+using System.Data;
 
 namespace CourseWebsiteDotNet.Models
 {
@@ -19,6 +20,30 @@ namespace CourseWebsiteDotNet.Models
     {
         private readonly string connectionString;
 
+        public DataTable GetBaiTapByCourseId(int id)
+        {
+            DataTable dataTable = new DataTable();
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
+                string query = $@"SELECT bai_tap.*, giang_vien.ho_ten FROM bai_tap inner join giang_vien on bai_tap.id_giang_vien = giang_vien.id_giang_vien 
+                    inner join muc on muc.id_muc = bai_tap.id_muc where muc.id_lop_hoc = @Id order by bai_tap.ngay_dang ASC;
+                    ";
+
+                using (MySqlCommand command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Id", id);
+
+
+                    using (MySqlDataReader reader = command.ExecuteReader())
+                    {
+                        dataTable.Load(reader);
+                    }
+                }
+            }
+
+            return dataTable;
+        }
         public BaiTapRepository()
         {
             connectionString = DatabaseConnection.CONNECTION_STRING;

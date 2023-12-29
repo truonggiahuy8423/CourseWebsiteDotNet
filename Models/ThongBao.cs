@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using MySql.Data.MySqlClient;
 
 namespace CourseWebsiteDotNet.Models
@@ -81,6 +82,31 @@ namespace CourseWebsiteDotNet.Models
             }
 
             return thongBaoList;
+        }
+
+        public DataTable GetThongBaoByCourseId(int id)
+        {
+            DataTable dataTable = new DataTable();
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
+                string query = $@"SELECT thong_bao.*, giang_vien.ho_ten 
+                FROM thong_bao inner join muc on thong_bao.id_muc = muc.id_muc inner join giang_vien on giang_vien.id_giang_vien = thong_bao.id_giang_vien 
+                where muc.id_lop_hoc = @Id order by thong_bao.ngay_dang ASC";
+
+                using (MySqlCommand command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Id", id);
+
+
+                    using (MySqlDataReader reader = command.ExecuteReader())
+                    {
+                        dataTable.Load(reader);
+                    }
+                }
+            }
+
+            return dataTable;
         }
 
         public ThongBaoModel? GetThongBaoById(int id)
