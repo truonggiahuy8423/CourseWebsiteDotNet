@@ -143,11 +143,13 @@ namespace CourseWebsiteDotNet.Models
             {
                 connection.Open();
 
-                string query = $@"SELECT COALESCE(gv.email, hv.email) AS Email , u.id_user,u.tai_khoan
+                string query = $@"SELECT COALESCE(gv.email, hv.email,a.email) AS Email , u.id_user,u.tai_khoan
                                 FROM users u LEFT JOIN giang_vien gv
                                 on u.id_giang_vien = gv.id_giang_vien LEFT JOIN hoc_vien hv
-                                on u.id_hoc_vien = hv.id_hoc_vien
-                                WHERE  gv.email = @email OR  hv.email = @email";
+                                on u.id_hoc_vien = hv.id_hoc_vien LEFT JOIN ad a
+                                on u.id_ad = a.id_ad
+                                
+                                WHERE  gv.email = @email OR  hv.email = @email or a.email = @email";
 
                 using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
