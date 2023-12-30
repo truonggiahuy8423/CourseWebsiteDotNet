@@ -1,0 +1,189 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@using System.Data;
+
+@{
+    Layout = null;
+    Layout = "_ProfileLayout";
+
+    var id = ViewData["id"] as int?;
+    var isLecturer = ViewData["isLecturer"] as bool?;
+
+    var user = ViewData["user"] as DataTable;
+    var gioiTinh = user.Rows[0]["gioi_tinh"] as int?;
+    var email = user.Rows[0]["email"] as string;
+
+    var attend = ViewData["attend"] as DataTable;
+    var n = Convert.ToInt32(attend.Rows.Count);
+    var n1 = (n <= 4) ? n : 4;
+
+    string getStatus(int statusCode)
+    {
+        if (statusCode == 1)
+        {
+            return "<span class='class__item--over'>Đã kết thúc</span>";
+        }
+        else if (statusCode == 2)
+        {
+            return "<span class='class__item--inprocess'>Đang diễn ra</span>";
+        }
+        else
+        {
+            return "<span class='class__item--upcoming'>Sắp diễn ra</span>";
+        }
+    }
+
+    int KiemTraTinhTrang(DateTime? ngayBatDau, DateTime? ngayKetThuc)
+    {
+        DateTime? currentDate = DateTime.Now.Date;
+
+        if (ngayBatDau <= currentDate && currentDate <= ngayKetThuc)
+        {
+            return 2;
+        }
+        else if (currentDate < ngayBatDau)
+        {
+            return 1;
+        }
+        else
+        {
+            return 3;
+        }
+    }
+}
+
+@section Navbar {
+    @await Html.PartialAsync("Navbar")
+}
+
+@section MainSectionProfile {
+    <div class="container-fluid" style="margin-top: 65px;">
+        <div class="logo card p-4 m-2 shadow-sm">
+            <div class="row">
+                <div class="col-2">
+                    <img class="logo img-responsive img-thumbnail rounded-circle" src="
+                    @{
+                        if (@ViewData["avatar_profile"] != null) {
+                            string base64Image = Convert.ToBase64String(ViewData["avatar_profile"] as byte[]);
+                            @($"data:image/png;base64,{base64Image}")
+    ;
+                        } else {
+                            @("/img/avatar_blank.jpg")
+                        }
+                    }
+                    " alt="Avatar_profile">
+                </div>
+                <div class="col-4">
+                    <div class="card-body d-flex align-items-start flex-column">
+                        <div>
+                            <div class="card-title text text-uppercase fs-3 fw-bold">@((user.Rows[0]["ho_ten"] as string) + (isLecturer == true ? "(Giảng viên)" : "(Học viên)"))</div>
+                            <div class="card-subtitle mb-2 text-muted fs-4">ID: <span class="mssv">@((id.HasValue) ? id.ToString() : "Error")</span></div>
+                        </div>
+                        <div class="mt-3 mb-2"></div>
+                        <div>
+                            <button class="btn btn-outline-dark expand-btn" type="button">
+                                Nhắn tin
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 border-start">
+                    <div class="card-body">
+                        <div class="card-title mb-1 fs-4 fw-bold">Giới tính: </div>
+                        <p class="sex fs-5">@((gioiTinh.HasValue && gioiTinh == 1) ? "Nam" : "Nữ")</p>
+                        <div class="card-title mt-3 mb-1 fs-4 fw-bold">Email: </div>
+                        <p class="email fs-5">@email</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr>
+
+        <div class="row ">
+            <div class="col-12">
+                <div class="card p-4 mb-3">
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <div class="card-title fs-4 fw-bold">@(isLecturer == true ? "Các khóa học giảng viên giảng dạy" : "Các khóa học đã tham gia")</div>
+                            </div>
+                            <div class="col-6">
+                                <div class=" d-flex justify-content-end">
+                                    <div>
+                                        <select class="form-select filterStatus" aria-label="Default select example">
+                                            <option value="0" selected>Tất cả</option>
+                                            <option value="1">Kết thúc</option>
+                                            <option value="2">Đang diễn ra</option>
+                                            <option value="3">Sắp diễn ra</option>
+                                        </select>
+                                    </div>
+                                    <div class="mx-2"></div>
+                                    <button class="btn btn-outline-dark expand-btn" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                                        Mở rộng
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class='row'>
+                            @{
+                                for (int i = 0; i < @n1; i++)
+                                {
+                                    var statusCode = KiemTraTinhTrang(attend.Rows[i]["ngay_bat_dau"] as DateTime?, attend.Rows[i]["ngay_ket_thuc"] as DateTime?);
+                                    var status = getStatus(statusCode);
+                                    string courseID = attend.Rows[i]["id_mon_hoc"].ToString().PadLeft(3, '0') + "." + attend.Rows[i]["id_lop_hoc"].ToString().PadLeft(6, '0');
+
+                                    <div class='col-6 mb-3' courseid='@attend.Rows[i]["id_lop_hoc"]' statusCode='@statusCode'>
+                                        <div class='p-3 card shadow-sm class-info'>
+                                            <div class='card-body'>
+                                                <h3 class='card-title fs-4'>@attend.Rows[i]["ten_mon_hoc"] - @courseID</h3>
+                                                <div class='my-3'></div>
+                                                <p class='card-text'>Trạng thái: @Html.Raw(status)</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                }
+                            }
+                        </div>
+                        <div class='collapse' id='collapseExample'>
+                            <div class='row'>
+                                @{
+                                    for (int i = 4; i < n; i++)
+                                    {
+                                        var statusCode = KiemTraTinhTrang(attend.Rows[i]["ngay_bat_dau"] as DateTime?, attend.Rows[i]["ngay_ket_thuc"] as DateTime?);
+                                        var status = getStatus(statusCode);
+                                        string courseID = attend.Rows[i]["id_mon_hoc"].ToString().PadLeft(3, '0') + "." + attend.Rows[i]["id_lop_hoc"].ToString().PadLeft(6, '0');
+
+                                        <div class='col-6 mb-3' courseid='@attend.Rows[i]["id_lop_hoc"]' statusCode='@statusCode'>
+                                            <div class='p-3 card shadow-sm class-info'>
+                                                <div class='card-body'>
+                                                    <h3 class='card-title fs-4'>@attend.Rows[i]["ten_mon_hoc"] - @courseID</h3>
+                                                    <div class='my-3'></div>
+                                                    <p class='card-text'>Trạng thái: @Html.Raw(status)</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+
+                        @{
+                            if (n > 4)
+                            {
+                                <div class='row et-cetera'>
+                                    <div class='col-12 text-center'>
+                                        <i class='fas fa-ellipsis-h' style='color: #0f0f0f;'></i>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
