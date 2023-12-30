@@ -184,7 +184,7 @@ namespace CourseWebsiteDotNet.Models
                     connection.Open();
 
                     string query = "INSERT INTO users (anh_dai_dien, tai_khoan, mat_khau, thoi_gian_dang_nhap_gan_nhat, id_ad, id_giang_vien, id_hoc_vien) " +
-                                   "VALUES (@AnhDaiDien, @TaiKhoan, @MatKhau, @ThoiGianDangNhapGanNhat, @IdAd, @IdGiangVien, @IdHocVien); SELECT SCOPE_IDENTITY();";
+                                   "VALUES (@AnhDaiDien, @TaiKhoan, @MatKhau, @ThoiGianDangNhapGanNhat, @IdAd, @IdGiangVien, @IdHocVien); SELECT LAST_INSERT_ID();";
 
                     using (MySqlCommand command = new MySqlCommand(query, connection))
                     {

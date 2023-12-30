@@ -17,7 +17,7 @@
         <div class="grid-2-column user-form__input-container">
             <div class="center-div">
                 <div class="uploaded-ava-container">
-                    <img class="uploaded-ava" src="/img/avatar_blank.jpg" alt="">
+                    <img id="avatarImg" class="uploaded-ava" src="/img/avatar_blank.jpg" alt="">
                     <input id="fileInput" class="file-upload-input" type="file">
                     <label for="fileInput" class="custom-file-input img-input"><i class="fa-solid fa-upload"></i></label>
                 </div>
@@ -89,6 +89,7 @@
             }, 4000);
         }
         $(document).ready(function () {
+            var base64Image = null;
             $(`.insert-user-form__save-btn`).click(function () {
                 if (!confirm("Xác nhận tạo mới user?")) {
                     return;
@@ -104,9 +105,6 @@
                     return;
                 }
                 let id_role = cb.val();
-
-                // console.log( $(".group-checkbox").length + "lenght");
-                // let id_role = 2;
                 let fileList = $(".file-upload-input").prop("files");
 
                 if (password != confirmed_password) {
@@ -140,45 +138,55 @@
                     }
                 }
 
-
-
                 var formData = new FormData();
+
+                //formData.append('file', base64Image);
                 formData.append('file', file);
                 formData.append('account', account);
                 formData.append('password', password);
                 formData.append('role', role);
                 formData.append('id_role', id_role);
-                console.log(id_role + "id role");
-                console.log(role);
-                loadingEffect(true);
+                // console.log("Base64 representation of the image:", base64Image);
+                // console.log(id_role + "id role");
+                // console.log(role);
+                loadingEffect(false);
                 $.ajax({
-                    url: '<?php echo base_url(); ?>/Admin/CoursesController/insertUser',
+                    url: 'User/InsertUser',
                     method: 'POST',
                     dataType: "json",
                     contentType: false,
                     processData: false,
                     data: formData,
+                    // data: JSON.stringify({
+                    //     file: base64Image,
+                    //     account: account,
+                    //     password: password,
+                    //     role: role,
+                    //     id_role: id_role
+                    // }),
                     success: function (response) {
                         loadingEffect(false);
-                        reloadUssers();
+                        //reloadUssers();
                         $(`.form-container`).remove();
                         if (response.state) {
                             toast({
                                 title: `Thành công!`,
                                 message: `Thêm user mới thành công`,
                                 type: "success",
-                                duration: 100000
+                                duration: 3000
                             });
                         } else {
                             toast({
                                 title: `Đã có lỗi xảy ra!`,
                                 message: response.message,
                                 type: "error",
-                                duration: 100000
+                                duration: 3000
                             });
                         }
-
-                        console.log(response);
+                        setTimeout(function () {
+                            location.reload();
+                        }, 2000);
+                        //console.log(response);
                     },
                     error: function (response) {
                         loadingEffect(false);
@@ -191,7 +199,7 @@
                     }
                 })
             })
-            loadingEffect(true);
+            loadingEffect(false);
             $(`.table-list`).empty();
             $(`.table-list`).append(`<thead style="top: -1px;">
                             <tr>
@@ -203,26 +211,26 @@
                         </thead>
                         <tbody></tbody>
                         `);
-            loadingEffect(true);
+            loadingEffect(false);
             // lấy admin
             $.ajax({
-                url: '<?php echo base_url(); ?>/Admin/CoursesController/getListOfAdmins',
+                url: 'User/getListOfAdmins',
                 method: 'POST',
                 dataType: "json",
                 success: function (response) {
                     loadingEffect(false);
-                    console.log(response);
-                    for (let ad of response) {
+                    //console.log(response);
+                    for (let ad of response.admins) {
                         $('.table-list tbody').append(`
-                                        <tr>
-                                            <td>${ad.id_ad}</td>
-                                            <td>${ad.ho_ten}</td>
-                                            <td>${ad.email}</td>
-                                            <td>
-                                                <input type="checkbox" value="${ad.id_ad}" class="group-checkbox">
-                                            </td>
-                                        </tr>
-                                        `);
+                            <tr>
+                                <td>${ad.id_ad}</td>
+                                <td>${ad.ho_ten}</td>
+                                <td>${ad.email}</td>
+                                <td>
+                                    <input type="checkbox" value="${ad.id_ad}" class="group-checkbox">
+                                </td>
+                            </tr>
+                        `);
                     }
                 }
             });
@@ -240,31 +248,31 @@
                         </thead>
                         <tbody></tbody>
                         `);
-                    loadingEffect(true);
+                    loadingEffect(false);
                     // lấy admin
                     $.ajax({
-                        url: '<?php echo base_url(); ?>/Admin/CoursesController/getListOfAdmins',
+                        url: 'User/getListOfAdmins',
                         method: 'POST',
                         dataType: "json",
                         success: function (response) {
                             loadingEffect(false);
-                            console.log(response);
-                            for (let ad of response) {
+                            //console.log(response);
+                            for (let ad of response.admins) {
                                 $('.table-list tbody').append(`
-                                        <tr>
-                                            <td>${ad.id_ad}</td>
-                                            <td>${ad.ho_ten}</td>
-                                            <td>${ad.email}</td>
-                                            <td>
-                                                <input type="checkbox" value="${ad.id_ad}" class="group-checkbox">
-                                            </td>
-                                        </tr>
-                                        `);
+                                    <tr>
+                                        <td>${ad.id_ad}</td>
+                                        <td>${ad.ho_ten}</td>
+                                        <td>${ad.email}</td>
+                                        <td>
+                                            <input type="checkbox" value="${ad.id_ad}" class="group-checkbox">
+                                        </td>
+                                    </tr>
+                                `);
                             }
                         }
                     });
                 } else if (choice === 2) {
-                    loadingEffect(true);
+                    loadingEffect(false);
 
                     $(`.table-list`).empty();
                     $(`.table-list`).append(`<thead style="top: -1px;">
@@ -278,32 +286,32 @@
                             </tr>
                         </thead>
                         <tbody></tbody>
-                        `);
+                    `);
                     $.ajax({
-                        url: '<?php echo base_url(); ?>/Admin/CoursesController/getListOfStudents',
+                        url: 'User/getListOfStudents',
                         method: 'POST',
                         dataType: "json",
                         success: function (response) {
                             loadingEffect(false);
-                            console.log(response);
-                            for (let student of response) {
+                            //console.log(response);
+                            for (let student of response.students) {
                                 $('.table-list tbody').append(`
-                                        <tr>
-                                            <td>${student.id_hoc_vien}</td>
-                                            <td>${student.ho_ten}</td>
-                                            <td>${student.gioi_tinh == 1 ? "Nam" : "Nữ"}</td>
-                                            <td>${student.ngay_sinh}</td>
-                                            <td>${student.email}</td>
-                                            <td>
-                                                <input type="checkbox" value="${student.id_hoc_vien}" class="group-checkbox">
-                                            </td>
-                                        </tr>
-                                        `);
+                                    <tr>
+                                        <td>${student.id_hoc_vien}</td>
+                                        <td>${student.ho_ten}</td>
+                                        <td>${student.gioi_tinh == 1 ? "Nam" : "Nữ"}</td>
+                                        <td>${student.ngay_sinh}</td>
+                                        <td>${student.email}</td>
+                                        <td>
+                                            <input type="checkbox" value="${student.id_hoc_vien}" class="group-checkbox">
+                                        </td>
+                                    </tr>
+                                `);
                             }
                         }
                     });
                 } else if (choice === 1) {
-                    loadingEffect(true);
+                    loadingEffect(false);
                     $(`.table-list`).empty();
                     $(`.table-list`).append(`<thead style="top: -1px;">
                             <tr>
@@ -318,25 +326,25 @@
                         <tbody></tbody>
                         `);
                     $.ajax({
-                        url: '<?php echo base_url(); ?>/Admin/CoursesController/getListOfLecturers',
+                        url: 'User/getListOfLecturers',
                         method: 'POST',
                         dataType: "json",
                         success: function (response) {
                             loadingEffect(false);
-                            console.log(response);
-                            for (let gv of response) {
+                            //console.log(response);
+                            for (let gv of response.lecturers) {
                                 $('.table-list tbody').append(`
-                                        <tr>
-                                            <td>${gv.id_giang_vien}</td>
-                                            <td>${gv.ho_ten}</td>
-                                            <td>${gv.gioi_tinh == 1 ? "Nam" : "Nữ"}</td>
-                                            <td>${gv.ngay_sinh}</td>
-                                            <td>${gv.email}</td>
-                                            <td>
-                                                <input type="checkbox" value="${gv.id_giang_vien}" class="group-checkbox">
-                                            </td>
-                                        </tr>
-                                        `);
+                                    <tr>
+                                        <td>${gv.id_giang_vien}</td>
+                                        <td>${gv.ho_ten}</td>
+                                        <td>${gv.gioi_tinh == 1 ? "Nam" : "Nữ"}</td>
+                                        <td>${gv.ngay_sinh}</td>
+                                        <td>${gv.email}</td>
+                                        <td>
+                                            <input type="checkbox" value="${gv.id_giang_vien}" class="group-checkbox">
+                                        </td>
+                                    </tr>
+                                `);
                             }
                         }
                     });
@@ -352,6 +360,7 @@
                 if (confirm("Xác nhận hủy bỏ thông tin hiện tại?"))
                     $(`.form-container`).remove();
             })
+            
             $('#fileInput').change(function () {
                 // Lấy ra đối tượng input file
                 var input = this;
@@ -364,6 +373,7 @@
                     // Lắng nghe sự kiện khi FileReader đã đọc xong file
                     reader.onload = function (e) {
                         // Gán nội dung của file vào thuộc tính src của thẻ img
+                        base64Image = e.target.result;
                         $('.uploaded-ava').attr('src', e.target.result);
                     };
 
@@ -371,7 +381,7 @@
                     reader.readAsDataURL(input.files[0]);
                 }
             });
-            console.log("ll")
+            
             $('.account-field').val('');
             $('.password-field').val('');
             $('.confirmed-password-field').val('');
