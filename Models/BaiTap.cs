@@ -193,12 +193,13 @@ namespace CourseWebsiteDotNet.Models
                     connection.Open();
 
                     string query = "UPDATE bai_tap " +
-                                    "SET trang_thai = @trang_thai, " +
+                                    "SET " +
                                         "ten = @ten, " +
-                                        "thoi_han_nop = @thoi_han_nop, " +
-                                        "ngay_dang = @ngay_dang, " +
-                                        "thoi_han = @thoi_han " +
-                                        "id_giang_vien = @id_giang_vien " +
+                                        "thoi_han_nop = @thoi_han_nop ," +
+                                        "ngay_dang = @ngay_dang ," +
+                                        "thoi_han = @thoi_han ," +
+                                        "noi_dung = @noi_dung ," +
+                                        "id_giang_vien = @id_giang_vien ," +
                                         "id_muc = @id_muc " +
                                     "WHERE id_bai_tap = @Id";
 

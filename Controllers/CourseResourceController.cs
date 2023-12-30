@@ -1,6 +1,7 @@
 ﻿using CourseWebsiteDotNet.Models;
 using Humanizer;
 using Microsoft.AspNetCore.Mvc;
+using MySqlX.XDevAPI.Common;
 using Newtonsoft.Json;
 using Org.BouncyCastle.Asn1.X509;
 using System.Data;
@@ -188,7 +189,17 @@ namespace CourseWebsiteDotNet.Controllers
             }
             else if (role == 3)
             {
+                HttpContext.Session.SetInt32("courseid", (int)courseid);
 
+
+
+                // Layout data
+                ViewData["class_name"] = $"{courses.Rows[0]["ten_mon_hoc"]} {courses.Rows[0]["id_mon_hoc"].ToString().PadLeft(3, '0')}.{courses.Rows[0]["id_lop_hoc"].ToString().PadLeft(6, '0')}";
+                ViewData["state"] = KiemTraTinhTrang((string)courses.Rows[0]["ngay_bat_dau"], (string)courses.Rows[0]["ngay_ket_thuc"]);
+                ViewData["student_quantity"] = Convert.ToInt32(courses.Rows[0]["so_luong_hoc_vien"]);
+                ViewData["courseid"] = Convert.ToInt32(courseid);
+
+                return View("StudentCourseResource");
             }
 
             ViewData["ExceptionMessage"] = "Đã có lỗi xảy ra, vui lòng đăng nhập lại";
@@ -240,7 +251,225 @@ namespace CourseWebsiteDotNet.Controllers
 
             return Ok(JsonConvert.SerializeObject(result));
         }
+        //public function getFile3()
+        //{
+        //    if (!session()->has('id_user'))
+        //    {
+        //        return redirect()->to('/');
+        //    }
+        //// $id_lop_hoc = $this->request->getVar('id_lop_hoc');
+        //$id_user = session()->get('id_user');
+        //$id_file = $this->request->getVar('id_file');
+        //    // $model = new FileUploadModel();
+        //    if (!is_numeric($id_file))
+        //    {
+        //    $result = ["state" => false, "message" => "Đã có lỗi xảy ra!"];
+        //        return $this->response->setJSON($result);
+        //    }
+
+        //$model = new FileUploadModel();
+        //$file = $model->getFileUploadById($id_file);
+        //    if ($file == null || $file->id_user != $id_user) {
+        //    $result = ["state" => false, "message" => "Tài nguyên không tồn tại hoặc bạn không có quyền hạn trên tài nguyên này!"];
+        //        return $this->response->setJSON($result);
+        //    } else
+        //    {
+        //    $FilePath = $this->path. "/{$file->du_lieu}.{$file->extension}";
+        //        if (file_exists($FilePath))
+        //        {
+        //        $result = ["state" => true, "data" => base64_encode(file_get_contents($FilePath)), "nameFile" => $file->ten_tep, "extension" => $file->extension]; // Lỗi ở đây, file_get_contents
+        //            return $this->response->setJSON($result);
+        //        }
+        //        else
+        //        {
+        //        $result = ["state" => false, "message" => "Tài nguyên không tồn tại hoặc bạn không có quyền hạn trên tài nguyên này!"];
+        //            return $this->response->setJSON($result);
+        //            // $result = ["state" => false, "message" => "Tài nguyên không tồn tại hoặc bạn không có quyền hạn trên tài nguyên này!"];
+        //        }
+        //    }
+        //}
+
         [HttpPost]
+        public IActionResult GetFile3(int? fileId)
+        {
+            if (fileId == 0 || fileId == null)
+            {
+                var notFoundResponse = new
+                {
+                    state = false,
+                    message = "Tệp tin không tồn tại."
+                };
+                return Json(notFoundResponse);
+            }
+            // Validate permission
+            TepTinTaiLenModel file = new TepTinTaiLenRepository().GetTepTinTaiLenById((int)fileId);
+            if (file == null || file.id_user != HttpContext.Session.GetInt32("user_id"))
+            {
+                var notFoundResponse = new
+                {
+                    state = false,
+                    message = "Tệp tin không tồn tại."
+                };
+                return Json(notFoundResponse);
+            }
+
+
+            TepTinTaiLenModel fileData = (new TepTinTaiLenRepository().GetTepTinTaiLenById((int)fileId));
+
+            // Validate is file exist in DB
+            if (fileData == null)
+            {
+                var notFoundResponse = new
+                {
+                    state = false,
+                    message = "Tệp tin không tồn tại."
+                };
+                return Json(notFoundResponse);
+            }
+
+            string binPath = Directory.GetCurrentDirectory();
+            var filePath = binPath + $"\\UserFiles\\{fileData.decoded}.{fileData.extension}";
+            try
+            {
+                if (System.IO.File.Exists(filePath))
+                {
+                    var fileBytes = System.IO.File.ReadAllBytes(filePath);
+
+                    // Chuyển đổi dữ liệu tệp thành base64
+                    var base64Data = Convert.ToBase64String(fileBytes);
+
+                    // Tạo đối tượng JSON
+                    var jsonResponse = new
+                    {
+                        state = true,
+                        data = base64Data,
+                        nameFile = $"{fileData.ten_tep}",
+                        extension = $"{fileData.extension}"
+                    };
+
+                    // Trả về JSON
+                    return Json(jsonResponse);
+                }
+                else
+                {
+                    // Trả về JSON nếu tệp không tồn tại
+                    var notFoundResponse = new
+                    {
+                        state = false,
+                        message = "Tệp tin không tồn tại."
+                    };
+                    return Json(notFoundResponse);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Trả về JSON nếu có lỗi
+                var errorResponse = new
+                {
+                    state = false,
+                    message = ex.Message
+                };
+                return Json(errorResponse);
+            }
+        }
+        [HttpPost]
+		public IActionResult GetFile2(int? fileId)
+		{
+			if (fileId == 0 || fileId == null)
+			{
+				var notFoundResponse = new
+				{
+					state = false,
+					message = "Tệp tin không tồn tại."
+				};
+				return Json(notFoundResponse);
+			}
+			// Validate permission
+			int? assignmentid = HttpContext.Session.GetInt32("assignmentid"); 
+            if (assignmentid == null)
+            {
+				var notFoundResponse = new
+				{
+					state = false,
+					message = "Bạn không có quyền truy cập tài nguyên này"
+				};
+				return Json(notFoundResponse);
+			}
+
+			DataTable file = SQLExecutor.ExecuteQuery($@"                
+                SELECT chi_tiet_bai_nop.id_tep_tin_tai_len FROM bai_nop INNER JOIN chi_tiet_bai_nop on bai_nop.id_bai_nop = chi_tiet_bai_nop.id_bai_nop WHERE bai_nop.id_bai_tap = {assignmentid} and chi_tiet_bai_nop.id_tep_tin_tai_len = {fileId};
+            ");
+
+			if (file.Rows.Count == 0)
+			{
+				var notFoundResponse = new
+				{
+					state = false,
+					message = "Bạn không có quyền truy cập tài nguyên này."
+				};
+				return Json(notFoundResponse);
+			}
+
+
+			TepTinTaiLenModel fileData = (new TepTinTaiLenRepository().GetTepTinTaiLenById((int)fileId));
+
+			// Validate is file exist in DB
+			if (fileData == null)
+			{
+				var notFoundResponse = new
+				{
+					state = false,
+					message = "Tệp tin không tồn tại."
+				};
+				return Json(notFoundResponse);
+			}
+
+			string binPath = Directory.GetCurrentDirectory();
+			var filePath = binPath + $"\\UserFiles\\{fileData.decoded}.{fileData.extension}";
+			try
+			{
+				if (System.IO.File.Exists(filePath))
+				{
+					var fileBytes = System.IO.File.ReadAllBytes(filePath);
+
+					// Chuyển đổi dữ liệu tệp thành base64
+					var base64Data = Convert.ToBase64String(fileBytes);
+
+					// Tạo đối tượng JSON
+					var jsonResponse = new
+					{
+						state = true,
+						data = base64Data,
+						nameFile = $"{fileData.ten_tep}",
+						extension = $"{fileData.extension}"
+					};
+
+					// Trả về JSON
+					return Json(jsonResponse);
+				}
+				else
+				{
+					// Trả về JSON nếu tệp không tồn tại
+					var notFoundResponse = new
+					{
+						state = false,
+						message = "Tệp tin không tồn tại."
+					};
+					return Json(notFoundResponse);
+				}
+			}
+			catch (Exception ex)
+			{
+				// Trả về JSON nếu có lỗi
+				var errorResponse = new
+				{
+					state = false,
+					message = ex.Message
+				};
+				return Json(errorResponse);
+			}
+		}
+		[HttpPost]
         public IActionResult GetFile(int? fileId)
         {
             if (fileId == 0 || fileId == null)

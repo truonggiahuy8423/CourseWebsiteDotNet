@@ -578,7 +578,51 @@ $@"SELECT lop_hoc.id_lop_hoc,  DATE_FORMAT(lop_hoc.ngay_bat_dau, '%d/%m/%Y') as 
             }
             else if (role == 3)
             {
-                return View("AdministratorCourseInformation");
+				LoadNavbar();
+				HttpContext.Session.SetInt32("courseid", (int)courseid);
+				// MainSection
+				courses.Columns.Add("so_luong_giang_vien");
+				courses.Columns.Add("so_luong_buoi_hoc");
+				courses.Columns.Add("so_luong_buoi_hoc_da_hoc");
+
+				courses.Rows[0]["so_luong_giang_vien"] = Convert.ToInt32(SQLExecutor.ExecuteQuery(
+					$@"
+                            SELECT COUNT(phan_cong_giang_vien.id_giang_vien) as slgv FROM lop_hoc LEFT JOIN phan_cong_giang_vien ON lop_hoc.id_lop_hoc = phan_cong_giang_vien.id_lop_hoc
+                            WHERE lop_hoc.id_lop_hoc = {courseid}
+                            GROUP BY lop_hoc.id_lop_hoc
+                        "
+				 ).Rows[0]["slgv"]);
+
+				courses.Rows[0]["so_luong_buoi_hoc"] = Convert.ToInt32(SQLExecutor.ExecuteQuery(
+				   $@"
+                            SELECT COUNT(buoi_hoc.id_buoi_hoc) as slbh FROM lop_hoc LEFT JOIN buoi_hoc ON lop_hoc.id_lop_hoc = buoi_hoc.id_lop_hoc
+                            WHERE lop_hoc.id_lop_hoc = {courseid}
+                            GROUP BY lop_hoc.id_lop_hoc
+                        "
+				).Rows[0]["slbh"]);
+
+				courses.Rows[0]["so_luong_buoi_hoc_da_hoc"] = Convert.ToInt32(SQLExecutor.ExecuteQuery(
+				   $@"
+                            SELECT COUNT(buoi_hoc.id_buoi_hoc) as slbh FROM lop_hoc LEFT JOIN buoi_hoc ON lop_hoc.id_lop_hoc = buoi_hoc.id_lop_hoc and buoi_hoc.trang_thai = 2
+                            WHERE lop_hoc.id_lop_hoc = {courseid}
+                            GROUP BY lop_hoc.id_lop_hoc
+                        "
+				).Rows[0]["slbh"]);
+				ViewData["subject_name"] = courses.Rows[0]["ten_mon_hoc"];
+				ViewData["subjectid"] = Convert.ToInt32(courses.Rows[0]["id_mon_hoc"]);
+				ViewData["slbh"] = Convert.ToInt32(courses.Rows[0]["so_luong_buoi_hoc"]);
+				ViewData["slbhdh"] = Convert.ToInt32(courses.Rows[0]["so_luong_buoi_hoc_da_hoc"]);
+				ViewData["slgv"] = Convert.ToInt32(courses.Rows[0]["so_luong_giang_vien"]);
+				ViewData["ngbd"] = courses.Rows[0]["ngay_bat_dau"];
+				ViewData["ngkt"] = courses.Rows[0]["ngay_ket_thuc"];
+
+
+				// Layout data
+				ViewData["class_name"] = $"{courses.Rows[0]["ten_mon_hoc"]} {courses.Rows[0]["id_mon_hoc"].ToString().PadLeft(3, '0')}.{courses.Rows[0]["id_lop_hoc"].ToString().PadLeft(6, '0')}";
+				ViewData["state"] = KiemTraTinhTrang((string)courses.Rows[0]["ngay_bat_dau"], (string)courses.Rows[0]["ngay_ket_thuc"]);
+				ViewData["courseid"] = Convert.ToInt32(courses.Rows[0]["id_lop_hoc"]);
+				ViewData["student_quantity"] = Convert.ToInt32(courses.Rows[0]["so_luong_hoc_vien"]);
+				return View("StudentCourseInformation");
 
             }
             return Index();

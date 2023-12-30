@@ -9,7 +9,7 @@
 }
 
 @section Navbar {
-	@await Html.PartialAsync("Navbar");
+	@await Html.PartialAsync("Navbar")
 
 
 }
@@ -357,13 +357,11 @@
 					let assignmentid = urlParams.get('assignmentid');
 					let id_lop_hoc = 1;
 					$.ajax({
-						url: "<?php echo base_url() ?>/Admin/CoursesController/getFile2",
-						contentType: "text",
+						url: `${window.location.protocol}//${window.location.hostname}:${window.location.port}/CourseResource/getFile2`,
+						method: 'POST',
 						dataType: "json",
 						data: {
-							id_lop_hoc: id_lop_hoc,
-							id_file: $(this).attr('value'),
-							id_bai_tap: assignmentid
+							fileId: $(this).attr('value')*1,
 						},
 						success: function (response) {
 							if (response.state) {
@@ -490,7 +488,6 @@
 					// var param1Value = urlParams.get('courrseid');
 					let assignmentid = urlParams.get('assignmentid');
 					let assignment = {
-						id_bai_tap: assignmentid * 1,
 						th: normalizeString($(`.th`).val()),
 						thn: normalizeString($(`.thn`).val()),
 						ten: $(`.assignment-title-input`).val(),
@@ -499,9 +496,9 @@
 					console.log(assignment);
 					assignmentData = JSON.stringify(assignment);
 					$.ajax({
-						url: `<?php echo base_url() ?>/Admin/CoursesController/updateAssignment`,
+						url: `${window.location.protocol}//${window.location.hostname}:${window.location.port}/Assignment/updateAssignment`,
 						method: 'POST',
-						contentType: 'json', // Đặt kiểu dữ liệu của yêu cầu là JSON
+						contentType: 'application/json', // Đặt kiểu dữ liệu của yêu cầu là JSON
 						dataType: "json",
 						data: assignmentData,
 						success: function (response) {

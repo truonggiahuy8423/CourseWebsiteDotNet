@@ -159,8 +159,8 @@
                                         <div class="resource-item file-variant">
                                             <h5 class="file-variant__title">
                                                 <img src="/img/${fileExtension.indexOf(files[c]['extension']) !== -1 ? file_icon[files[c]['extension']] : 'any_file_icon'}.png" style="height: 14px; margin-bottom: 2px;" alt="">
-                                                <span class="file-title" id="${files[c]['id_tep_tin_tai_len']}">${files[c]['ten_tep']}.${files[c]['extension']}</span>
-                                                        <span class="item-details">Đã đăng ${formatDateTimeString(files[c]['ngay_dang'])} bởi ${files[c]['ho_ten']}</span>
+                                                <span style="cursor: pointer!important;" class="file-title" id="${files[c]['id_tep_tin_tai_len']}">${files[c]['ten_tep']}.${files[c]['extension']}</span>
+                                                <span class="item-details">Đã đăng ${formatDateTimeString(files[c]['ngay_dang'])} bởi ${files[c]['ho_ten']}</span>
                                             </h5>
                                         </div>
                                     `);
