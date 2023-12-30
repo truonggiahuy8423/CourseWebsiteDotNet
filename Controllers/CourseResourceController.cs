@@ -102,6 +102,29 @@ namespace CourseWebsiteDotNet.Controllers
                 return "<span class=\"class__item--upcoming\">Sắp diễn ra</span>";
             }
         }
+        private bool checkPreviledge(int courseid)
+        {
+            int? userId = HttpContext.Session.GetInt32("user_id");
+            int? role = HttpContext.Session.GetInt32("role");
+            int? roleId = HttpContext.Session.GetInt32("role_id");
+
+            if (role == 1)
+            {
+                return true;
+            }
+            else if (role == 2)
+            {
+                var rs = SQLExecutor.ExecuteQuery($@"SELECT * FROM phan_cong_giang_vien WHERE phan_cong_giang_vien.id_giang_vien = {roleId} AND phan_cong_giang_vien.id_lop_hoc = {courseid}");
+                return rs.Rows.Count == 0 ? false : true;
+
+            }
+            else if (role == 3)
+            {
+                var rs = SQLExecutor.ExecuteQuery($@"SELECT * FROM hoc_vien_tham_gia WHERE hoc_vien_tham_gia.id_hoc_vien = {roleId} AND hoc_vien_tham_gia.id_lop_hoc = {courseid}");
+                return rs.Rows.Count == 0 ? false : true;
+            }
+            return false;
+        }
         [HttpGet]
         public IActionResult Resource(int? courseid)
         {
@@ -125,7 +148,12 @@ namespace CourseWebsiteDotNet.Controllers
                 ViewData["ExceptionMessage"] = "Lớp học không tồn tại";
                 return View("ExceptionPage");
             }
-
+            if (!checkPreviledge((int)courseid))
+            {
+                LoadNavbar();
+                ViewData["ExceptionMessage"] = "Bạn không có quyền truy cập lớp học này";
+                return View("ExceptionPage");
+            }
 
             int? role = HttpContext.Session.GetInt32("role");
 
@@ -143,7 +171,8 @@ namespace CourseWebsiteDotNet.Controllers
                 ViewData["courseid"] = Convert.ToInt32(courseid);
 
                 return View("AdministratorCourseResource");
-            } else if (role == 2)
+            }
+            else if (role == 2)
             {
                 HttpContext.Session.SetInt32("courseid", (int)courseid);
 
@@ -173,7 +202,7 @@ namespace CourseWebsiteDotNet.Controllers
                 return BadRequest();
             }
             ExpandoObject result = new ExpandoObject();
-    
+
             ((IDictionary<string, object>)result)["folders"] = new MucRepository().GetMucByCourseId((int)courseid);
 
             ((IDictionary<string, object>)result)["notis"] = new ThongBaoRepository().GetThongBaoByCourseId((int)courseid);
@@ -204,7 +233,7 @@ namespace CourseWebsiteDotNet.Controllers
             v.ngay_dang ASC;
             
                 "
-                
+
                 );
 
             ((IDictionary<string, object>)result)["assignments"] = new BaiTapRepository().GetBaiTapByCourseId((int)courseid);
@@ -245,7 +274,8 @@ namespace CourseWebsiteDotNet.Controllers
             TepTinTaiLenModel fileData = (new TepTinTaiLenRepository().GetTepTinTaiLenById((int)fileId));
 
             // Validate is file exist in DB
-            if (fileData == null) {
+            if (fileData == null)
+            {
                 var notFoundResponse = new
                 {
                     state = false,
@@ -336,12 +366,276 @@ namespace CourseWebsiteDotNet.Controllers
             return Ok(JsonConvert.SerializeObject(response));
 
         }
-        
+
         public IActionResult getAddResourceIntoCourseForm()
         {
             return View("AddResourceIntoClassForm");
         }
+        [HttpPost]
+        public IActionResult postNewFolder([FromBody] JsonDocument dataReceived)
+        {
+            dynamic obj = JsonConvert.DeserializeObject<ExpandoObject>(dataReceived.RootElement.ToString());
+            int id_muc = Convert.ToInt32(obj.id_muc);
+            int? courseid = HttpContext.Session.GetInt32("courseid");
+            string name = obj.ten_muc;
+            MucModel muc = (new MucRepository().GetMucById(id_muc));
+            if (muc != null && muc.id_lop_hoc == courseid)
+            {
+                MucModel mucModel = new MucModel()
+                {
+                    id_lop_hoc = (int)courseid,
+                    id_muc_cha = id_muc,
+                    ten_muc = name
+                };
+                return Ok(JsonConvert.SerializeObject(new MucRepository().InsertMuc(mucModel)));
+
+            }
+            dynamic response = new
+            {
+                state = false,
+                message = "Đã có lỗi xảy ra!"
+
+            };
+            return Ok(JsonConvert.SerializeObject(response));
+        }
+
+        [HttpPost]
+        public IActionResult postNewLinkOnClass([FromBody] JsonDocument dataReceived)
+        {
+            dynamic obj = JsonConvert.DeserializeObject<ExpandoObject>(dataReceived.RootElement.ToString());
+            int id_muc = Convert.ToInt32(obj.id_muc);
+            int? courseid = HttpContext.Session.GetInt32("courseid");
+            string link = obj.link;
+            string tieu_de = obj.tieu_de;
+
+            MucModel muc = (new MucRepository().GetMucById(id_muc));
+            if (muc != null && muc.id_lop_hoc == courseid)
+            {
+                TimeZoneInfo vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                DateTime vietnamNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
+
+                DuongLinkModel dlink = new DuongLinkModel()
+                {
+                    link = link,
+                    tieu_de = tieu_de,
+                    id_muc = id_muc,
+                    id_giang_vien = (int)HttpContext.Session.GetInt32("role_id"),
+                    ngay_dang = vietnamNow
+                };
+                return Ok(JsonConvert.SerializeObject(new DuongLinkRepository().InsertDuongLink(dlink)));
+
+            }
+            dynamic response = new
+            {
+                state = false,
+                message = "Đã có lỗi xảy ra!"
+
+            };
+            return Ok(JsonConvert.SerializeObject(response));
+        }
 
 
+        [HttpPost]
+        public IActionResult postNewNotiOnClass([FromBody] JsonDocument dataReceived)
+        {
+            dynamic obj = JsonConvert.DeserializeObject<ExpandoObject>(dataReceived.RootElement.ToString());
+            int id_muc = Convert.ToInt32(obj.id_muc);
+            int? courseid = HttpContext.Session.GetInt32("courseid");
+            string noi_dung = obj.noi_dung;
+            string tieu_de = obj.tieu_de;
+
+            MucModel muc = (new MucRepository().GetMucById(id_muc));
+            if (muc != null && muc.id_lop_hoc == courseid)
+            {
+                TimeZoneInfo vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                DateTime vietnamNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
+
+                ThongBaoModel tb = new ThongBaoModel()
+                { 
+                    noi_dung = noi_dung,
+                    tieu_de = tieu_de,
+                    id_muc = id_muc,
+                    id_giang_vien = (int)HttpContext.Session.GetInt32("role_id"),
+                    ngay_dang = vietnamNow
+                };
+                return Ok(JsonConvert.SerializeObject(new ThongBaoRepository().InsertThongBao(tb)));
+
+            }
+            dynamic response = new
+            {
+                state = false,
+                message = "Đã có lỗi xảy ra!"
+
+            };
+            return Ok(JsonConvert.SerializeObject(response));
+        }
+        static DateTime CreateDateTimeFromString(string dateTimeString)
+        {
+            // Định dạng của chuỗi ngày giờ (ví dụ: "yyyy-MM-dd HH:mm")
+            string format = "yyyy-MM-dd HH:mm";
+
+            try
+            {
+                // Thử tạo đối tượng DateTime từ chuỗi với định dạng cụ thể
+                DateTime result = DateTime.ParseExact(dateTimeString, format, System.Globalization.CultureInfo.InvariantCulture);
+                return result;
+            }
+            catch (FormatException)
+            {
+                Console.WriteLine("Invalid date format");
+                return DateTime.MinValue; // Trả về giá trị mặc định nếu có lỗi
+            }
+        }
+        [HttpPost]
+        public IActionResult postAssignmentOnClass([FromBody] JsonDocument dataReceived)
+        {
+            dynamic obj = JsonConvert.DeserializeObject<ExpandoObject>(dataReceived.RootElement.ToString());
+            int id_muc = Convert.ToInt32(obj.id_muc);
+            int? courseid = HttpContext.Session.GetInt32("courseid");
+            string name = obj.ten_bai_tap;
+            string content = obj.noi_dung;
+            string th = obj.thoi_han;
+            string thn = obj.thoi_han_nop;
+            MucModel muc = (new MucRepository().GetMucById(id_muc));
+            if (muc != null && muc.id_lop_hoc == courseid)
+            {
+                TimeZoneInfo vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                DateTime vietnamNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
+
+                BaiTapModel tb = new BaiTapModel()
+                {
+                    noi_dung = content,
+                    ten = name,
+                    id_muc = id_muc,
+                    id_giang_vien = (int)HttpContext.Session.GetInt32("role_id"),
+                    thoi_han = CreateDateTimeFromString(th),
+                    thoi_han_nop = CreateDateTimeFromString(thn),
+                    ngay_dang = vietnamNow,
+                    
+
+                };
+                return Ok(JsonConvert.SerializeObject(new BaiTapRepository().InsertBaiTap(tb)));
+
+            }
+            dynamic response = new
+            {
+                state = false,
+                message = "Đã có lỗi xảy ra!"
+
+            };
+            return Ok(JsonConvert.SerializeObject(response));
+        }
+
+        [HttpPost]
+        public IActionResult postFileOnClass([FromBody] JsonDocument dataReceived)
+        {
+            dynamic obj = JsonConvert.DeserializeObject<ExpandoObject>(dataReceived.RootElement.ToString());
+            int id_muc = Convert.ToInt32(obj.id_muc);
+            int? courseid = HttpContext.Session.GetInt32("courseid");
+            int fileid = Convert.ToInt32(obj.file_id);
+
+
+            // Validate file id
+            TepTinTaiLenModel file = new TepTinTaiLenRepository().GetTepTinTaiLenById(fileid);
+            if (file == null || file.id_user != HttpContext.Session.GetInt32("user_id"))
+            {
+                dynamic response2 = new
+                {
+                    state = false,
+                    message = "Tệp tin không tồn tại!"
+
+                };
+                return Ok(JsonConvert.SerializeObject(response2));
+            }
+
+
+            MucModel muc = (new MucRepository().GetMucById(id_muc));
+            if (muc != null && muc.id_lop_hoc == courseid)
+            {
+                TimeZoneInfo vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                DateTime vietnamNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
+
+                ViTriTepTinModel tb = new ViTriTepTinModel()
+                {
+                    id_tep_tin_tai_len = (int)file.id_tep_tin_tai_len,
+                    id_muc = id_muc,
+                    ngay_dang = vietnamNow,
+
+
+                };
+                return Ok(JsonConvert.SerializeObject(new ViTriTepTinRepository().InsertViTriTepTin(tb)));
+
+            }
+            dynamic response = new
+            {
+                state = false,
+                message = "Đã có lỗi xảy ra!"
+
+            };
+            return Ok(JsonConvert.SerializeObject(response));
+        }
+
+        public IActionResult getChooseUserFileForm()
+        {
+            ViewData["files"] = new TepTinTaiLenRepository().GetTepTinTaiLenByUserId((int)HttpContext.Session.GetInt32("user_id"));
+            return View("ChooseFileForm");
+        }
+
+
+        public IActionResult UploadFile()
+        {
+            // Lấy file từ request
+            var file = HttpContext.Request.Form.Files.GetFile("file");
+
+            if (file != null && file.Length > 0)
+            {
+                var encoded = Guid.NewGuid().ToString();
+                TimeZoneInfo vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                DateTime vietnamNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
+                var fileModel = new TepTinTaiLenModel 
+                {
+                    decoded = encoded,
+                    id_user = (int)HttpContext.Session.GetInt32("user_id"),
+                    ngay_tai_len = vietnamNow,
+                    ten_tep = Path.GetFileNameWithoutExtension(file.FileName),
+                    extension = Path.GetExtension(file.FileName).Substring(1, Path.GetExtension(file.FileName).Length - 1)
+                };
+
+                var rs = new TepTinTaiLenRepository().InsertTepTinTaiLen(fileModel);
+
+                if (rs.state)
+                {
+
+                    string binPath = Directory.GetCurrentDirectory();
+                    var folderPath = binPath + $"\\UserFiles\\";
+                    // Di chuyển file đến thư mục lưu trữ
+                    var newFileName = encoded + "." + fileModel.extension;
+                    var filePath = folderPath + newFileName;
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        file.CopyTo(stream);
+                    }
+
+                    var response = new
+                    {
+                        state = true,
+                        auto_increment_id = rs.insertedId,
+                        message = "Đăng tải tệp thành công",
+                        fileName = fileModel.ten_tep,
+                        extension = fileModel.extension
+                    };
+
+                    return Ok(JsonConvert.SerializeObject(response));
+                }
+                else
+                {
+                    return Json(new { state = false, message = "Tệp tải lên không thành công" });
+                }
+            }
+            else
+            {
+                return Json(new { state = false, message = "Tệp tải lên không thành công" });
+            }
+        }
     }
 }

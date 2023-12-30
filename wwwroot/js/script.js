@@ -120,7 +120,7 @@ async function chooseUserFile() {
   return new Promise(function(resolve, reject) {
     loadingEffect(true);
     $.ajax({
-      url: `${window.location.protocol}//${window.location.hostname}/Admin/CoursesController/getChooseUserFileForm`,
+        url: `${window.location.protocol}//${window.location.hostname}:${window.location.port}/CourseResource/getChooseUserFileForm`,
       contentType: "",
       dataType: "text",
       data: "",
@@ -136,14 +136,18 @@ async function chooseUserFile() {
             resolve(false);
           });
           $(`.get-file-form__save-btn`).click(function() {
-            let dom = $(`.file-item[ischosen="true"]`);
+              let dom = $(`.file-item[ischosen="true"]`);
+              if (dom.lenght == 0) {
+                  uploadingNoti(false, "Chưa tệp tin nào được chọn");
+                  return;
+              }
             let file_id = dom.attr('value');
             let fileName =  removeNewlines(tachChuoiCham(dom.text()).fileName).trim();
             let extension =  removeNewlines(tachChuoiCham(dom.text()).extension).trim();
 
             // setTimeout(function() {
               $(`.form-container--file`).remove();
-            
+              
             resolve({
               id_tep_tin_tai_len: file_id,
               ten_tep: fileName,

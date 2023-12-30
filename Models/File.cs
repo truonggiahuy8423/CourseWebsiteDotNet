@@ -80,6 +80,40 @@ namespace CourseWebsiteDotNet.Models
 
             return tepTinTaiLenList;
         }
+        public List<TepTinTaiLenModel> GetTepTinTaiLenByUserId(int userid)
+        {
+            List<TepTinTaiLenModel> tepTinTaiLenList = new List<TepTinTaiLenModel>();
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
+
+                string query = "SELECT * FROM tep_tin_tai_len where id_user = @Id order by ngay_tai_len desc";
+
+                using (MySqlCommand command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Id", userid);
+
+                    using (MySqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            TepTinTaiLenModel tepTinTaiLen = new TepTinTaiLenModel
+                            {
+                                id_tep_tin_tai_len = reader["id_tep_tin_tai_len"] != DBNull.Value ? Convert.ToInt32(reader["id_tep_tin_tai_len"]) : (int?)null,
+                                decoded = reader["decoded"] != DBNull.Value ? Convert.ToString(reader["decoded"]) : null,
+                                ngay_tai_len = reader["ngay_tai_len"] != DBNull.Value ? Convert.ToDateTime(reader["ngay_tai_len"]) : (DateTime?)null,
+                                id_user = reader["id_user"] != DBNull.Value ? Convert.ToInt32(reader["id_user"]) : (int?)null,
+                                ten_tep = reader["ten_tep"] != DBNull.Value ? Convert.ToString(reader["ten_tep"]) : null,
+                                extension = reader["extension"] != DBNull.Value ? Convert.ToString(reader["extension"]) : null
+                            };
+                            tepTinTaiLenList.Add(tepTinTaiLen);
+                        }
+                    }
+                }
+            }
+
+            return tepTinTaiLenList;
+        }
 
         public TepTinTaiLenModel? GetTepTinTaiLenById(int id)
         {

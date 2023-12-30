@@ -142,7 +142,7 @@
                                                 <span class="content-panel">
                                                 <img src="/img/link_icon.png" style="height: 14px; margin-bottom: 2px;" alt="">
                                                 <a href="${links[a]["link"]}" style="text-decoration: none; color: #2C2C2C;">${links[a]["tieu_de"]}</a>
-                                                <span class="item-details">Đã đăng vào ${links[a]["ngay_dang"]} bởi ${links[a]["ho_ten"]}</span>
+                                                        <span class="item-details">Đã đăng vào ${formatDateTimeString(links[a]["ngay_dang"])} bởi ${links[a]["ho_ten"]}</span>
                                                 <i value="${links[a]["id_duong_link"]}" type="link" class='fa-solid fa-x delete-resource-btn' style='z-index:100; font-size: 11px!important;'></i>
                                                 </span>
                                             </h5>
@@ -157,7 +157,7 @@
                                                 <span class="content-panel">
                                                     <i class="bi bi-chat-left-text"></i>
                                                     <span class="noti-title"> ${notis[b]["tieu_de"]} </span>
-                                                    <span class="item-details">Đã đăng vào ${notis[b]["ngay_dang"]} bởi ${notis[b]["ho_ten"]}</span>
+                                                            <span class="item-details">Đã đăng vào ${formatDateTimeString(notis[b]["ngay_dang"])} bởi ${notis[b]["ho_ten"]}</span>
                                                     <i value="${notis[b]["id_thong_bao"]}" type="noti" class='fa-solid fa-x delete-resource-btn' style='z-index:100; font-size: 11px!important;'></i>
                                                 </span>
                                             </h5>
@@ -174,7 +174,7 @@
                                             <span class="content-panel">
                                                 <img src="/img/${fileExtension.indexOf(files[c]['extension']) !== -1 ? file_icon[files[c]['extension']] : 'any_file_icon'}.png" style="height: 14px; margin-bottom: 2px;" alt="">
                                                 <span class="file-title" id="${files[c]['id_tep_tin_tai_len']}">${files[c]['ten_tep']}.${files[c]['extension']}</span>
-                                                <span class="item-details">Đã đăng ${files[c]['ngay_dang']} bởi ${files[c]['ho_ten']}</span>
+                                                        <span class="item-details">Đã đăng ${formatDateTimeString(files[c]['ngay_dang'])} bởi ${files[c]['ho_ten']}</span>
                                                 <i value="${files[c]["id_tep_tin_tai_len"]}" type="file" class='fa-solid fa-x delete-resource-btn' style='z-index:100; font-size: 11px!important;'></i>
                                             </span>
                                             </h5>
@@ -188,8 +188,8 @@
                                             <h5 class="assignment-variant__title" href="">
                                             <span class="content-panel">
                                                 <img src="/img/assignment_icon.png" style="height: 14px; margin-bottom: 2px;" alt="">
-                                                <a href="<?php echo base_url() ?>//resource/assignment?assignmentid=${assignments[d]["id_bai_tap"]}" style="text-decoration: none; color: #2C2C2C;">${assignments[d]["ten"]}</a>
-                                                <span class="item-details">Đã đăng ${assignments[d]['ngay_dang']} bởi ${assignments[d]['ho_ten']}</span>
+                                                <a href="/courses/resource/assignment?assignmentid=${assignments[d]["id_bai_tap"]}" style="text-decoration: none; color: #2C2C2C;">${assignments[d]["ten"]}</a>
+                                                        <span class="item-details">Đã đăng ${formatDateTimeString(assignments[d]['ngay_dang'])} bởi ${assignments[d]['ho_ten']}</span>
                                                 <i value="${assignments[d]["id_bai_tap"]}" type="assignment" class='fa-solid fa-x delete-resource-btn' style='z-index:100; font-size: 11px!important;'></i>
                                                 </span>
                                             </h5>
@@ -213,7 +213,15 @@
             })
         }
 
+        function formatDateTimeString(inputString) {
+            // Chuyển tất cả chữ cái thành khoảng trắng
+            let resultString = inputString.replace(/[a-zA-Z]/g, ' ');
 
+            // Bỏ khoảng trắng ở đầu cuối chuỗi
+            resultString = resultString.trim();
+
+            return resultString;
+        }
 
 
         $(document).ready(function () {
@@ -298,7 +306,7 @@
             loadingEffect(true);
             $btn = $(this);
             $.ajax({
-                url: "<?php echo base_url() ?>/Admin/CoursesController/getAddResourceIntoCourseForm",
+                url: `${window.location.protocol}//${window.location.hostname}:${window.location.port}/CourseResource/getAddResourceIntoCourseForm`,
                 // contentType: "text",
                 dataType: "text",
                 success: function (response) {

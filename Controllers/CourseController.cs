@@ -4,6 +4,7 @@ using Humanizer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Razor.Language.Intermediate;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using MySqlX.XDevAPI.Common;
 using Newtonsoft.Json;
 using Org.BouncyCastle.Asn1.X509;
@@ -28,6 +29,28 @@ namespace CourseWebsiteDotNet.Controllers
         {
             _httpContextAccessor = httpContextAccessor;
         }
+        private bool checkPreviledge(int courseid)
+        {
+			int? userId = HttpContext.Session.GetInt32("user_id");
+			int? role = HttpContext.Session.GetInt32("role");
+			int? roleId = HttpContext.Session.GetInt32("role_id");
+
+            if (role == 1)
+            {
+                return true;
+            } else if (role == 2)
+            {
+                var rs = SQLExecutor.ExecuteQuery($@"SELECT * FROM phan_cong_giang_vien WHERE phan_cong_giang_vien.id_giang_vien = {roleId} AND phan_cong_giang_vien.id_lop_hoc = {courseid}");
+                return rs.Rows.Count == 0 ? false : true;
+
+            } else if (role == 3)
+            {
+				var rs = SQLExecutor.ExecuteQuery($@"SELECT * FROM hoc_vien_tham_gia WHERE hoc_vien_tham_gia.id_hoc_vien = {roleId} AND hoc_vien_tham_gia.id_lop_hoc = {courseid}"
+);
+				return rs.Rows.Count == 0 ? false : true;
+			}
+            return false;
+		}
         public IActionResult Index()
         {
             ViewData["chosenItem"] = 1;
@@ -426,6 +449,7 @@ $@"SELECT lop_hoc.id_lop_hoc,  DATE_FORMAT(lop_hoc.ngay_bat_dau, '%d/%m/%Y') as 
                 return Index();
             }
 
+
             DataTable courses = SQLExecutor.ExecuteQuery(
                 " SELECT lop_hoc.id_lop_hoc,  DATE_FORMAT(lop_hoc.ngay_bat_dau, '%d/%m/%Y') as ngay_bat_dau,  DATE_FORMAT(lop_hoc.ngay_ket_thuc, '%d/%m/%Y') as ngay_ket_thuc, mon_hoc.id_mon_hoc, mon_hoc.ten_mon_hoc, COUNT(hoc_vien_tham_gia.id_hoc_vien) as so_luong_hoc_vien "
               + " FROM lop_hoc"
@@ -440,8 +464,14 @@ $@"SELECT lop_hoc.id_lop_hoc,  DATE_FORMAT(lop_hoc.ngay_bat_dau, '%d/%m/%Y') as 
                 return View("ExceptionPage");
             }
 
+			if (!checkPreviledge((int)courseid))
+			{
+				LoadNavbar();
+				ViewData["ExceptionMessage"] = "Bạn không có quyền truy cập lớp học này";
+				return View("ExceptionPage");
+			}
 
-            int? userId = HttpContext.Session.GetInt32("user_id");
+			int? userId = HttpContext.Session.GetInt32("user_id");
             int? role = HttpContext.Session.GetInt32("role");
             int? roleId = HttpContext.Session.GetInt32("role_id");
             if (role == 1)

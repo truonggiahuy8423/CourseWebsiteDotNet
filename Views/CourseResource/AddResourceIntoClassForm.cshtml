@@ -97,14 +97,14 @@
                         return;
                     }
                     $.ajax({
-                        url: `${window.location.protocol}//${window.location.hostname}/Admin/CoursesController/postNewFolder`,
-                        contentType: "text",
+                        url: `${window.location.protocol}//${window.location.hostname}:${window.location.port}/CourseResource/postNewFolder`,
+                        method: "POST",
+                        contentType: "application/json",
                         dataType: "json",
-                        data: {
+                        data: JSON.stringify({
                             ten_muc: newFolder,
-                            id_lop_hoc: id_lop_hoc,
                             id_muc: id_muc
-                        },
+                        }),
                         success: function (response) {
                             loadingEffect(false);
                             rerenderCourseResources(id_muc);
@@ -173,7 +173,7 @@
                     $(`.file-container`).append(
                         `
                                         <div class='file-item--var' value='${file['id_tep_tin_tai_len']}' isChosen>
-                                            <img src='<?php echo base_url(); ?>/assets/img/${fileExtension.indexOf(file['extension']) !== -1 ? file_icon[file['extension']] : 'any_file_icon'}.png' alt=''>
+                                            <img src='/img/${fileExtension.indexOf(file['extension']) !== -1 ? file_icon[file['extension']] : 'any_file_icon'}.png' alt=''>
                                             <span>${file['ten_tep']}.${file['extension']}</span>
                                         </div>
                                         `
@@ -198,14 +198,14 @@
 
                     // console.log(id_lop_hoc + " " + id_tep_tin_tai_len);
                     $.ajax({
-                        url: `${window.location.protocol}//${window.location.hostname}/Admin/CoursesController/postFileOnClass`,
-                        contentType: "text",
+                        url: `${window.location.protocol}//${window.location.hostname}:${window.location.port}/CourseResource/postFileOnClass`,
+                        contentType: "application/json",
                         dataType: "json",
-                        data: {
+                        method: 'POST',
+                        data: JSON.stringify({
                             file_id: id_tep_tin_tai_len,
-                            id_lop_hoc: id_lop_hoc,
                             id_muc: id_muc
-                        },
+                        }),
                         success: function (response) {
                             loadingEffect(false);
                             rerenderCourseResources(id_muc);
@@ -213,7 +213,7 @@
                                 $(`.form-container`).remove();
                                 toast({
                                     title: "Thành công!",
-                                    message: response.message,
+                                    message: "Đăng tệp tin thành công",
                                     type: "success",
                                     duration: 100000
                                 });
@@ -270,15 +270,15 @@
                         return;
                     }
                     $.ajax({
-                        url: `${window.location.protocol}//${window.location.hostname}/Admin/CoursesController/postNewLinkOnClass`,
-                        contentType: "text",
+                        url: `${window.location.protocol}//${window.location.hostname}:${window.location.port}/CourseResource/postNewLinkOnClass`,
+                        contentType: "application/json",
+                        method: 'POST',
                         dataType: "json",
-                        data: {
+                        data: JSON.stringify({
                             tieu_de: tieu_de,
                             link: link,
-                            id_lop_hoc: id_lop_hoc,
                             id_muc: id_muc
-                        },
+                        }),
                         success: function (response) {
                             loadingEffect(false);
                             rerenderCourseResources(id_muc);
@@ -370,22 +370,24 @@
                         loadingEffect(false);
                         return;
                     }
+
+                    console.log((th));
                     // let id_tep_tin_tai_len = file.attr(`value`);
                     // console.log(id_lop_hoc + " " + id_muc + " " + id_tep_tin_tai_len);
 
                     // console.log(id_lop_hoc + " " + id_tep_tin_tai_len);
                     $.ajax({
-                        url: `${window.location.protocol}//${window.location.hostname}/Admin/CoursesController/postAssignmentOnClass`,
-                        contentType: "text",
+                        url: `${window.location.protocol}//${window.location.hostname}:${window.location.port}/CourseResource/postAssignmentOnClass`,
+                        contentType: "application/json",
+                        method: 'POST',
                         dataType: "json",
-                        data: {
-                            id_lop_hoc: id_lop_hoc,
+                        data: JSON.stringify({
                             id_muc: id_muc,
                             ten_bai_tap: ten_bai_tap,
                             noi_dung: noi_dung,
                             thoi_han: replaceLettersWithSpace(th),
                             thoi_han_nop: replaceLettersWithSpace(thn)
-                        },
+                        }),
                         success: function (response) {
                             loadingEffect(false);
                             rerenderCourseResources(id_muc);
@@ -443,6 +445,7 @@
                         // var param1Value = urlParams.get('courrseid');
                         let id_lop_hoc = urlParams.get('courseid');
                         let id_muc = $(`.insert-resource-form`).attr(`value`);
+
                         let tieu_de = $(`.noti-title-input`).val();
                         let noi_dung = document.querySelector(".noti-content-input").value;
                         console.log(noi_dung);
@@ -452,15 +455,15 @@
                             return;
                         }
                         $.ajax({
-                            url: `${window.location.protocol}//${window.location.hostname}/Admin/CoursesController/postNewNotiOnClass`,
-                            contentType: "text",
+                            url: `${window.location.protocol}//${window.location.hostname}:${window.location.port}/CourseResource/postNewNotiOnClass`,
+                            contentType: "application/json",
                             dataType: "json",
-                            data: {
+                            method: 'POST',
+                            data: JSON.stringify({
                                 tieu_de: tieu_de,
                                 noi_dung: noi_dung,
-                                id_lop_hoc: id_lop_hoc,
                                 id_muc: id_muc
-                            },
+                            }),
                             success: function (response) {
                                 loadingEffect(false);
                                 rerenderCourseResources(id_muc);

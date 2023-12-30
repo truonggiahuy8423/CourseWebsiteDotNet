@@ -48,6 +48,16 @@
         let files = null;
         let assignments = null;
 
+        function formatDateTimeString(inputString) {
+            // Chuyển tất cả chữ cái thành khoảng trắng
+            let resultString = inputString.replace(/[a-zA-Z]/g, ' ');
+
+            // Bỏ khoảng trắng ở đầu cuối chuỗi
+            resultString = resultString.trim();
+
+            return resultString;
+        }
+
         function rerenderCourseResources() {
             console.log("rerenderRe")
             loadingEffect(true);
@@ -122,7 +132,7 @@
                                             <h5 class="link-variant__title">
                                                 <img src="/img/link_icon.png" style="height: 14px; margin-bottom: 2px;" alt="">
                                                 <a href="${links[a]["link"]}" style="text-decoration: none; color: #2C2C2C;">${links[a]["tieu_de"]}</a>
-                                                <span class="item-details">Đã đăng vào ${links[a]["ngay_dang"]} bởi ${links[a]["ho_ten"]}</span>
+                                                        <span class="item-details">Đã đăng vào ${formatDateTimeString(links[a]["ngay_dang"])} bởi ${links[a]["ho_ten"]}</span>
                                             </h5>
                                         </div>
                                     `);
@@ -135,7 +145,7 @@
                                                 <span class="content-panel">
                                                     <i class="bi bi-chat-left-text"></i>
                                                     <span class="noti-title"> ${notis[b]["tieu_de"]} </span>
-                                                    <span class="item-details">Đã đăng vào ${notis[b]["ngay_dang"]} bởi ${notis[b]["ho_ten"]}</span>
+                                                            <span class="item-details">Đã đăng vào ${formatDateTimeString(notis[b]["ngay_dang"])} bởi ${notis[b]["ho_ten"]}</span>
                                                 </span>
                                             </h5>
                                             <p class="notification-variant__content">${notis[b]["noi_dung"]}</p>
@@ -150,7 +160,7 @@
                                             <h5 class="file-variant__title">
                                                 <img src="/img/${fileExtension.indexOf(files[c]['extension']) !== -1 ? file_icon[files[c]['extension']] : 'any_file_icon'}.png" style="height: 14px; margin-bottom: 2px;" alt="">
                                                 <span class="file-title" id="${files[c]['id_tep_tin_tai_len']}">${files[c]['ten_tep']}.${files[c]['extension']}</span>
-                                                <span class="item-details">Đã đăng ${files[c]['ngay_dang']} bởi ${files[c]['ho_ten']}</span>
+                                                        <span class="item-details">Đã đăng ${formatDateTimeString(files[c]['ngay_dang'])} bởi ${files[c]['ho_ten']}</span>
                                             </h5>
                                         </div>
                                     `);
@@ -161,8 +171,8 @@
                                         <div class="resource-item assignment-variant">
                                             <h5 class="assignment-variant__title" href="">
                                                 <img src="/img/assignment_icon.png" style="height: 14px; margin-bottom: 2px;" alt="">
-                                                <a href="<?php echo base_url() ?>//resource/assignment?assignmentid=${assignments[d]["id_bai_tap"]}" style="text-decoration: none; color: #2C2C2C;">${assignments[d]["ten"]}</a>
-                                                <span class="item-details">Đã đăng ${assignments[d]['ngay_dang']} bởi ${assignments[d]['ho_ten']}</span>
+                                                <a href="/courses/resource/assignment?assignmentid=${assignments[d]["id_bai_tap"]}" style="text-decoration: none; color: #2C2C2C;">${assignments[d]["ten"]}</a>
+                                                        <span class="item-details">Đã đăng ${formatDateTimeString(assignments[d]['ngay_dang'])} bởi ${assignments[d]['ho_ten']}</span>
                                             </h5>
                                         </div>
                                     `);

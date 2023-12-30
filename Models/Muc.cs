@@ -155,7 +155,7 @@ namespace CourseWebsiteDotNet.Models
                     using (MySqlCommand command = new MySqlCommand(query, connection))
                     {
                         command.Parameters.AddWithValue("@ten_muc", muc.ten_muc);
-                        command.Parameters.AddWithValue("@id_lop_hoc", muc.id_muc);
+                        command.Parameters.AddWithValue("@id_lop_hoc", muc.id_lop_hoc);
                         command.Parameters.AddWithValue("@id_muc_cha", muc.id_muc_cha);
 
                         int insertedId = Convert.ToInt32(command.ExecuteScalar());
