@@ -56,6 +56,21 @@ namespace CourseWebsiteDotNet.Controllers
             return View("InsertUserForm");
         }
 
+        [HttpGet]
+        public IActionResult getUpdateUserForm()
+        {
+            var userRepo = new UserRepository();
+            ViewData["users"] = userRepo.GetAllUsers();
+
+            var lecturerRepo = new GiangVienRepository();
+            ViewData["lecturers"] = lecturerRepo.GetAllGiangVien();
+
+            var studentRepo = new HocVienRepository();
+            ViewData["students"] = studentRepo.GetAllHocVien();
+
+            return View("UpdateUserForm");
+        }
+
         //[HttpPost]
         //public IActionResult insertUser([FromBody] JsonDocument dataReceived)
         //{

@@ -43,129 +43,129 @@
                         @{
                             for (int i = 0; i < users.Rows.Count; i++)
                             {
-                                <tr>
-                                    <td>
-                                        @users.Rows[i]["id_user"]
-                                    </td>
-                                    <td>
-                                        @{
+                                    <tr>
+                                        <td>
+                                            @users.Rows[i]["id_user"]
+                                        </td>
+                                        <td>
+                                            @{
                                     var anhDaiDien = users.Rows[i]["anh_dai_dien"];
                                     if (Convert.IsDBNull(anhDaiDien))
                                     {
-                                                <img src="/img/avatar_blank.jpg" alt="" style="height: 20px; border-radius: 100px;">
+                                                        <img src="/img/avatar_blank.jpg" alt="" style="height: 20px; border-radius: 100px;">
                                     }
                                     else
                                     {
                                         var imageBytes = (byte[])users.Rows[i]["anh_dai_dien"];
                                         var base64String = Convert.ToBase64String(imageBytes);
                                         var imgSrc = $"data:image/jpeg;base64,{base64String}";
-                                                <img src="@imgSrc" alt="" style="height: 20px; border-radius: 100px;">
+                                                        <img src="@imgSrc" alt="" style="height: 20px; border-radius: 100px;">
                                     }
 
-                                        }
-                                        @users.Rows[i]["ho_ten"]
-                                    </td>
-                                    <td>
-                                        @users.Rows[i]["tai_khoan"]
-                                    </td>
-                                    <td>
-                                        <style>
-                                            .password-container {
-                                                width: 100px; /* Set your desired fixed width */
-                                                overflow: hidden;
                                             }
-                                            .password-container:hover .hidden-password {
-                                                display: none;
-                                            }
+                                            @users.Rows[i]["ho_ten"]
+                                        </td>
+                                        <td>
+                                            @users.Rows[i]["tai_khoan"]
+                                        </td>
+                                        <td>
+                                            <style>
+                                                .password-container {
+                                                    width: 100px; /* Set your desired fixed width */
+                                                    overflow: hidden;
+                                                }
+                                                .password-container:hover .hidden-password {
+                                                    display: none;
+                                                }
 
-                                            .password-container:hover .visible-password {
-                                                display: inline;
-                                            }
+                                                .password-container:hover .visible-password {
+                                                    display: inline;
+                                                }
 
-                                            .visible-password {
-                                                display: none;
-                                            }
-                                        </style>
+                                                .visible-password {
+                                                    display: none;
+                                                }
+                                            </style>
 
-                                        @{
+                                            @{
                                             string repeatedAsterisks = new string('*', users.Rows[i]["mat_khau"].ToString().Length);
-                                        }
-
-                                        <div class="password-container">
-                                            <span class="hidden-password">@repeatedAsterisks</span>
-                                            <span class="visible-password">@users.Rows[i]["mat_khau"]</span>
-                                        </div>
-                                    
-                                    </td>
-                                    <td>
-                                        <script>
-                                            // JavaScript function to calculate time difference
-                                            function timeDifference(inputDatetime) {
-                                                if (!inputDatetime) {
-                                                    return "Chưa đăng nhập lần nào";
-                                                }
-                                                // Set the time zone to Asia/Ho_Chi_Minh
-                                                const vietnamTimeZone = 'Asia/Ho_Chi_Minh';
-
-                                                // Convert the input string to a Date object
-                                                const inputTime = new Date(inputDatetime);
-
-                                                // Get the current time in the Vietnam time zone
-                                                const now = new Date();
-
-                                                // Calculate the time difference
-                                                const interval = new Date(now - inputTime);
-
-                                                // Get the total seconds
-                                                const totalSeconds = Math.floor(interval / 1000);
-                                                if (totalSeconds >= 86400) {
-                                                    // If the time is greater than or equal to 1 day, return the original input string
-                                                    return inputDatetime;
-                                                } else if (totalSeconds < 60) {
-                                                    // If the time is less than 60 seconds, return "Đang hoạt động"
-                                                    return "<div class='active-icon'></div> Đang hoạt động";
-                                                } else if (totalSeconds < 3600) {
-                                                    // If the time is less than 1 hour, calculate and return minutes ago
-                                                    const minutes = Math.floor(totalSeconds / 60);
-                                                    return `Hoạt động ${minutes} phút trước`;
-                                                } else {
-                                                    // If the time is less than 1 day but greater than 1 hour, calculate and return hours ago
-                                                    const hours = Math.floor(totalSeconds / 3600);
-                                                    return `Hoạt động ${hours} giờ trước`;
-                                                }
                                             }
 
-                                            // Apply timeDifference to thoi_gian_dang_nhap_gan_nhat
-                                            var thoiGian = '@users.Rows[i]["thoi_gian_dang_nhap_gan_nhat"]';
-                                            console.log(thoiGian);
-                                            var timeDiffResult = timeDifference(thoiGian);
-                                            document.write(timeDiffResult);
-                                        </script>
-                                    </td>
-                                    <td>
-                                        @{
+                                            <div class="password-container">
+                                                <span class="hidden-password">@repeatedAsterisks</span>
+                                                <span class="visible-password">@users.Rows[i]["mat_khau"]</span>
+                                            </div>
+                                        
+                                        </td>
+                                        <td>
+                                            <script>
+                                                // JavaScript function to calculate time difference
+                                                function timeDifference(inputDatetime) {
+                                                    if (!inputDatetime) {
+                                                        return "Chưa đăng nhập lần nào";
+                                                    }
+                                                    // Set the time zone to Asia/Ho_Chi_Minh
+                                                    const vietnamTimeZone = 'Asia/Ho_Chi_Minh';
+
+                                                    // Convert the input string to a Date object
+                                                    const inputTime = new Date(inputDatetime);
+
+                                                    // Get the current time in the Vietnam time zone
+                                                    const now = new Date();
+
+                                                    // Calculate the time difference
+                                                    const interval = new Date(now - inputTime);
+
+                                                    // Get the total seconds
+                                                    const totalSeconds = Math.floor(interval / 1000);
+                                                    if (totalSeconds >= 86400) {
+                                                        // If the time is greater than or equal to 1 day, return the original input string
+                                                        return inputDatetime;
+                                                    } else if (totalSeconds < 60) {
+                                                        // If the time is less than 60 seconds, return "Đang hoạt động"
+                                                        return "<div class='active-icon'></div> Đang hoạt động";
+                                                    } else if (totalSeconds < 3600) {
+                                                        // If the time is less than 1 hour, calculate and return minutes ago
+                                                        const minutes = Math.floor(totalSeconds / 60);
+                                                        return `Hoạt động ${minutes} phút trước`;
+                                                    } else {
+                                                        // If the time is less than 1 day but greater than 1 hour, calculate and return hours ago
+                                                        const hours = Math.floor(totalSeconds / 3600);
+                                                        return `Hoạt động ${hours} giờ trước`;
+                                                    }
+                                                }
+
+                                                // Apply timeDifference to thoi_gian_dang_nhap_gan_nhat
+                                                var thoiGian = '@users.Rows[i]["thoi_gian_dang_nhap_gan_nhat"]';
+                                                console.log(thoiGian);
+                                                var timeDiffResult = timeDifference(thoiGian);
+                                                document.write(timeDiffResult);
+                                            </script>
+                                        </td>
+                                        <td>
+                                            @{
                                     if (users.Rows[i]["id_ad"] != DBNull.Value)
                                     {
                                         var rs = users.Rows[i]["id_ad"].ToString().PadLeft(3, '0');
-                                                        @($"Quản trị viên({rs})")
+                                                                @($"Quản trị viên({rs})")
                                     }
                                     else if (users.Rows[i]["id_giang_vien"] != DBNull.Value)
                                     {
                                         var rs = users.Rows[i]["id_giang_vien"].ToString().PadLeft(6, '0');
-                                                        @($"Giảng viên({rs})")
+                                                                @($"Giảng viên({rs})")
                                     }
                                     else
                                     {
                                         var rs = users.Rows[i]["id_hoc_vien"].ToString().PadLeft(6, '0');
-                                                        @($"Học viên({rs})")
+                                                                @($"Học viên({rs})")
                                     }
-                                        }
-                                    </td>
-                                    <td class="text-center">
-                                        <button class="update-user-btn btn-link text-primary border-0 btn-sm" style="background-color: transparent;" onclick="Sua(@users.Rows[i]["id_user"])">Sửa</button>
-                                        <button class="btn-link text-primary border-0 btn-sm" style="background-color: transparent;" onclick="xoa(@users.Rows[i]["id_user"])">Xóa</button>
-                                    </td>
-                                </tr>
+                                            }
+                                        </td>
+                                        <td class="text-center">
+                                            <button class="update-user-btn btn-link text-primary border-0 btn-sm" style="background-color: transparent;" onclick="Sua(@users.Rows[i]["id_user"])">Sửa</button>
+                                            <button class="btn-link text-primary border-0 btn-sm" style="background-color: transparent;" onclick="xoa(@users.Rows[i]["id_user"])">Xóa</button>
+                                        </td>
+                                    </tr>
                             }
                         }
                     </tbody>
@@ -214,41 +214,41 @@
     </div>
 
     <script>
-        function timeDifference(inputDatetime) {
-            if (inputDatetime == null) {
-                return "Chưa đăng nhập lần nào";
-            }
-            // Chuyển đổi chuỗi datetime thành đối tượng Date
-            var inputTime = new Date(inputDatetime);
+        // function timeDifference(inputDatetime) {
+        //     if (inputDatetime == null) {
+        //         return "Chưa đăng nhập lần nào";
+        //     }
+        //     // Chuyển đổi chuỗi datetime thành đối tượng Date
+        //     var inputTime = new Date(inputDatetime);
 
-            // Lấy thời gian hiện tại
-            var now = new Date();
+        //     // Lấy thời gian hiện tại
+        //     var now = new Date();
 
-            // Tính khoảng thời gian giữa hai thời điểm
-            var timeDiff = Math.abs(now.getTime() - inputTime.getTime());
+        //     // Tính khoảng thời gian giữa hai thời điểm
+        //     var timeDiff = Math.abs(now.getTime() - inputTime.getTime());
 
-            // Tính số giây tổng cộng
-            var totalSeconds = Math.floor(timeDiff / 1000);
+        //     // Tính số giây tổng cộng
+        //     var totalSeconds = Math.floor(timeDiff / 1000);
 
-            if (totalSeconds >= 86400) {
-                // Nếu thời gian lớn hơn hoặc bằng 1 ngày, trả về chính chuỗi input
-                return inputDatetime;
-            } else if (totalSeconds < 30) {
-                // Nếu thời gian dưới 30 giây, trả về chuỗi "đang hoạt động"
-                return '<div class="active-icon"></div> Đang hoạt động';
-            } else if (totalSeconds < 3600) {
-                // Nếu thời gian dưới 1 giờ, tính và trả về phút trước
-                var minutes = Math.floor(totalSeconds / 60);
-                return "Hoạt động " + minutes + ' phút trước';
-            } else {
-                // Nếu thời gian dưới 1 ngày nhưng lớn hơn 1 giờ, tính và trả về giờ trước
-                var hours = Math.floor(totalSeconds / 3600);
-                return "Hoạt động " + hours + ' giờ trước';
-            }
-        }
-        function generateAsterisks(n) {
-            return '*'.repeat(n);
-        }
+        //     if (totalSeconds >= 86400) {
+        //         // Nếu thời gian lớn hơn hoặc bằng 1 ngày, trả về chính chuỗi input
+        //         return inputDatetime;
+        //     } else if (totalSeconds < 30) {
+        //         // Nếu thời gian dưới 30 giây, trả về chuỗi "đang hoạt động"
+        //         return '<div class="active-icon"></div> Đang hoạt động';
+        //     } else if (totalSeconds < 3600) {
+        //         // Nếu thời gian dưới 1 giờ, tính và trả về phút trước
+        //         var minutes = Math.floor(totalSeconds / 60);
+        //         return "Hoạt động " + minutes + ' phút trước';
+        //     } else {
+        //         // Nếu thời gian dưới 1 ngày nhưng lớn hơn 1 giờ, tính và trả về giờ trước
+        //         var hours = Math.floor(totalSeconds / 3600);
+        //         return "Hoạt động " + hours + ' giờ trước';
+        //     }
+        // }
+        // function generateAsterisks(n) {
+        //     return '*'.repeat(n);
+        // }
         // function reloadUssers() {
         //     loadingEffect(false);
         //     let urlParams = new URLSearchParams(window.location.search);
@@ -337,15 +337,15 @@
         //         }
         //     })
         // }
-        function showPassword(cell) {
-            cell.querySelector('.hidden-password').style.display = 'none';
-            cell.querySelector('.visible-password').style.display = 'inline';
-        }
+        // function showPassword(cell) {
+        //     cell.querySelector('.hidden-password').style.display = 'none';
+        //     cell.querySelector('.visible-password').style.display = 'inline';
+        // }
 
-        function hidePassword(cell) {
-            cell.querySelector('.hidden-password').style.display = 'inline';
-            cell.querySelector('.visible-password').style.display = 'none';
-        }
+        // function hidePassword(cell) {
+        //     cell.querySelector('.hidden-password').style.display = 'inline';
+        //     cell.querySelector('.visible-password').style.display = 'none';
+        // }
 
         $(document).ready(function () {
             //reloadUssers();
@@ -356,6 +356,33 @@
                     success: function (response) {
                         loadingEffect(false);
                         $('body').append(response);
+                    }
+                });
+            });
+        });
+
+        $(document).ready(function () {
+            //reloadUssers();
+            $(`.update-user-btn`).click(function () {
+                $.ajax({
+                    url: '/User/getUpdateUserForm',
+                    method: 'GET',
+                    success: function (response) {
+                        loadingEffect(false);
+                        $('body').append(response);
+                        $.ajax({
+                            url: 'User/getUserInfo',
+                            method: 'GET',
+                            data: { id_user: currentUserId },
+                            success: function (response) {
+                                $('.account-field').val(response.tai_khoan);
+                                var imgSrc = response.anh_dai_dien ? `data:image/jpeg;base64,${response.anh_dai_dien}` : '/img/avatar_blank.jpg';                               ;
+                                $('.uploaded-ava').attr('src', imgSrc);
+                            },
+                            error: function (xhr, status, error) {
+                                console.error('Error fetching user information:', status, error);
+                            }
+                        });
                     }
                 });
             });
@@ -384,24 +411,24 @@
         });
         var currentUserId;
         function Sua(id) {
-            console.log("đây là sửa form");
-            $('#SuaUserForm').modal('show');
+            //$('#SuaUserForm').modal('show');
             currentUserId = id * 1;
-            $.ajax({
-                url: 'User/getUserInfo',
-                method: 'GET',
-                dataType: 'json',
-                data: { id_user: currentUserId },
-                success: function (response) {
-                    // Populate the form fields with the fetched data
-                    $('#taiKhoanSua').val(response.tai_khoan);
-                    var imgSrc = response.anh_dai_dien ? `data:image/jpeg;base64,${response.anh_dai_dien}` : '/img/avatar_blank.jpg';                               ;
-                    $('#avatarImage').attr('src', imgSrc);
-                },
-                error: function (xhr, status, error) {
-                    console.error('Error fetching student information:', status, error);
-                }
-            });
+            // $.ajax({
+            //     url: '/User/getUpdateUserForm',
+            //     method: 'GET',
+            //     dataType: 'json',
+            //     data: { id_user: currentUserId },
+            //     success: function (response) {
+                    
+            //         $('body').append(response);
+            //         $('#account-field').val(response.tai_khoan);
+            //         // var imgSrc = response.anh_dai_dien ? `data:image/jpeg;base64,${response.anh_dai_dien}` : '/img/avatar_blank.jpg';                               ;
+            //         // $('#avatarImage').attr('src', imgSrc);
+            //     },
+            //     error: function (xhr, status, error) {
+            //         console.error('Error fetching user information:', status, error);
+            //     }
+            // });
         }
 
         function luuThongTinSua() {
