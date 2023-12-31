@@ -1,5 +1,6 @@
 using CourseWebsiteDotNet.Middleware;
 using System;
+using System.Data.SqlClient;
 
 namespace CourseWebsiteDotNet
 {
@@ -93,6 +94,18 @@ namespace CourseWebsiteDotNet
                     name: "subjects",
                     pattern: "subjects",
                     defaults: new { controller = "Subject", action = "Index" }
+                );
+                
+                endpoints.MapControllerRoute(
+                    name: "profile/lecturer",
+                    pattern: "profile/lecturer/{id?}",
+                    defaults: new { controller = "Profile", action = "Index", isLecturer = true }
+                );
+
+                endpoints.MapControllerRoute(
+                    name: "profile/student",
+                    pattern: "profile/student/{id?}",
+                    defaults: new { controller = "Profile", action = "Index", isLecturer = false }
                 );
             });
             //app.MapControllerRoute(

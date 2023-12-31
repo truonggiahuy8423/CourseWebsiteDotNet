@@ -81,7 +81,7 @@ namespace CourseWebsiteDotNet.Models
         }
 
         // Trả về 1 LopHocModel
-        public GiangVienModel? GetLopHocById(int id)
+        public GiangVienModel? GetGiangVienById(int id)
         {
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
@@ -97,7 +97,7 @@ namespace CourseWebsiteDotNet.Models
                     {
                         if (reader.Read())
                         {
-                            return new GiangVienModel // Trả về 1 LopHocModel
+                            return new GiangVienModel // Trả về 1 GiangVienModel
                             {
                                 id_giang_vien = reader["id_giang_vien"] != DBNull.Value ? Convert.ToInt32(reader["id_giang_vien"]) : (int?)null,
                                 ho_ten = reader["ho_ten"] != DBNull.Value ? Convert.ToString(reader["ho_ten"]) : (string?)null,
