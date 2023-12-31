@@ -15,6 +15,12 @@ namespace CourseWebsiteDotNet.Models
         public int? id_giang_vien { get; set; }
         public int? id_hoc_vien { get; set; }
     }
+    public class EmailUser
+    {
+        public string? Email { get; set; }
+        public string? tai_khoan { get; set; }
+        public int? id_user { get; set; }
+    }
     public class UserRepository
     {
         private readonly string connectionString;
@@ -123,6 +129,41 @@ namespace CourseWebsiteDotNet.Models
                                 id_hoc_vien = reader["id_hoc_vien"] != DBNull.Value
                                     ? Convert.ToInt32(reader["id_hoc_vien"])
                                     : (int?)null
+                            };
+                        }
+                        else
+                            return null;
+                    }
+                }
+            }
+        }
+        public EmailUser? GetUserByEmail(string email)
+        {
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
+
+                string query = $@"SELECT COALESCE(gv.email, hv.email,a.email) AS Email , u.id_user,u.tai_khoan
+                                FROM users u LEFT JOIN giang_vien gv
+                                on u.id_giang_vien = gv.id_giang_vien LEFT JOIN hoc_vien hv
+                                on u.id_hoc_vien = hv.id_hoc_vien LEFT JOIN ad a
+                                on u.id_ad = a.id_ad
+                                
+                                WHERE  gv.email = @email OR  hv.email = @email or a.email = @email";
+
+                using (MySqlCommand command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@email", email);
+
+                    using (MySqlDataReader reader = command.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            return new EmailUser
+                            {
+                                Email = reader["Email"].ToString() ,
+                                id_user = reader["id_user"] != DBNull.Value ? Convert.ToInt32(reader["id_user"]) : (int?)null,
+                                tai_khoan = reader["tai_khoan"].ToString(),
                             };
                         }
                         else
