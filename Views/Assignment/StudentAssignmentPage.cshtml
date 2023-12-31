@@ -269,7 +269,7 @@
                                     $('.submit-btn').click(function () {
                                         loadingEffect(true);
                                         $.ajax({
-                                            url: `${window.location.protocol}//${window.location.hostname}/Admin/CoursesController/getSubmissionForm`,
+                                            url: `${window.location.protocol}//${window.location.hostname}:${window.location.port}/Assignment/getSubmissionForm`,
                                             method: 'GET',
                                             dataType: "text",
                                             success: function (response) {
@@ -328,13 +328,8 @@
                     let urlParams = new URLSearchParams(window.location.search);
                     let assignmentid = urlParams.get('assignmentid');
                     $.ajax({
-                        url: `${window.location.protocol}//${window.location.hostname}/Admin/CoursesController/deleteSubmission`,
-                        method: 'GET',
+                        url: `${window.location.protocol}//${window.location.hostname}:${window.location.port}/Assignment/deleteSubmission`,
                         dataType: "json",
-                        contentType: "text",
-                        data: {
-                            assignmentid: assignmentid * 1
-                        },
                         success: function (response) {
                             loadingEffect(false);
                             if (response.state) {

@@ -225,6 +225,165 @@ namespace CourseWebsiteDotNet.Controllers
 			}
 		}
         [HttpGet]
+        public IActionResult getSubmissionForm()
+        {
+            return View("SubmitSubmissionForm");
+
+
+        }
+        [HttpPost]
+        public IActionResult submitAssignment([FromBody] JsonDocument dataReceived)
+        {
+            dynamic obj = JsonConvert.DeserializeObject<ExpandoObject>(dataReceived.RootElement.ToString());
+            int? courseid = HttpContext.Session.GetInt32("courseid");
+            int? assignmentid = HttpContext.Session.GetInt32("assignmentid");
+            int? studentid = HttpContext.Session.GetInt32("role_id");
+            int? userid = HttpContext.Session.GetInt32("user_id");
+            int? role = HttpContext.Session.GetInt32("role");
+            if (courseid == null || assignmentid == null || role != 3)
+            {
+                var notFoundResponse = new
+                {
+                    state = false,
+                    message = "Bạn không có quyền truy cập tài nguyên này"
+                };
+                return Json(notFoundResponse);
+            }
+            TimeZoneInfo vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+            DateTime vietnamNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
+
+            BaiNopModel model = new BaiNopModel()
+            {
+                id_bai_tap = assignmentid,
+                id_hoc_vien = studentid,
+                thoi_gian_nop = vietnamNow
+                
+            };
+
+            Response rs = new BaiNopRepository().InsertBaiNop(model);
+            int? id_bai_nop = rs.insertedId;
+            List<object> dstt = obj.list_of_files_id;
+            if (rs.state)
+            {
+                
+                var userfiles = new TepTinTaiLenRepository().GetTepTinTaiLenByUserId((int)userid);
+                for (int i = 0; i< dstt.Count; i++)
+                {
+                    bool isBelongtoUser = false;
+                    for (int j = 0; j < userfiles.Count; j++)
+                    {
+                        if (Convert.ToInt32(dstt[i]) == userfiles[j].id_tep_tin_tai_len)
+                        {
+                            isBelongtoUser = true;
+                            break;
+                        }
+                    }
+
+                    if (isBelongtoUser)
+                    {
+                        new ChiTietBaiNopRepository().InsertChiTietBaiNop(new ChiTietBaiNopModel() { id_bai_nop =   (int)id_bai_nop, id_tep_tin_tai_len = Convert.ToInt32(dstt[i]) });
+                    }
+                }
+            }
+            dynamic response = new
+            {
+                state = rs.state,
+                message = rs.message
+            };
+                return Ok(JsonConvert.SerializeObject(response));
+
+
+        }
+        //public function submitAssignment()
+        //{
+        //    if (!session()->has('id_user'))
+        //    {
+        //        return redirect()->to('/');
+        //    }
+        //$submission = json_decode(json_encode($this->request->getJSON()), true);
+
+        //// $submission = [
+        ////     "id_bai_tap" => "3",
+        ////     "list_of_files_id" => [1, 2,34, 4, 53, 34]
+        //// ];
+        //$id_bai_tap = $submission["id_bai_tap"];
+        //$dstep = $submission["list_of_files_id"];
+        
+        
+        //$bai_nop = new BaiNopModel();
+        //$bai_nop->id_bai_tap = $id_bai_tap;
+        //$bai_nop->id_hoc_vien = session()->get("id_role");
+        //$bai_nop->thoi_gian_nop = $this->getCurrentDateTimeInVietnam();
+        //$rs = $bai_nop->insertBaiNop($bai_nop);
+        //$id_bai_nop = $rs["id_bai_nop"];
+        //    // return $this->response->setJSON(["state" => true, "message" => $rs['id_bai_nop']]);
+        //    if ($rs["state"]) {
+        //    $dstt = $this->filterAndFormatArray($dstep);
+        //    $id_user = session()->get("id_user");
+        //    $dstt = (new chi_tiet_bai_nopModel())->executeCustomQuery(
+        //        "SELECT id_tep_tin_tai_len FROM tep_tin_tai_len WHERE id_user = $id_user $dstt;
+        //    ");
+    
+        //    foreach ($dstt as $tt) {
+        //                // return $this->response->setJSON(["state" => true, "message" => true]);
+        //        $ctbn = new chi_tiet_bai_nopModel();
+        //        $ctbn->id_bai_nop = $id_bai_nop;
+        //        $ctbn->id_tep_tin_tai_len = $tt["id_tep_tin_tai_len"];
+        //        $ctbn->insertchi_tiet_bai_nop($ctbn);
+        //            // return $this->response->setJSON($rs);
+        //        }
+
+        //    }
+        //    return $this->response->setJSON($rs);
+        //}
+        public IActionResult deleteSubmission()
+        {
+            int? courseid = HttpContext.Session.GetInt32("courseid");
+            int? assignmentid = HttpContext.Session.GetInt32("assignmentid");
+            int? studentid = HttpContext.Session.GetInt32("role_id");
+            int? role = HttpContext.Session.GetInt32("role");
+            if (courseid == null || assignmentid == null || role != 3)
+            {
+                var notFoundResponse = new
+                {
+                    state = false,
+                    message = "Bạn không có quyền truy cập tài nguyên này"
+                };
+                return Json(notFoundResponse);
+            }
+
+            
+
+            DataTable studentSubmission = SQLExecutor.ExecuteQuery($@"SELECT * FROM bai_nop WHERE id_bai_tap = {assignmentid} and id_hoc_vien = {studentid}");
+
+            if (studentSubmission.Rows.Count > 0)
+            {
+                return Ok(JsonConvert.SerializeObject(new BaiNopRepository().DeleteBaiNop((int)studentSubmission.Rows[0]["id_bai_nop"])));
+            }
+
+            var notFoundResponse2 = new
+            {
+                state = false,
+                message = "Đã có lỗi xảy ra!"
+            };
+            return Json(notFoundResponse2);
+
+        }
+        //function deleteSubmission()
+        //{
+        //$id_bai_tap = $this->request->getVar("assignmentid");
+        //$id_hoc_vien = session()->get("id_role");
+        //$model = new BaiNopModel();
+        //$rs = $model->executeCustomQuery(
+        //    "SELECT * FROM bai_nop WHERE id_bai_tap = $id_bai_tap and id_hoc_vien = $id_hoc_vien"
+        //);
+        //    if (count($rs) > 0)
+        //    {
+        //        return $this->response->setJSON($model->deleteBaiNop($rs[0]["id_bai_nop"]));
+        //    }
+        //    return $this->response->setJSON(['state' => false, 'message' => "Đã có lỗi xảy ra"]);
+        //}
+        [HttpGet]
         public IActionResult getAssignmentInformation()
         {
             int assignmentid = (int)HttpContext.Session.GetInt32("assignmentid");

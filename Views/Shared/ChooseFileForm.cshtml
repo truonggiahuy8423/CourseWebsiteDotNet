@@ -60,6 +60,19 @@
         </div>
     </div>
     <script>
+        function tachChuoiCham(chuoi) {
+            var index = chuoi.lastIndexOf('.');
+            console.log("file slpit")
+            console.log(chuoi.substring(0, index) + "   " + chuoi.substring(index + 1));
+            if (index !== -1) {
+                var truocCham = chuoi.substring(0, index);
+                var sauCham = chuoi.substring(index + 1);
+                return { fileName: truocCham, extension: sauCham };
+            } else {
+                return { fileName: chuoi, extension: '' };
+            }
+        }
+
         $(document).ready(function () {
             $(`.upload-file-btn`).click(function () {
                 let fileList = $(`.file-upload-input`).prop('files');
@@ -124,13 +137,16 @@
 
         })
         $(document).on('click', '.file-item', function () {
-            console.log('clicked');
+
             console.log($(this).attr('isChosen'));
             $(`.file-item`).attr(`isChosen`, "false");
             $(`.file-item`).removeClass(`hilight`);
             $(this).attr(`isChosen`, "true");
             $(this).addClass(`hilight`);
-            console.log($(this).attr('isChosen'));
+            let dom = $(`.file-item[ischosen="true"]`);
+            let file_id = dom.attr('value');
+
+            console.log(tachChuoiCham(dom.text()).extension.length);
         });
         $(document).on('change', '#fileInput', function () {
             // Lấy tên file đã chọn

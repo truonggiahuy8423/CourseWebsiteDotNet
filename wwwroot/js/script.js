@@ -141,6 +141,8 @@ async function chooseUserFile() {
                   uploadingNoti(false, "Chưa tệp tin nào được chọn");
                   return;
               }
+              console.log("file slpit")
+
             let file_id = dom.attr('value');
             let fileName =  removeNewlines(tachChuoiCham(dom.text()).fileName).trim();
             let extension =  removeNewlines(tachChuoiCham(dom.text()).extension).trim();
@@ -163,8 +165,9 @@ async function chooseUserFile() {
   })
 }
 function tachChuoiCham(chuoi) {
-  var index = chuoi.indexOf('.');
-
+    var index = chuoi.lastIndexOf('.');
+    console.log("file slpit")
+    console.log(chuoi.substring(0, index) + "   " + chuoi.substring(index + 1));
   if (index !== -1) {
       var truocCham = chuoi.substring(0, index);
       var sauCham = chuoi.substring(index + 1);
@@ -176,7 +179,6 @@ function tachChuoiCham(chuoi) {
 
 function removeNewlines(inputString) {
   // Sử dụng biểu thức chính quy để thay thế tất cả các ký tự \n thành chuỗi rỗng
-  var resultString = inputString.replace(/\n/g, '');
-
-  return resultString;
+  var resultString = inputString.replace(/\n/g, '');    
+  return resultString.trim();
 }

@@ -109,12 +109,13 @@ namespace CourseWebsiteDotNet.Models
                 {
                     connection.Open();
 
-                    string query = "INSERT INTO chi_tiet_bai_nop (id_tep_tin_tai_len) " +
-                                   "VALUES (@id_tep_tin_tai_len); SELECT LAST_INSERT_ID();";
+                    string query = "INSERT INTO chi_tiet_bai_nop (id_tep_tin_tai_len, id_bai_nop) " +
+                                   "VALUES (@id_tep_tin_tai_len, @id_bai_nop); SELECT LAST_INSERT_ID();";
 
                     using (MySqlCommand command = new MySqlCommand(query, connection))
                     {
                         command.Parameters.AddWithValue("@id_tep_tin_tai_len", chiTietBaiNop.id_tep_tin_tai_len);
+                        command.Parameters.AddWithValue("@id_bai_nop", chiTietBaiNop.id_bai_nop);
 
                         int insertedId = Convert.ToInt32(command.ExecuteScalar());
 
