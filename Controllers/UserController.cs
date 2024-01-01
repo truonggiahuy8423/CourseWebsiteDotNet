@@ -1,6 +1,8 @@
 ﻿using CourseWebsiteDotNet.Models;
+using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using System.Data;
 using System.Dynamic;
 using System.Text.Json;
 
@@ -256,25 +258,51 @@ namespace CourseWebsiteDotNet.Controllers
         }
 
         [HttpPost]
-        public IActionResult updatUser([FromBody] JsonDocument dataReceived)
+        public IActionResult updateUser(IFormFile file, int id_user, string account, string password, int role, int id_role)
         {
-            dynamic obj = JsonConvert.DeserializeObject<ExpandoObject>(dataReceived.RootElement.ToString());
+            var userModel = new UserModel();
+            using (var ms = new MemoryStream())
+            {
+                file.CopyTo(ms);
+                userModel.anh_dai_dien = ms.ToArray();
+            }
 
-            UserRepository userRepo = new UserRepository();
-            UserModel userModel = userRepo.GetUserById(Convert.ToInt32(obj.id_user));
+            userModel.id_user = id_user;
+            userModel.tai_khoan = account;
+            userModel.mat_khau = password;
 
-            byte[] imageBytes = Convert.FromBase64String(Convert.ToString(obj.anh_dai_dien));
-            userModel.anh_dai_dien = imageBytes;
-            userModel.tai_khoan = Convert.ToString(obj.tai_khoan);
-            userModel.mat_khau = Convert.ToString(obj.mat_khau);
+            if (role == 0)
+            {
+                userModel.id_ad = Convert.ToInt32(id_role);
+                userModel.id_giang_vien = null;
+                userModel.id_hoc_vien = null;
+            }
+            else if (role == 1)
+            {
+                userModel.id_ad = null;
+                userModel.id_giang_vien = Convert.ToInt32(id_role);
+                userModel.id_hoc_vien = null;
+            }
+            else if (role == 2)
+            {
+                userModel.id_ad = null;
+                userModel.id_giang_vien = null;
+                userModel.id_hoc_vien = Convert.ToInt32(id_role);
+            }
+
+            var userRepo = new UserRepository();
+            userModel.thoi_gian_dang_nhap_gan_nhat = null;
+
             var processResult = userRepo.UpdateUser(userModel);
-            dynamic response = new
+
+            var response = new
             {
                 state = processResult.state,
                 message = processResult.message,
                 auto_increment_id = processResult.insertedId
             };
-            return Ok(JsonConvert.SerializeObject(response));
+
+            return Ok(response);
         }
 
         [HttpGet]
@@ -298,6 +326,75 @@ namespace CourseWebsiteDotNet.Controllers
                 });
             }
         }
+
+        [HttpGet]
+        public IActionResult searchUser([FromBody] JsonDocument dataReceived)
+        {
+            dynamic obj = JsonConvert.DeserializeObject<ExpandoObject>(dataReceived.RootElement.ToString());
+            var key = obj.input;
+
+            var users = SQLExecutor.ExecuteQuery(
+                "SELECT users.*, COALESCE(ad.ho_ten, giang_vien.ho_ten, hoc_vien.ho_ten) AS ho_ten " +
+                "FROM users LEFT JOIN ad ON users.id_ad = ad.id_ad LEFT JOIN giang_vien ON users.id_giang_vien = giang_vien.id_giang_vien LEFT JOIN hoc_vien ON users.id_hoc_vien = hoc_vien.id_hoc_vien " +
+                $"WHERE id_user LIKE('{key}%') " +
+                $"OR tai_khoan LIKE('{key}%') " +
+                $"OR ho_ten LIKE('{key}%');"
+            );
+
+            users = users as DataTable;
+            return Json(users);
+            //var userList = new List<object>();
+
+            //for (int i = 0; i < users.Rows.Count; i++)
+            //{
+            //    var userObject = new
+            //    {
+            //        id_user = users.Rows[i]["id_user"],
+            //        anh_dai_dien = users.Rows[i]["anh_dai_dien"],
+            //        ho_ten = users.Rows[i]["ho_ten"],
+            //        tai_khoan = users.Rows[i]["tai_khoan"],
+            //        mat_khau = users.Rows[i]["mat_khau"],
+            //        thoi_gian_dang_nhap_gan_nhat = users.Rows[i]["thoi_gian_dang_nhap_gan_nhat"],
+            //        id_ad = users.Rows[i]["id_ad"],
+            //        id_giang_vien = users.Rows[i]["id_giang_vien"],
+            //        id_hoc_vien = users.Rows[i]["id_hoc_vien"],
+            //    };
+
+            //    userList.Add(userObject);
+            //}
+            //if (userList != null && userList.Any())
+            //{
+            //    return Json(new
+            //    {
+            //        users = userList
+            //    });
+            //}
+            //else
+            //{
+            //    return Json(new
+            //    {
+            //        error = $"Không tìm thấy user"
+            //    });
+            //}
+        }
+
+        // Example method to get user role based on id_ad, id_giang_vien, id_hoc_vien
+        private string GetUserRole(DataRow user)
+        {
+            if (user["id_ad"] != DBNull.Value)
+            {
+                return "Adminstrator(" + String.Format("{0:D3}", user["id_ad"]) + ")";
+            }
+            else if (user["id_giang_vien"] != DBNull.Value)
+            {
+                return "Giảng viên(" + String.Format("{0:D6}", user["id_giang_vien"]) + ")";
+            }
+            else
+            {
+                return "Học viên(" + String.Format("{0:D6}", user["id_hoc_vien"]) + ")";
+            }
+        }
+
     }
 }
 

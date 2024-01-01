@@ -18,7 +18,7 @@
         <div class="class-container">
             <div style="height: 30px; margin-bottom: 8px;" class="class__search me-2 d-flex justify-content-end">
                 <input style="border-radius: 0; height: 30px; width: 90px; z-index: 3" type="text" class="w-25 form-control search-input" placeholder="Tìm kiếm user">
-                <button class="btn btn-info search-button highlight-button"><i class="fas fa-search icon-search highlight-icon" style=""></i></button>
+                <button class="btn btn-info search-button highlight-button" onclick="searchUser()"><i class="fas fa-search icon-search highlight-icon" style=""></i></button>
                 <button class="add-user-btn highlight-button">
                     <i class="fa-solid fa-plus add-class-icon highlight-icon"></i>
                 </button>
@@ -387,7 +387,7 @@
                 });
             });
         });
-
+        var base64Image = null;
         $(document).ready(function () {
             $('#fileInput').change(function () {
                 // Lấy ra đối tượng input file
@@ -401,6 +401,7 @@
                     // Lắng nghe sự kiện khi FileReader đã đọc xong file
                     reader.onload = function (e) {
                         // Gán nội dung của file vào thuộc tính src của thẻ img
+                        base64Image = e.target.result;
                         $('.uploaded-ava').attr('src', e.target.result);
                     };
 
@@ -534,5 +535,44 @@
                 });
             }
         }
+
+        function searchUser() {
+            var searchInput = $('.search-input').val();
+
+            $.ajax({
+                url: 'User/searchUser', 
+                method: 'GET',
+                data: {
+                    input: searchInput
+                },
+                success: function (response) {
+                    //var tbody = $('.user-table tbody').empty();
+                    // for (let user of response.users) {
+                    //     $('.user-table tbody').append(`
+                    //         <tr>
+                    //             <td>${user.id_user}</td>
+                    //             <td>
+                    //                 <!-- Add user information here -->
+                    //             </td>
+                    //             <!-- Add other columns as needed -->
+                    //         </tr>
+                    //     `);
+                    // }
+                    for (var i = 0; i < response.length; i++) {
+                        $('.user-table tbody').append(`
+                            <tr>
+                                <td>${response[i].id_user}</td>
+                                <td>${response[i].tai_khoan}</td>
+                                <!-- Add other columns as needed -->
+                            </tr>
+                        `);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Search error:', status, error);
+                }
+            });
+        }
+
     </script>
 }

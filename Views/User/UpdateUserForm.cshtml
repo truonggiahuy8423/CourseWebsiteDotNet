@@ -89,9 +89,9 @@
             }, 4000);
         }
         $(document).ready(function () {
-            var base64Image = null;
+            
             $(`.insert-user-form__save-btn`).click(function () {
-                if (!confirm("Xác nhận tạo mới user?")) {
+                if (!confirm("Xác nhận thay đổi user?")) {
                     return;
                 }
 
@@ -137,33 +137,52 @@
                         return;
                     }
                 }
+                console.log(base64Image);
+                
+                // function base64toBlob(base64Data, contentType = '', sliceSize = 512) {
+                //     const byteCharacters = atob(base64Data);
+                //     const byteArrays = [];
 
+                //     for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+                //         const slice = byteCharacters.slice(offset, offset + sliceSize);
+                //         const byteNumbers = new Array(slice.length);
+
+                //         for (let i = 0; i < slice.length; i++) {
+                //             byteNumbers[i] = slice.charCodeAt(i);
+                //         }
+
+                //         const byteArray = new Uint8Array(byteNumbers);
+                //         byteArrays.push(byteArray);
+                //     }
+
+                //     return new Blob(byteArrays, { type: contentType });
+                // }
+
+                // // Create a Blob from the base64 image data
+                // const blob = base64toBlob(base64Image, 'image/jpeg');
+
+                // // Create a File from the Blob
+                // const file = new File([blob], 'image.jpg', { type: 'image/jpeg' });
                 var formData = new FormData();
 
                 //formData.append('file', base64Image);
                 formData.append('file', file);
+                formData.append('id_user', currentUserId);
                 formData.append('account', account);
                 formData.append('password', password);
                 formData.append('role', role);
                 formData.append('id_role', id_role);
                 // console.log("Base64 representation of the image:", base64Image);
                 // console.log(id_role + "id role");
-                // console.log(role);
+                console.log(role);
                 loadingEffect(false);
                 $.ajax({
-                    url: 'User/InsertUser',
+                    url: 'User/updateUser',
                     method: 'POST',
                     dataType: "json",
                     contentType: false,
                     processData: false,
                     data: formData,
-                    // data: JSON.stringify({
-                    //     file: base64Image,
-                    //     account: account,
-                    //     password: password,
-                    //     role: role,
-                    //     id_role: id_role
-                    // }),
                     success: function (response) {
                         loadingEffect(false);
                         //reloadUssers();
@@ -171,7 +190,7 @@
                         if (response.state) {
                             toast({
                                 title: `Thành công!`,
-                                message: `Thêm user mới thành công`,
+                                message: `Cập nhật user thành công`,
                                 type: "success",
                                 duration: 3000
                             });
@@ -373,7 +392,6 @@
                     // Lắng nghe sự kiện khi FileReader đã đọc xong file
                     reader.onload = function (e) {
                         // Gán nội dung của file vào thuộc tính src của thẻ img
-                        base64Image = e.target.result;
                         $('.uploaded-ava').attr('src', e.target.result);
                     };
 
