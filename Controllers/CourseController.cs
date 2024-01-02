@@ -666,12 +666,8 @@ $@"SELECT lop_hoc.id_lop_hoc,  DATE_FORMAT(lop_hoc.ngay_bat_dau, '%d/%m/%Y') as 
             var rs = SQLExecutor.ExecuteQuery(
                $@"
                     SELECT buoi_hoc.id_buoi_hoc, buoi_hoc.trang_thai, buoi_hoc.id_phong, DATE_FORMAT(buoi_hoc.ngay, '%d/%m/%Y') AS ngay, DAYOFWEEK(buoi_hoc.ngay) AS thu,
-                    ca.id_ca, ca.thoi_gian_bat_dau, ca.thoi_gian_ket_thuc, a.id_lop_hoc, a.id_mon_hoc, a.ten_mon_hoc
+                    ca.id_ca, ca.thoi_gian_bat_dau, ca.thoi_gian_ket_thuc
                     FROM buoi_hoc INNER JOIN ca ON buoi_hoc.id_ca = ca.id_ca
-                    LEFT JOIN (
-                        SELECT lop_hoc.id_lop_hoc, mon_hoc.id_mon_hoc, mon_hoc.ten_mon_hoc
-                        FROM lop_hoc INNER JOIN mon_hoc ON lop_hoc.id_mon_hoc = mon_hoc.id_mon_hoc
-                    ) AS a ON a.id_lop_hoc = buoi_hoc.id_lop_hoc
                     WHERE buoi_hoc.id_lop_hoc = {courseid}
                     ORDER BY buoi_hoc.ngay ASC"
             );

@@ -2,19 +2,26 @@
 
 namespace CourseWebsiteDotNet.Models
 {
-    public class BuoiHocModel
+    public class BuoiHocModel : IEquatable<BuoiHocModel>
     {
+        
         public int? id_buoi_hoc { get; set; }
         public int? trang_thai { get; set; }
         public DateTime? ngay { get; set; }
         public int? id_lop_hoc { get; set; }
         public int? id_ca { get; set; }
         public int? id_phong { get; set; }
+
+        public bool Equals(BuoiHocModel? other)
+        {
+            return this.id_buoi_hoc == other.id_buoi_hoc;
+        }
     }
-    public class BuoiHocRepository
+    public class BuoiHocRepository 
     {
         private readonly string connectionString;
 
+        
         public BuoiHocRepository()
         {
             connectionString = DatabaseConnection.CONNECTION_STRING;
@@ -45,7 +52,40 @@ namespace CourseWebsiteDotNet.Models
                 };
             }
         }
+        public List<BuoiHocModel> GetAllBuoiHocByCourseId(int courseid)
+        {
+            List<BuoiHocModel> buoiHocList = new List<BuoiHocModel>();
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
 
+                string query = "SELECT * FROM buoi_hoc where buoi_hoc.id_buoi_hoc = @Id";
+
+                using (MySqlCommand command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Id", courseid);
+
+                    using (MySqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            BuoiHocModel buoiHoc = new BuoiHocModel
+                            {
+                                id_buoi_hoc = reader["id_buoi_hoc"] != DBNull.Value ? Convert.ToInt32(reader["id_buoi_hoc"]) : (int?)null,
+                                trang_thai = reader["trang_thai"] != DBNull.Value ? Convert.ToInt32(reader["trang_thai"]) : (int?)null,
+                                ngay = reader["ngay"] != DBNull.Value ? Convert.ToDateTime(reader["ngay"]) : (DateTime?)null,
+                                id_lop_hoc = reader["id_lop_hoc"] != DBNull.Value ? Convert.ToInt32(reader["id_lop_hoc"]) : (int?)null,
+                                id_ca = reader["id_ca"] != DBNull.Value ? Convert.ToInt32(reader["id_ca"]) : (int?)null,
+                                id_phong = reader["id_phong"] != DBNull.Value ? Convert.ToInt32(reader["id_phong"]) : (int?)null
+                            };
+                            buoiHocList.Add(buoiHoc);
+                        }
+                    }
+                }
+            }
+
+            return buoiHocList;
+        }
         public List<BuoiHocModel> GetAllBuoiHoc()
         {
             List<BuoiHocModel> buoiHocList = new List<BuoiHocModel>();

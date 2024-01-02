@@ -193,7 +193,6 @@
                     schedule_table.empty();
                     let i = 0;
                     for (let schedule of listOfSchedule) {
-                        let mh = schedule.id_lop_hoc === null ? "--" : `${schedule.ten_mon_hoc} ${schedule.id_mon_hoc.toString().padStart(3, '0')}.${schedule.id_lop_hoc.toString().padStart(6, '0')}`;
                         let state = "";
                         switch (schedule.trang_thai * 1) {
                             case 1:

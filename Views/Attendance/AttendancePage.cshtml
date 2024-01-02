@@ -1,0 +1,776 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+	Layout = null;
+	Layout = "_LecturerCourseDetailLayout";
+}
+
+
+@section Navbar {
+	@await Html.PartialAsync("Navbar")
+
+
+}
+
+
+@section MainSection {
+	<link rel="stylesheet" href="/css/schedule.css">
+
+
+	<div class="content-section">
+		<h3 style="margin-right: 14px; margin-top: 17px; margin-left: 27px; display: flex; align-items: center; justify-content: space-between;">Lịch học</h3>
+		<style>
+			.overflow-layout {
+				/* overflow: auto; */
+				/* height: 260px!important; */
+				/* box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.5); /* Shadow với độ mờ */ */ display: block;
+				margin: 17px 20px;
+				margin-bottom: 35px;
+			}
+
+			.schedule-container {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+				padding: 6px;
+				gap: 8px;
+			}
+
+			.schedule {
+				position: relative;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: space-around;
+				height: 60px;
+				width: 100%;
+				/* padding: 5px; */
+
+				border: none;
+				box-shadow: 0 0 2px rgba(0, 0, 0, 0.5); /* Shadow với độ mờ */
+				border-radius: 5px;
+				box-sizing: border-box;
+				cursor: pointer;
+			}
+
+			.highlight-schedule::before {
+				background-color: black;
+				opacity: 0.2;
+				height: 100%;
+				width: 100%;
+				position: absolute;
+				top: 0;
+				left: 0;
+				z-index: 1;
+				content: "";
+				border-radius: 5px;
+			}
+
+			.green-bg {
+				background-color: #a4ffb6;
+			}
+
+			.schedule p {
+				font-size: 11px;
+			}
+
+			.schedule:hover {
+				background-color: #e8e8e8;
+			}
+
+			.attendance-table {
+				margin-top: 17px;
+			}
+
+				.attendance-table td {
+					height: 38px;
+				}
+
+					.attendance-table td:nth-child(1) {
+						width: 10%;
+						/* Độ rộng cố định cho cột 1 và cột 2 */
+					}
+
+					.attendance-table td:nth-child(2) {
+						width: 30%;
+						/* Độ rộng cố định cho cột 1 và cột 2 */
+					}
+
+					.attendance-table td:nth-child(3) {
+						width: 10%;
+						/* Độ rộng cố định cho cột 1 và cột 2 */
+					}
+
+					.attendance-table td:nth-child(4) {
+						width: 50%;
+						/* Độ rộng cố định cho cột 1 và cột 2 */
+					}
+
+		</style>
+
+		<script>
+			let isOpen = false;
+			function openAttendanceTable(option) {
+
+			}
+			$(document).on('click', '.update-btn', function () {
+				isOpen = true;
+				$(this).before(`
+												<div style="display: flex; justify-content: space-between; align-items: center;">
+													<button class="highlight-button--cancel " style="height: 30px; font-size: 13px; width: 80px; color: white;">
+											Hủy bỏ
+										</button>
+																			<button class="highlight-button--save" style="height: 30px; font-size: 13px; width: 120px; color: white; margin-left: 10px">
+											Lưu thông tin
+										</button>
+									</div>
+									`)
+				$(`.attendance-table input[type="checkbox"]`).attr('disabled', false);
+				$(`.attendance-table tbody tr`).each(function () {
+					let note = $(this).find("td").eq(3);
+					console.log(note.text())
+					note.html(`<input type="text" value="${note.text().trim()}" style="font-size: 13px;">`)
+				})
+				$(this).remove();
+			})
+			$(document).on('click', '.highlight-button--cancel', function () {
+				$(".highlight-schedule").click();
+			})
+			$(document).on('click', '.highlight-button--save', function () {
+				if (confirm("Xác nhận lưu thông tin? Trạng thái buổi học sẽ không thể thay đổi sau khi lưu thông tin điểm danh")) {
+					let attendanceRecords = [];
+					$(`.attendance-table tbody tr`).each(function () {
+						attendanceRecords.push({
+							"studentId": $(this).find("td").eq(0).text() * 1,
+							"isAttend": $(this).find("td").eq(2).find("input[type='checkbox']").prop("checked") == true ? 1 : 0,
+							"note": $(this).find("td").eq(3).find(`input[type="text"]`).val(),
+						});
+					});
+					console.log("attendance records")
+					console.log(attendanceRecords)
+									$.ajax({
+						url: `${window.location.protocol}//${window.location.hostname}:${window.location.port}/Attendance/submitAttendanceRecords`,
+						method: 'POST',
+						contentType: 'application/json',
+						data: JSON.stringify(attendanceRecords),
+						dataType: 'json',
+						success: function (response) {
+							if (response.state) {
+								toast({
+									title: "Thành công!",
+									message: response.message,
+									type: "success",
+									duration: 100000
+								});
+								$(".highlight-schedule").removeClass("green-bg");
+
+								$(".highlight-schedule").addClass("green-bg");
+								$(".highlight-schedule").click();
+
+							} else {
+								toast({
+									title: "Lưu thông tin thất bại!",
+									message: response.message,
+									type: "error",
+									duration: 100000
+								});
+							}
+
+						},
+						error: function () {
+							toast({
+								title: "Lỗi!",
+								message: "Đã có lỗi xảy ra",
+								type: "error",
+								duration: 100000
+							});
+						}
+					})
+
+							} else
+					return;
+			})
+			function getSchedule() {
+				loadingEffect(true);
+				$.ajax({
+					url: `${window.location.protocol}//${window.location.hostname}:${window.location.port}/Attendance/getSchedule`,
+					method: 'GET',
+					dataType: 'json',
+					success: function (response) {
+						let scheduleContainer = $(`.schedule-container`);
+
+						scheduleContainer.empty();
+
+						loadingEffect(false)
+
+						if (response.hasOwnProperty("state")) {
+							toast({
+								title: "Lỗi!",
+								message: response.message,
+								type: "error",
+								duration: 100000
+							});
+						} else {
+							let dow = {
+								1: "Chủ Nhật",
+								2: "Thứ Hai",
+								3: "Thứ Ba",
+								4: "Thứ Tư",
+								5: "Thứ Năm",
+								6: "Thứ Sáu",
+								7: "Thứ Bảy"
+							};
+							console.log("Response")
+							console.log(response)
+							for (let i = 0; i < response.length; i++) {
+								scheduleContainer.append(`
+													<div class='schedule ${response[i].trang_thai == 2 ? 'green-bg' : ''}' id='${response[i].id_buoi_hoc}'>
+														<p class='schedule-date'>
+															<b>
+																${dow[response[i].thu]} ${response[i].ngay}
+															</b>
+														</p>
+														<p class='schedule-room'>P.${response[i].id_phong}</p>
+														<p class='schedule-time'>${response[i].thoi_gian_bat_dau.substr(0, 5)} - ${response[i].thoi_gian_ket_thuc.substr(0, 5)}</p>
+													</div>
+													`);
+							}
+							$(`.schedule`).click(function () {
+								if (isOpen) {
+									if (confirm("Xác nhận không lưu thông tin đang chỉnh sửa?")) {
+										$('.highlight-button--cancel').parent().before(`
+												<button class="update-btn highlight-button" style="height: 30px;">
+													Điều chỉnh
+													<i class="fa-solid fa-pen highlight-icon"></i>
+												</button>
+												`)
+										isOpen = false;
+										$('.highlight-button--cancel').parent().remove();
+										$(`.schedule`).removeClass("highlight-schedule");
+										$(this).addClass("highlight-schedule");
+										console.log("schedule id: " + $(this).attr("id") * 1);
+										getAttendanceRecords($(this).attr("id") * 1);
+										let date = $(`.highlight-schedule .schedule-date`).text();
+										let room = $(`.highlight-schedule .schedule-room`).text();
+										let time = $(`.highlight-schedule .schedule-time`).text();
+										$(`.schedule-info`).text(`${date} ${time} ${room}`);
+									} else {
+										return;
+									}
+								} else {
+									$(`.schedule`).removeClass("highlight-schedule");
+									$(this).addClass("highlight-schedule");
+									console.log("schedule id: " + $(this).attr("id") * 1);
+									getAttendanceRecords($(this).attr("id") * 1);
+									let date = $(`.highlight-schedule .schedule-date`).text();
+									let room = $(`.highlight-schedule .schedule-room`).text();
+									let time = $(`.highlight-schedule .schedule-time`).text();
+									$(`.schedule-info`).text(`${date} ${time} ${room}`);
+								}
+
+							});
+							$(`.schedule:first`).click();
+						}
+					}, error: function () {
+						toast({
+							title: "Lỗi!",
+							message: "Đã có lỗi xảy ra",
+							type: "error",
+							duration: 100000
+						});
+					}
+				})
+			}
+
+			function getAttendanceRecords(scheduleID) {
+				loadingEffect(true);
+				console.log("click");
+				$.ajax({
+					url: `${window.location.protocol}//${window.location.hostname}:${window.location.port}/Attendance/getAttendanceRecords`,
+					method: 'GET',
+					data: { scheduleId: $(`.highlight-schedule`).attr('id') * 1 },
+					dataType: 'json',
+					success: function (response) {
+						let attendanceTable = $(`.attendance-table tbody`);
+						attendanceTable.empty();
+						loadingEffect(false);
+						console.log("records");
+						console.log(response);
+						if (response.hasOwnProperty("state")) {
+							toast({
+								title: "Lỗi!",
+								message: response.message,
+								type: "error",
+								duration: 100000
+							});
+						} else {
+							console.log("Response")
+							console.log(response)
+							for (let i = 0; i < response.length; i++) {
+								console.log(response[i]);
+								attendanceTable.append(`
+													<tr>
+														<td>${(response[i].id_hoc_vien + '').padStart(6, "0")}</td>
+														<td>${response[i].ho_ten}</td>
+																	<td style="text-align: center;">
+															<input type="checkbox" class="attendance-checkbox" disabled ${response[i].co_mat == 1 ? 'checked' : ''}>
+														</td>
+														<td>
+																		${response[i].ghi_chu == null ? "" : response[i].ghi_chu}
+														</td>
+													</tr>
+												`);
+							}
+						}
+					},
+					error: function () {
+						toast({
+							title: "Lỗi!",
+							message: "Đã có lỗi xảy ra",
+							type: "error",
+							duration: 100000
+						});
+					}
+				})
+			}
+
+			$(document).ready(function () {
+				$(`.update-btn`).click(function () {
+
+				})
+				getSchedule();
+			})
+		</script>
+		<div class="overflow-layout">
+			<div class="schedule-container">
+			</div>
+		</div>
+		<h3 style="margin-right: 14px; margin-top: 17px; margin-left: 27px; display: flex; align-items: center; justify-content: space-between;">
+			<span>Thông tin điểm danh<span style="font-size: 13px; margin-left: 5px; color: #737373;" class="schedule-info">hello</span></span>
+			<button class="update-btn highlight-button" style="height: 30px;">
+				Điều chỉnh
+				<i class="fa-solid fa-pen highlight-icon"></i>
+			</button>
+		</h3>
+
+		<table class="schedule-table attendance-table">
+			<thead>
+				<tr>
+					<td>Mã học viên</td>
+					<td>Họ tên</td>
+					<td>Điểm danh</td>
+					<td>Ghi chú</td>
+				</tr>
+			</thead>
+			<tbody>
+			</tbody>
+		</table>
+
+		@* <div class="container-pr1" style="height: auto;">
+	<?php foreach ($tatCaBuoiHoc as $buoiHoc) : ?>
+	<div class='rectangle-parent1' data-buoihoc='<?= $buoiHoc->id_buoi_hoc ?>'>
+	<div class='th-6-201024-container'>
+	<p class='thnh-ph-th'>
+	<b class='datetime'>
+	Thứ <?= $buoiHoc->thu ?> <?= date('d/m/y', strtotime($buoiHoc->ngay)) ?>
+	</b>
+	</p>
+	<p class='thnh-ph'><?= $buoiHoc->id_phong ?></p>
+	<p class='thnh'><?= substr($buoiHoc->thoi_gian_bat_dau, 0, 5) ?>-<?= substr($buoiHoc->thoi_gian_ket_thuc, 0, 5) ?></p>
+	</div>
+	</div>
+	<div class='rectangle-parent1' data-buoihoc='<?= $buoiHoc->id_buoi_hoc ?>'>
+	<div class='th-6-201024-container'>
+	<p class='thnh-ph-th'>
+	<b class='datetime'>
+	Thứ <?= $buoiHoc->thu ?> <?= date('d/m/y', strtotime($buoiHoc->ngay)) ?>
+	</b>
+	</p>
+	<p class='thnh-ph'><?= $buoiHoc->id_phong ?></p>
+	<p class='thnh'><?= substr($buoiHoc->thoi_gian_bat_dau, 0, 5) ?>-<?= substr($buoiHoc->thoi_gian_ket_thuc, 0, 5) ?></p>
+	</div>
+	</div>
+	<div class='rectangle-parent1' data-buoihoc='<?= $buoiHoc->id_buoi_hoc ?>'>
+	<div class='th-6-201024-container'>
+	<p class='thnh-ph-th'>
+	<b class='datetime'>
+	Thứ <?= $buoiHoc->thu ?> <?= date('d/m/y', strtotime($buoiHoc->ngay)) ?>
+	</b>
+	</p>
+	<p class='thnh-ph'><?= $buoiHoc->id_phong ?></p>
+	<p class='thnh'><?= substr($buoiHoc->thoi_gian_bat_dau, 0, 5) ?>-<?= substr($buoiHoc->thoi_gian_ket_thuc, 0, 5) ?></p>
+	</div>
+	</div>
+	<?php endforeach; ?>
+	</div> *@
+		@* <h3 style="margin-right: 14px; margin-top: 17px; margin-left: 27px; display: flex; align-items: center; justify-content: space-between;">Thông tin điểm danh</h3>
+	<h3 id="container" style="margin-right: 14px; margin-top: 17px; margin-left: 27px; display: flex; align-items: center; justify-content: space-between;"></h3>
+	<div class="group-parent"> *@
+		@* <div class="button-container">
+	<button class="save-button" style="display: none;" id="save_btn">
+	<div class="save-button-background"></div>
+	<div class="save">Lưu thông tin</div>
+	</button>
+	<button class="cancel-button" style="display: none;" id="cancel_btn">
+	<div class="cancel-button-background"></div>
+	<div class="cancel">Hủy bỏ</div>
+	</button>
+	</div>
+	<div class="btn-ctn d-flex justify-content-end pe-5">
+	<button class="update-btn highlight-button" id="show_btn">Điều chỉnh<i class="fa-solid fa-pen highlight-icon"></i></button>
+	</div>
+	<br> *@
+		@* <div class="container-tg">
+	<div class="MaHV">
+	<div class="Hvien"> Mã học viên</div>
+	</div>
+	<div class="HoVTen">
+	<div class="Hotena"> Họ tên</div>
+	</div>
+	<div class="Aten">
+	<div class="diemanh">Điểm danh</div>
+	</div>
+	<div class="ghichu">
+	<div class="note">Ghi chú</div>
+	</div>
+	</div> *@
+	</div>
+			</div>
+
+	<!-- js bắt đầu từ đây -->
+	@*  <script>
+        let globalCheckbox = [];
+        globalCheckbox.id = 'myGlobalCheckboxArray'
+        let checkbox;
+        let inputText;
+        // ajax
+        $(document).ready(function () {
+
+
+
+
+
+            $('.rectangle-parent1').click(function (e) {
+                globalCheckbox.splice(0, globalCheckbox.length);
+
+                // Lấy giá trị của data-buoihoc từ thuộc tính data của div
+                let idBuoiHoc = $(this).data('buoihoc');
+                console.log(idBuoiHoc);
+                // Tạo đối tượng dữ liệu để gửi đi
+                let dataToSend = {
+                    idBuoiHoc: idBuoiHoc
+                };
+                console.log(dataToSend);
+
+
+
+                // Gửi request AJAX
+                $.ajax({
+                    url: "<?php echo base_url() ?>Admin/CoursesController/getAttByIDBuoi",
+                    method: "POST",
+                    contentType: 'application/json',
+                    dataType: "json",
+                    data: JSON.stringify(dataToSend), // Chuyển đổi dữ liệu sang chuỗi JSON
+                    success: function (response) {
+                        // Xử lý phản hồi từ server
+                        let ArrListAtten = response;
+                        let newElement = `
+
+                                            <div class="MaHV">
+                                                <div class="Hvien"> Mã học viên</div>
+                                            </div>
+                                            <div class="HoVTen">
+                                                <div class="Hotena"> Họ tên</div>
+                                            </div>
+                                            <div class="Aten">
+                                                <div class="diemanh">Điểm danh</div>
+                                            </div>
+                                            <div class="ghichu">
+                                                <div class="note">Ghi chú</div>
+                                            </div>
+                                        `;
+                        //     console.log(ArrListAtten);
+                        //     <div class="thng-tin-im">Thông tin điểm danh</div>
+
+                        // <div class="bui-hc-th">
+                        //     Buổi học: Thứ 6 03/11/2023 P.101 07:00 - 11:00 - 2809232092
+                        // </div>
+                        const firstElement = ArrListAtten[0]; // Lấy phần tử đầu tiên của mảng
+
+                        const ngay = new Date(firstElement.ngay);
+                        const dayOfWeek = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'][ngay.getDay()];
+                        const ngayFormatted = `${ngay.getDate()}/${ngay.getMonth() + 1}/${ngay.getFullYear()}`;
+                        const gioBD = firstElement.thoi_gian_bat_dau;
+                        const gioKT = firstElement.thoi_gian_ket_thuc;
+                        const phong = `P.${firstElement.id_phong}`;
+                        const id = `-${firstElement.id_buoi_hoc}`;
+
+                        const htmlString = `<div class="bui-hc-th">
+                                                Buổi học: ${dayOfWeek} ${ngayFormatted} ${phong} ${gioBD} - ${gioKT} ${id}
+                                            </div>`;
+                        document.getElementById('container').innerHTML = htmlString;
+
+                        console.log(htmlString);
+
+                        // Xóa nội dung cũ của container-tg trước khi thêm danh sách mới
+
+                        // Kiểm tra xem có phần tử con nào có class là container-tg không
+                        var lammoi = $('.group-child4 .container-tg');
+                        if (lammoi.length > 0) {
+                            lammoi.remove(); // Loại bỏ thẻ div ra khỏi DOM và xóa nó khỏi bộ nhớ
+                        }
+                        // Nếu tồn tại phần tử container-tg, loại bỏ nó
+
+                        $('.container-tg').empty();
+                        console.log(ArrListAtten)
+                        // Tạo container-tg mới và thêm danh sách học viên vào
+                        let containerTG = $('<div>').addClass('container-tg');
+                        ArrListAtten.forEach(function (hocvien) {
+                            let idBuoiHoc = hocvien.id_buoi_hoc;
+                            let idSinhVien = hocvien.id_hoc_vien;
+                            let hoVaTen = hocvien.ho_ten;
+                            let ghiChu = hocvien.ghi_chu;
+                            let coMat = hocvien.co_mat === '1'; // Kiểm tra nếu có mặt
+                            let strId = idSinhVien.toString();
+                            let paddedId = '0000' + strId;
+                            let displayedId = paddedId.slice(-5);
+                            let groupChild5 = $('<div>').addClass('group-child5');
+                            let groupChild6 = $('<div>').addClass('group-child6');
+                            let groupChild7 = $('<div>').addClass('group-child7');
+                            let groupChild8 = $('<div>').addClass('group-child8');
+
+                            let divIdSinhVien = $('<div>').text(displayedId).addClass('div');
+                            let divHoVaTen = $('<div>').text(hoVaTen).addClass('trng-gia-huy');
+
+                            let checkbox = $('<input>').attr({
+                                type: 'checkbox',
+                                id: idSinhVien,
+                                idbuoihoc: idBuoiHoc,
+                                checked: coMat // Thiết lập trạng thái checked dựa trên co_mat
+                            });
+
+                            let inputText = $('<input>').attr({
+                                type: 'text',
+                                placeholder: '',
+                                id: idSinhVien,
+                                idbuoihoc: idBuoiHoc,
+                            }).val(ghiChu); // Hiển thị ghi chú trong input text
+
+                            groupChild8.append(inputText);
+                            groupChild7.append(checkbox);
+                            groupChild5.append(divIdSinhVien);
+                            groupChild6.append(divHoVaTen);
+
+                            globalCheckbox.push(checkbox);
+                            globalCheckbox.push(inputText);
+                            containerTG.append(groupChild5, groupChild6, groupChild7, groupChild8);
+
+                        });
+                        var container = $('.group-child4');
+                        container.append(containerTG);
+                        $('.container-tg').prepend(newElement);
+
+                        // globalCheckbox.forEach(function(checkbox) {
+                        // checkbox.prop('disabled', true);
+                        // inputText.prop('disabled',true)
+                        // });
+
+                        globalCheckbox.forEach(function (element) {
+                            element.prop('disabled', true);
+                        });
+
+                        console.log(globalCheckbox);
+
+                        // Disable checkbox khi lấy được
+
+                        $('.container-tg').append(containerTG);
+                        console.log(containerTG);
+
+                        // Thêm sự kiện change để theo dõi sự thay đổi trạng thái của checkbox
+
+                    },
+                    error: function (xhr, status, error) {
+                        // Xử lý lỗi nếu có
+                        console.error(status + ': ' + error);
+                    }
+
+                });
+                setTimeout(() => {
+                    console.log('First event completed');
+                }, 2000);
+                // $('.showButtons').trigger('click');
+
+                $('show-buttons').trigger('click');
+            }
+
+            );
+            $(`.rectangle-parent1:first`).click();
+        });
+
+
+
+
+        //tạo checkbox
+        document.addEventListener("DOMContentLoaded", function () {
+            const showButtons = document.getElementById('show_btn');
+            const buttonContainer = document.querySelector('.button-container');
+            const cancelButton = document.getElementById('cancel_btn');
+            const saveButton = document.getElementById('save_btn');
+
+            function enableCheckboxes() {
+                globalCheckbox.forEach(function (element) {
+                    element.prop('disabled', false);
+                });
+            }
+
+            // showButtons.onclick = function () {
+            //     saveButton.style.display = 'block';
+            //     cancelButton.style.display = 'block';
+            //     showButtons.style.display = 'none';
+            //     console.log('đã click');
+            //     console.log(globalCheckbox);
+            //     enableCheckboxes();
+
+            // };
+
+
+            function ConfirmCheckbox() {
+                globalCheckbox.forEach(function (checkbox) {
+                    checkbox.addEventListener('change', function () {
+                        if (this.checked) {
+                            // Gán thuộc tính khi checkbox được chọn
+                            this.setAttribute('data-state', '1');
+                            console.log('Checkbox được chọn');
+                        } else {
+                            // Gán thuộc tính khi checkbox không được chọn
+                            this.removeAttribute('data-state');
+                            console.log('Checkbox không được chọn');
+                        }
+                    });
+                });
+
+            }
+
+
+
+            cancelButton.addEventListener('click', function () {
+                saveButton.style.display = 'none';
+                cancelButton.style.display = 'none';
+                showButtons.style.display = 'block';
+                globalCheckbox.forEach(function (element) {
+                    element.prop('checked', element.prop('defaultChecked'));
+                    element.prop('value', element.prop('defaultValue'));
+                    element.prop('disabled', true);
+                });
+            });
+
+
+
+            saveButton.addEventListener('click', function () {
+                // let checkedCheckboxes = document.querySelectorAll('input[type="checkbox"]');
+
+                // Thay đổi animation đã tick và thêm thuộc tính checked cho các checkbox đã chọn
+                saveButton.style.display = 'none';
+                cancelButton.style.display = 'none';
+                showButtons.style.display = 'block';
+                globalCheckbox.forEach(function (element) {
+                    element.prop('disabled', true);
+                });
+
+
+                let attributesArray = [];
+
+                // Duyệt qua từng cặp đối tượng checkbox và inputText trong globalCheckbox
+                for (let i = 0; i < globalCheckbox.length; i += 2) {
+                    let checkbox = globalCheckbox[i];
+                    let inputText = globalCheckbox[i + 1];
+
+                    let idValue = checkbox.prop('id');
+                    let typeValue = checkbox.attr('idbuoihoc');
+                    let comat;
+                    let ghichu = inputText.prop('value');
+
+                    if (checkbox.prop('checked')) {
+                        comat = '1';
+                    } else {
+                        comat = '0';
+                    }
+
+                    // Tạo đối tượng chứa các thuộc tính của checkbox và inputText tương ứng và push vào mảng attributesArray
+                    let checkboxAttributes = {
+                        id: idValue,
+                        type: typeValue,
+                        comat: comat,
+                        ghichu: ghichu
+                    };
+
+                    attributesArray.push(checkboxAttributes);
+                }
+
+                console.log(attributesArray);
+                if (globalCheckbox.length > 0) { // Kiểm tra xem mảng có phần tử không
+                    let firstCheckboxId = globalCheckbox[0].attr('idbuoihoc'); // Lấy id của phần tử đầu tiên trong mảng
+
+                    // Gán id của phần tử đầu tiên cho mảng globalCheckbox
+                    globalCheckbox.id = firstCheckboxId;
+
+                    console.log(globalCheckbox); // In ra mảng globalCheckbox sau khi gán id
+                } else {
+                    console.log("Mảng globalCheckbox không có phần tử."); // Nếu mảng không có phần tử
+                }
+
+
+                let datachecked = attributesArray;
+                console.log(datachecked);
+                let jsonts = JSON.stringify(datachecked)
+                console.log(jsonts);
+
+
+                // xử lý chuỗi
+                $.ajax({
+                    url: "<?php echo base_url() ?>Admin/CoursesController/CheckingAtt",
+                    method: "POST",
+                    contentType: 'application/json',
+                    dataType: "json",
+                    data: jsonts, // Chuyển đổi dữ liệu sang chuỗi JSON
+                    success: function (response) {
+                        console.log(response);
+                        // Xử lý phản hồi thành công từ máy chủ
+                    },
+                    error: function (response) {
+                        console.log(response);
+                    }
+                });
+
+
+                // gửi về response
+            })
+
+
+        })
+
+
+
+
+
+
+
+
+
+
+        // let  globalCheckbox = globalCheckbox; // Thay thế phần này bằng mảng chứa các checkbox cần kiểm tra
+        console.log(globalCheckbox);
+
+        globalCheckbox.forEach(function (checkbox) {
+            console.log(checkbox); // In ra từng phần tử checkbox
+        });
+
+
+
+        window.addEventListener("load", function () {
+
+
+        });
+
+    </script> *@
+}

@@ -75,19 +75,20 @@ namespace CourseWebsiteDotNet.Models
         }
 
         // Trả về 1 DiemDanhModel
-        public DiemDanhModel? GetDiemDanhById(int id)
+        public DiemDanhModel? GetDiemDanhById(int scheduleId, int studentId)
         {
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 connection.Open();
 
-                string query = "SELECT * FROM diem_danh WHERE id_hoc_vien = @Id";
+                string query = "SELECT * FROM diem_danh WHERE id_hoc_vien = @Id and id_buoi_hoc = @idbh";
 
                 using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@Id", id);
+                    command.Parameters.AddWithValue("@Id", studentId);
+					command.Parameters.AddWithValue("@idbh", scheduleId);
 
-                    using (MySqlDataReader reader = command.ExecuteReader())
+					using (MySqlDataReader reader = command.ExecuteReader())
                     {
                         if (reader.Read())
                         {
@@ -146,13 +147,13 @@ namespace CourseWebsiteDotNet.Models
                 {
                     connection.Open();
 
-                    string query = "UPDATE diem_danh SET id_buoi_hoc = @id_buoi_hoc, " +
+                    string query = "UPDATE diem_danh SET " +
                                    "ghi_chu = @ghi_chu, co_mat = @co_mat " +
-                    "WHERE id_hoc_vien = @Id";
+                    "WHERE id_hoc_vien = @Id and id_buoi_hoc = @idbh";
 
                     using (MySqlCommand command = new MySqlCommand(query, connection))
                     {
-                        command.Parameters.AddWithValue("@id_buoi_hoc", diemDanh.id_buoi_hoc);
+                        command.Parameters.AddWithValue("@idbh", diemDanh.id_buoi_hoc);
                         command.Parameters.AddWithValue("@ghi_chu", diemDanh.ghi_chu);
                         command.Parameters.AddWithValue("@co_mat", diemDanh.co_mat);
                         command.Parameters.AddWithValue("@Id", diemDanh.id_hoc_vien);

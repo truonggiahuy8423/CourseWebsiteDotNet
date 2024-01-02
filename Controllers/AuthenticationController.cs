@@ -77,9 +77,9 @@ namespace CourseWebsiteDotNet.Controllers
                 return Index("Vui lòng nhập tài khoản", userAccount, userPassword);
             }
 
-            if (userAccount.Length < 8 || userAccount.Length > 20)
+            if (userAccount.Length < 6 || userAccount.Length > 20)
             {
-                return Index("Tài khoản chứa từ 8 - 20 ký tự", userAccount, userPassword);
+                return Index("Tài khoản chứa từ 6 - 20 ký tự", userAccount, userPassword);
             }
 
             if (userPassword == "")
@@ -87,9 +87,9 @@ namespace CourseWebsiteDotNet.Controllers
                 return Index("Vui lòng nhập tài khoản", userAccount, userPassword);
             }
 
-            if (userPassword.Length < 8 || userPassword.Length > 20)
+            if (userPassword.Length < 6 || userPassword.Length > 20)
             {
-                return Index("Mật khẩu chứa từ 8 - 20 ký tự", userAccount, userPassword);
+                return Index("Mật khẩu chứa từ 6 - 20 ký tự", userAccount, userPassword);
             }
 
             // Authentication

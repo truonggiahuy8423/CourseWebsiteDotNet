@@ -81,7 +81,7 @@ namespace CourseWebsiteDotNet.Controllers
 
         }
 
-        public string KiemTraTinhTrang(string ngayBatDau, string ngayKetThuc)
+        private string KiemTraTinhTrang(string ngayBatDau, string ngayKetThuc)
         {
             DateTime datetimeBatDau = DateTime.ParseExact(ngayBatDau, "d/M/yyyy", CultureInfo.InvariantCulture);
             DateTime datetimeKetThuc = DateTime.ParseExact(ngayKetThuc, "d/M/yyyy", CultureInfo.InvariantCulture);
@@ -152,7 +152,7 @@ namespace CourseWebsiteDotNet.Controllers
             if (!checkPreviledge((int)courseid))
             {
                 LoadNavbar();
-                ViewData["ExceptionMessage"] = "Bạn không có quyền truy cập lớp học này";
+                ViewData["ExceptionMessage"] = "Quyền truy cập hạn chế";
                 return View("ExceptionPage");
             }
 
