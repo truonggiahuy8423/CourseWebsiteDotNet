@@ -7,7 +7,64 @@ namespace CourseWebsiteDotNet.Controllers
 {
     public class AccountManagementController : Controller
     {
-        private readonly IWebHostEnvironment _hostingEnvironment;
+		private void LoadNavbar()
+		{
+			int? userId = HttpContext.Session.GetInt32("user_id");
+			int? role = HttpContext.Session.GetInt32("role");
+			int? roleId = HttpContext.Session.GetInt32("role_id");
+
+			if (role == 1)
+			{
+				var dataTable = SQLExecutor.ExecuteQuery(
+				   "SELECT ad.ho_ten, users.anh_dai_dien FROM users INNER JOIN ad ON users.id_ad = ad.id_ad WHERE users.id_user = " + userId
+				);
+				string? username = dataTable.Rows[0]["ho_ten"].ToString();
+				byte[]? avatarData = dataTable.Rows[0]["anh_dai_dien"] != DBNull.Value ? dataTable.Rows[0]["anh_dai_dien"] as byte[] : null;
+
+				// Set data to ViewData
+				// Navbar data
+				ViewData["username"] = username;
+				ViewData["role"] = "Administrator";
+				ViewData["avatar_data"] = avatarData;
+			}
+			else if (role == 2)
+			{
+				var dataTable = SQLExecutor.ExecuteQuery(
+				   $@"SELECT giang_vien.ho_ten, giang_vien.id_giang_vien, users.anh_dai_dien
+                    FROM users
+                    INNER JOIN giang_vien ON users.id_giang_vien = giang_vien.id_giang_vien
+                    WHERE users.id_user = {userId}"
+				);
+				string? username = dataTable.Rows[0]["ho_ten"].ToString();
+				byte[]? avatarData = dataTable.Rows[0]["anh_dai_dien"] != DBNull.Value ? dataTable.Rows[0]["anh_dai_dien"] as byte[] : null;
+
+				// Set data to ViewData
+				// Navbar data
+				ViewData["username"] = username;
+				ViewData["role"] = "Giảng viên";
+				ViewData["avatar_data"] = avatarData;
+			}
+			else if (role == 3)
+			{
+				var dataTable = SQLExecutor.ExecuteQuery(
+				   $@"SELECT hoc_vien.ho_ten, hoc_vien.id_hoc_vien, users.anh_dai_dien
+                FROM users
+                INNER JOIN hoc_vien ON users.id_hoc_vien = hoc_vien.id_hoc_vien
+                WHERE users.id_user = {userId}"
+				);
+				string? username = dataTable.Rows[0]["ho_ten"].ToString();
+				byte[]? avatarData = dataTable.Rows[0]["anh_dai_dien"] != DBNull.Value ? dataTable.Rows[0]["anh_dai_dien"] as byte[] : null;
+
+				// Set data to ViewData
+				// Navbar data
+				ViewData["username"] = username;
+				ViewData["role"] = "Học viên";
+				ViewData["avatar_data"] = avatarData;
+			}
+
+		}
+
+		private readonly IWebHostEnvironment _hostingEnvironment;
          UserRepository _userRepo = new UserRepository();   
         public AccountManagementController(IWebHostEnvironment hostingEnvironment)
         {
@@ -19,8 +76,7 @@ namespace CourseWebsiteDotNet.Controllers
            var user = _userRepo.GetUserById(userid);
             if (user != null)
             {
-                ViewData["avatar_data"] = user.anh_dai_dien;
-            }
+                LoadNavbar();            }
 
             
             return View();
@@ -68,13 +124,13 @@ namespace CourseWebsiteDotNet.Controllers
                 {
                     ModelState.AddModelError("", "Lưu thay đổi thất bại");
                 }
-                ViewData["avatar_data"] = user.anh_dai_dien;
-                return View("Index", accountRequest);
+                LoadNavbar();
+                    return View("Index", accountRequest);
 
             }
             else
             {
-                ViewData["avatar_data"] = user.anh_dai_dien;
+                LoadNavbar();
                 return View("Index",accountRequest );
             }
         }
