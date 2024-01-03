@@ -1,8 +1,8 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model IEnumerable<CourseWebsiteDotNet.Models.UserModel>
+@using System.Data;
 @{
     Layout = "_AdministratorMainLayout";
+    var users = ViewData["users"] as DataTable;
 }
 
 @section Navbar {
@@ -11,6 +11,568 @@
 
 @section MainSection {
     <div class="main">
-        Users list section of admin
+        <div style="margin-bottom: 30px;" class="title w-100 text-center text-uppercase">
+            <h4>Danh sách user hệ thống</h4>
+        </div>
+
+        <div class="class-container">
+            <div style="height: 30px; margin-bottom: 8px;" class="class__search me-2 d-flex justify-content-end">
+                <input style="border-radius: 0; height: 30px; width: 90px; z-index: 3" type="text" class="w-25 form-control search-input" placeholder="Tìm kiếm user">
+                <button class="btn btn-info search-button highlight-button" onclick="searchUser()"><i class="fas fa-search icon-search highlight-icon" style=""></i></button>
+                <button class="add-user-btn highlight-button">
+                    <i class="fa-solid fa-plus add-class-icon highlight-icon"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="class__list p-4 border border-gray rounded-2 m-2 mt-3 shadow-inset" style="margin-top: 8px!important;">
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered user-table">
+                    <thead style="top: -1px">
+                        <tr>
+                            <th class="text-center text-white bg-dark">Mã user</th>
+                            <th class="text-center text-white bg-dark">Họ tên</th>
+                            <th class="text-center text-white bg-dark">Tài khoản</th>
+                            <th class="text-center text-white bg-dark">Mật khẩu</th>
+                            <th class="text-center text-white bg-dark">Đăng nhập gần nhất</th>
+                            <th class="text-center text-white bg-dark">Vai trò</th>
+                            <th class="text-center text-white bg-dark"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            for (int i = 0; i < users.Rows.Count; i++)
+                            {
+                                    <tr>
+                                        <td>
+                                            @users.Rows[i]["id_user"]
+                                        </td>
+                                        <td>
+                                            @{
+                                    var anhDaiDien = users.Rows[i]["anh_dai_dien"];
+                                    if (Convert.IsDBNull(anhDaiDien))
+                                    {
+                                                        <img src="/img/avatar_blank.jpg" alt="" style="height: 20px; border-radius: 100px;">
+                                    }
+                                    else
+                                    {
+                                        var imageBytes = (byte[])users.Rows[i]["anh_dai_dien"];
+                                        var base64String = Convert.ToBase64String(imageBytes);
+                                        var imgSrc = $"data:image/jpeg;base64,{base64String}";
+                                                        <img src="@imgSrc" alt="" style="height: 20px; border-radius: 100px;">
+                                    }
+
+                                            }
+                                            @users.Rows[i]["ho_ten"]
+                                        </td>
+                                        <td>
+                                            @users.Rows[i]["tai_khoan"]
+                                        </td>
+                                        <td>
+                                            <style>
+                                                .password-container {
+                                                    width: 100px; /* Set your desired fixed width */
+                                                    overflow: hidden;
+                                                }
+                                                .password-container:hover .hidden-password {
+                                                    display: none;
+                                                }
+
+                                                .password-container:hover .visible-password {
+                                                    display: inline;
+                                                }
+
+                                                .visible-password {
+                                                    display: none;
+                                                }
+                                            </style>
+
+                                            @{
+                                            string repeatedAsterisks = new string('*', users.Rows[i]["mat_khau"].ToString().Length);
+                                            }
+
+                                            <div class="password-container">
+                                                <span class="hidden-password">@repeatedAsterisks</span>
+                                                <span class="visible-password">@users.Rows[i]["mat_khau"]</span>
+                                            </div>
+                                        
+                                        </td>
+                                        <td>
+                                            <script>
+                                                // JavaScript function to calculate time difference
+                                                function timeDifference(inputDatetime) {
+                                                    if (!inputDatetime) {
+                                                        return "Chưa đăng nhập lần nào";
+                                                    }
+                                                    // Set the time zone to Asia/Ho_Chi_Minh
+                                                    const vietnamTimeZone = 'Asia/Ho_Chi_Minh';
+
+                                                    // Convert the input string to a Date object
+                                                    const inputTime = new Date(inputDatetime);
+
+                                                    // Get the current time in the Vietnam time zone
+                                                    const now = new Date();
+
+                                                    // Calculate the time difference
+                                                    const interval = new Date(now - inputTime);
+
+                                                    // Get the total seconds
+                                                    const totalSeconds = Math.floor(interval / 1000);
+                                                    if (totalSeconds >= 86400) {
+                                                        // If the time is greater than or equal to 1 day, return the original input string
+                                                        return inputDatetime;
+                                                    } else if (totalSeconds < 60) {
+                                                        // If the time is less than 60 seconds, return "Đang hoạt động"
+                                                        return "<div class='active-icon'></div> Đang hoạt động";
+                                                    } else if (totalSeconds < 3600) {
+                                                        // If the time is less than 1 hour, calculate and return minutes ago
+                                                        const minutes = Math.floor(totalSeconds / 60);
+                                                        return `Hoạt động ${minutes} phút trước`;
+                                                    } else {
+                                                        // If the time is less than 1 day but greater than 1 hour, calculate and return hours ago
+                                                        const hours = Math.floor(totalSeconds / 3600);
+                                                        return `Hoạt động ${hours} giờ trước`;
+                                                    }
+                                                }
+
+                                                // Apply timeDifference to thoi_gian_dang_nhap_gan_nhat
+                                                var thoiGian = '@users.Rows[i]["thoi_gian_dang_nhap_gan_nhat"]';
+                                                console.log(thoiGian);
+                                                var timeDiffResult = timeDifference(thoiGian);
+                                                document.write(timeDiffResult);
+                                            </script>
+                                        </td>
+                                        <td>
+                                            @{
+                                    if (users.Rows[i]["id_ad"] != DBNull.Value)
+                                    {
+                                        var rs = users.Rows[i]["id_ad"].ToString().PadLeft(3, '0');
+                                                                @($"Quản trị viên({rs})")
+                                    }
+                                    else if (users.Rows[i]["id_giang_vien"] != DBNull.Value)
+                                    {
+                                        var rs = users.Rows[i]["id_giang_vien"].ToString().PadLeft(6, '0');
+                                                                @($"Giảng viên({rs})")
+                                    }
+                                    else
+                                    {
+                                        var rs = users.Rows[i]["id_hoc_vien"].ToString().PadLeft(6, '0');
+                                                                @($"Học viên({rs})")
+                                    }
+                                            }
+                                        </td>
+                                        <td class="text-center">
+                                            <button class="update-user-btn btn-link text-primary border-0 btn-sm" style="background-color: transparent;" onclick="Sua(@users.Rows[i]["id_user"])">Sửa</button>
+                                            <button class="btn-link text-primary border-0 btn-sm" style="background-color: transparent;" onclick="xoa(@users.Rows[i]["id_user"])">Xóa</button>
+                                        </td>
+                                    </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
+
+    @* Update Form *@
+    <div class="modal fade" id="SuaUserForm" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title d-flex justify-content-between" id="exampleModalLabel">Sửa Thông Tin User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+                    <form>
+                        <div class="mb-3">
+                            <div class="center-div">
+                                <div class="uploaded-ava-container">
+                                    <img id="avatarImage" class="uploaded-ava" src="/img/avatar_blank.jpg" alt="">
+                                    <input id="fileInput" class="file-upload-input" type="file">
+                                    <label for="fileInput" class="custom-file-input img-input"><i class="fa-solid fa-upload"></i></label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="taiKhoanSua" class="form-label">Tài khoản</label> <span id="error_fixaccount" class="text-danger ms-3"></span>
+                            <input type="text" class="form-control" id="taiKhoanSua" placeholder="tài khoản">
+                        </div>
+                        <div class="mb-3">
+                            <label for="matKhauSua" class="form-label">Mật khẩu mới</label> <span id="error_fixpass" class="text-danger ms-3"></span>
+                            <input type="text" class="form-control" id="matKhauSua">
+                        </div>
+                        <div class="mb-3">
+                            <label for="xacNhanMatKhauSua" class="form-label">Xác nhận mật khẩu mới</label> <span id="error_confirmpass" class="text-danger ms-3"></span>
+                            <input type="text" class="form-control" id="xacNhanMatKhauSua">
+                        </div>
+                        <button type="button" class="btn btn-primary d-flex justify-content-between" onclick="luuThongTinSua()">Lưu</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // function timeDifference(inputDatetime) {
+        //     if (inputDatetime == null) {
+        //         return "Chưa đăng nhập lần nào";
+        //     }
+        //     // Chuyển đổi chuỗi datetime thành đối tượng Date
+        //     var inputTime = new Date(inputDatetime);
+
+        //     // Lấy thời gian hiện tại
+        //     var now = new Date();
+
+        //     // Tính khoảng thời gian giữa hai thời điểm
+        //     var timeDiff = Math.abs(now.getTime() - inputTime.getTime());
+
+        //     // Tính số giây tổng cộng
+        //     var totalSeconds = Math.floor(timeDiff / 1000);
+
+        //     if (totalSeconds >= 86400) {
+        //         // Nếu thời gian lớn hơn hoặc bằng 1 ngày, trả về chính chuỗi input
+        //         return inputDatetime;
+        //     } else if (totalSeconds < 30) {
+        //         // Nếu thời gian dưới 30 giây, trả về chuỗi "đang hoạt động"
+        //         return '<div class="active-icon"></div> Đang hoạt động';
+        //     } else if (totalSeconds < 3600) {
+        //         // Nếu thời gian dưới 1 giờ, tính và trả về phút trước
+        //         var minutes = Math.floor(totalSeconds / 60);
+        //         return "Hoạt động " + minutes + ' phút trước';
+        //     } else {
+        //         // Nếu thời gian dưới 1 ngày nhưng lớn hơn 1 giờ, tính và trả về giờ trước
+        //         var hours = Math.floor(totalSeconds / 3600);
+        //         return "Hoạt động " + hours + ' giờ trước';
+        //     }
+        // }
+        // function generateAsterisks(n) {
+        //     return '*'.repeat(n);
+        // }
+        // function reloadUssers() {
+        //     loadingEffect(false);
+        //     let urlParams = new URLSearchParams(window.location.search);
+        //     let currentPage = urlParams.get('page') == null ? 1 : urlParams.get('page');
+        //     // console.log(page)
+        //     // let page = 1;
+        //     $.ajax({
+
+        //         url: 'User/getUsersList',
+        //         method: 'GET',
+        //         contentType: "text",
+        //         dataType: "json",
+        //         data: {
+        //             page: currentPage
+        //         },
+        //         success: function (response) {
+        //             loadingEffect(false);
+        //             console.log(response);
+        //             $(`.user-table tbody`).empty();
+        //             $(`#bottom-nav`).remove();
+        //             let tbody = $(`.user-table tbody`);
+        //             for (let user of response.users) {
+        //                 let rs = '';
+        //                 if (user.id_ad !== null) {
+
+        //                     rs = "Adminstrator(" + String(user["id_ad"]).padStart(3, '0') + ")";
+        //                     // console.log("Adminstrator(" + rs + ")");
+        //                 } else if (user['id_giang_vien'] !== null) {
+        //                     rs = "Giảng viên(" + String(user.id_giang_vien).padStart(6, '0') + ")";
+        //                     // console.log("Giảng viên(" + rs + ")");
+        //                 } else {
+        //                     rs = "Học viên(" + String(user['id_hoc_vien']).padStart(6, '0') + ")";
+        //                     // console.log("Học viên(" + rs + ")");
+        //                 }
+        //                 let imgSource = (user['anh_dai_dien'] !== null) ? ("data:image/png;base64," + user['anh_dai_dien']) : ("img/avatar_blank.jpg");
+        //                 tbody.append(`
+        //                     <tr>
+        //         <td>${String(user['id_user']).padStart(8, '0')}</td>
+        //         <td>
+        //             <img src="${imgSource}" alt='' style='height: 20px; border-radius: 100px;'>
+        //             ${user['ho_ten']}
+        //         </td>
+        //         <td>${user['tai_khoan']}</td>
+        //         <td class="password-cell">
+        //          <div style="width: 100px">
+        //         <span class="hidden-password">${generateAsterisks(user['mat_khau'].length)}</span>
+        //         <span class="visible-password">${user['mat_khau']}</span>
+        //         </div>
+        //     </td>
+        //         <td>${timeDifference(user['thoi_gian_dang_nhap_gan_nhat'])}</td>
+        //         <td>${rs}</td>
+        //         <td class="text-center">
+        //             <button class="btn-link text-primary border-0 btn-sm" style="background-color: transparent;" data-bs-toggle="modal" data-bs-target="#SuaStudentForm" data-student-id="" onclick="sua()">Sửa</button>
+        //             <button class="btn-link text-primary border-0 btn-sm" style="background-color: transparent;" onclick="xoa()">Xóa</button>
+        //         </td>
+        //     </tr>
+        //                             `);
+        //             }
+        //             let totalUsers = response['totalUsers'];
+        //             var totalPages = Math.ceil(totalUsers / 20);
+
+        //             let sth = '';
+        //             for (let i = 1; i <= totalPages; i++) {
+        //                 sth += `<li class="page-item ${(i == currentPage) ? 'active' : ''}">
+        //                     <a class="page-link" href="?page=${i}">${i}</a>
+        //                 </li>`
+        //             }
+        //             $(`.main`).append(`
+        //                     <nav aria-label="Page navigation example">
+        //         <ul id="bottom-nav" class="pagination justify-content-center">
+        //             <li class="page-item ${currentPage <= 1 ? 'disabled' : ''}">
+        //                 <a class="page-link" href="?page=${currentPage - 1}" tabindex="-1" aria-disabled="true">Trang trước</a>
+        //             </li>
+        //             ${sth}
+        //             <li class="page-item ${(currentPage >= totalPages) ? 'disabled' : ''}">
+        //                 <a class="page-link" href="?page=${currentPage + 1}">Trang sau</a>
+        //             </li>
+        //         </ul>
+        //     </nav>
+        //                     `)
+
+
+        //         },
+        //         error: function (jqXHR, textStatus, errorThrown) {
+        //             console.error("AJAX Error:", textStatus, errorThrown);
+        //         }
+        //     })
+        // }
+        // function showPassword(cell) {
+        //     cell.querySelector('.hidden-password').style.display = 'none';
+        //     cell.querySelector('.visible-password').style.display = 'inline';
+        // }
+
+        // function hidePassword(cell) {
+        //     cell.querySelector('.hidden-password').style.display = 'inline';
+        //     cell.querySelector('.visible-password').style.display = 'none';
+        // }
+
+        $(document).ready(function () {
+            //reloadUssers();
+            $(`.add-user-btn`).click(function () {
+                $.ajax({
+                    url: '/User/getInsertUserForm',
+                    method: 'GET',
+                    success: function (response) {
+                        loadingEffect(false);
+                        $('body').append(response);
+                    }
+                });
+            });
+        });
+
+        $(document).ready(function () {
+            //reloadUssers();
+            $(`.update-user-btn`).click(function () {
+                $.ajax({
+                    url: '/User/getUpdateUserForm',
+                    method: 'GET',
+                    success: function (response) {
+                        loadingEffect(false);
+                        $('body').append(response);
+                        $.ajax({
+                            url: 'User/getUserInfo',
+                            method: 'GET',
+                            data: { id_user: currentUserId },
+                            success: function (response) {
+                                $('.account-field').val(response.tai_khoan);
+                                var imgSrc = response.anh_dai_dien ? `data:image/jpeg;base64,${response.anh_dai_dien}` : '/img/avatar_blank.jpg';                               ;
+                                $('.uploaded-ava').attr('src', imgSrc);
+                            },
+                            error: function (xhr, status, error) {
+                                console.error('Error fetching user information:', status, error);
+                            }
+                        });
+                    }
+                });
+            });
+        });
+        var base64Image = null;
+        $(document).ready(function () {
+            $('#fileInput').change(function () {
+                // Lấy ra đối tượng input file
+                var input = this;
+
+                // Kiểm tra xem người dùng đã chọn file hay chưa
+                if (input.files && input.files[0]) {
+                    // Tạo đối tượng FileReader để đọc nội dung file
+                    var reader = new FileReader();
+
+                    // Lắng nghe sự kiện khi FileReader đã đọc xong file
+                    reader.onload = function (e) {
+                        // Gán nội dung của file vào thuộc tính src của thẻ img
+                        base64Image = e.target.result;
+                        $('.uploaded-ava').attr('src', e.target.result);
+                    };
+
+                    // Đọc file như là một đối tượng dữ liệu URL
+                    reader.readAsDataURL(input.files[0]);
+                }
+            });
+        });
+        var currentUserId;
+        function Sua(id) {
+            //$('#SuaUserForm').modal('show');
+            currentUserId = id * 1;
+            // $.ajax({
+            //     url: '/User/getUpdateUserForm',
+            //     method: 'GET',
+            //     dataType: 'json',
+            //     data: { id_user: currentUserId },
+            //     success: function (response) {
+                    
+            //         $('body').append(response);
+            //         $('#account-field').val(response.tai_khoan);
+            //         // var imgSrc = response.anh_dai_dien ? `data:image/jpeg;base64,${response.anh_dai_dien}` : '/img/avatar_blank.jpg';                               ;
+            //         // $('#avatarImage').attr('src', imgSrc);
+            //     },
+            //     error: function (xhr, status, error) {
+            //         console.error('Error fetching user information:', status, error);
+            //     }
+            // });
+        }
+
+        function luuThongTinSua() {
+            var taiKhoan = document.getElementById('taiKhoanSua').value;
+            var avatar = $('#avatarImage').attr('src');
+            var matKhau = document.getElementById('matKhauSua').value;
+            var xacNhanMatKhau = '';
+            console.log(avatar);
+            $('#error_fixaccount, #error_fixpass, #error_fixconfirmpass').text('');
+            // Perform input validation
+            var isValid = true;
+
+            if ($.trim(taiKhoan) == '') {
+                $('#error_fixaccount').text('Tài khoản không được để trống');
+                isValid = false;
+            }
+
+            if ($.trim(matKhau) == '') {
+                $('#error_fixpass').text('Mật khẩu không được để trống');
+                isValid = false;
+            }
+
+            if ($.trim(xacNhanMatKhau) == '' || $.trim(xacNhanMatKhau) != $.trim(matKhau)) {
+                $('#error_fixconfirmpass').text('Mật khẩu không khớp');
+                isValid = false;
+            }
+
+            if (!isValid) {
+                return false;
+            }
+
+            $.ajax({
+                url: 'User/updateUser',
+                method: 'POST',
+                contentType: "application/json",
+                data: JSON.stringify({
+                    id_user: currentUserId,
+                    anh_dai_dien: avatar,
+                    tai_khoan: taiKhoan,
+                    mat_khau: matKhau,
+                }),
+                success: function (response) {
+                    $('#SuaUserForm').modal('hide');
+
+                    toast({
+                        title: "Thành công!",
+                        message: "Cập nhật thông tin user thành công",
+                        type: "success",
+                        duration: 3000
+                    });
+
+                    setTimeout(function () {
+                        location.reload();
+                    }, 2000);
+                    console.log(response);
+                },
+                error: function (xhr, status, error) {
+                    toast({
+                        title: "Thất bại!",
+                        message: "Cập nhật thất bại",
+                        type: "error",
+                        duration: 3000
+                    });
+                    console.log(response);
+                    console.error('Error:', status, error);
+                }
+            });
+        }
+
+        function xoa(id) {
+            var confirmation = confirm("Bạn có chắc chắn muốn xóa user " + id);
+            if (confirmation) {
+                $.ajax({
+                    url: 'User/deleteUser',
+                    method: 'POST',
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        id_user: id
+                    }),
+                    success: function (response) {
+
+                        //$('#row_' + id).remove();
+                        toast({
+                            title: 'Thành công',
+                            message: 'Xóa user thành công',
+                            type: 'success',
+                            duration: 5000
+                        });
+
+                        setTimeout(function () {
+                            location.reload();
+                        }, 1000);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Delete error:', status, error);
+                        toast({
+                            title: 'Thất bại',
+                            message: 'Có lỗi xảy ra, vui lòng liên hệ quản trị viên',
+                            type: 'error',
+                            duration: 5000
+                        });
+                    }
+                });
+            }
+        }
+
+        function searchUser() {
+            var searchInput = $('.search-input').val();
+
+            $.ajax({
+                url: 'User/searchUser', 
+                method: 'GET',
+                data: {
+                    input: searchInput
+                },
+                success: function (response) {
+                    //var tbody = $('.user-table tbody').empty();
+                    // for (let user of response.users) {
+                    //     $('.user-table tbody').append(`
+                    //         <tr>
+                    //             <td>${user.id_user}</td>
+                    //             <td>
+                    //                 <!-- Add user information here -->
+                    //             </td>
+                    //             <!-- Add other columns as needed -->
+                    //         </tr>
+                    //     `);
+                    // }
+                    for (var i = 0; i < response.length; i++) {
+                        $('.user-table tbody').append(`
+                            <tr>
+                                <td>${response[i].id_user}</td>
+                                <td>${response[i].tai_khoan}</td>
+                                <!-- Add other columns as needed -->
+                            </tr>
+                        `);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Search error:', status, error);
+                }
+            });
+        }
+
+    </script>
 }

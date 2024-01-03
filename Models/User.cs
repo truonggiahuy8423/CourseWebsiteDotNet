@@ -1,4 +1,5 @@
 ﻿using System.Data.Common;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using MySql.Data.MySqlClient;
 using Org.BouncyCastle.Crypto;
 
@@ -192,7 +193,7 @@ namespace CourseWebsiteDotNet.Models
                             return new UserModel
                             {
                                 id_user = Convert.ToInt32(reader["id_user"]),
-                                //anh_dai_dien = reader["anh_dai_dien"] != DBNull.Value ? reader["anh_dai_dien"] as string : null,
+                                //anh_dai_dien = reader["anh_dai_dien"] != DBNull.Value ? reader["anh_dai_dien"] as byte[] : null,
                                 tai_khoan = reader["tai_khoan"].ToString(),
                                 mat_khau = reader["mat_khau"].ToString(),
                                 thoi_gian_dang_nhap_gan_nhat = reader["thoi_gian_dang_nhap_gan_nhat"] != DBNull.Value
@@ -225,7 +226,7 @@ namespace CourseWebsiteDotNet.Models
                     connection.Open();
 
                     string query = "INSERT INTO users (anh_dai_dien, tai_khoan, mat_khau, thoi_gian_dang_nhap_gan_nhat, id_ad, id_giang_vien, id_hoc_vien) " +
-                                   "VALUES (@AnhDaiDien, @TaiKhoan, @MatKhau, @ThoiGianDangNhapGanNhat, @IdAd, @IdGiangVien, @IdHocVien); SELECT SCOPE_IDENTITY();";
+                                   "VALUES (@AnhDaiDien, @TaiKhoan, @MatKhau, @ThoiGianDangNhapGanNhat, @IdAd, @IdGiangVien, @IdHocVien); SELECT LAST_INSERT_ID();";
 
                     using (MySqlCommand command = new MySqlCommand(query, connection))
                     {

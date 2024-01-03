@@ -1,0 +1,409 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    Layout = null;
+    List<UserModel> users = ViewData["users"] as List<UserModel>;
+    List<GiangVienModel> lecturers = ViewData["lecturers"] as List<GiangVienModel>;
+    List<HocVienModel> students = ViewData["students"] as List<HocVienModel>;
+}
+
+<div class="form-container">
+    <div class="insert-student-form insert-user-form">
+        <div class="insert-student-form__title-section">
+            <h5 class="insert-student-form__title">Chỉnh sửa user</h5>
+        </div>
+
+        <div class="grid-2-column user-form__input-container">
+            <div class="center-div">
+                <div class="uploaded-ava-container">
+                    <img id="avatarImg" class="uploaded-ava" src="/img/avatar_blank.jpg" alt="">
+                    <input id="fileInput" class="file-upload-input" type="file">
+                    <label for="fileInput" class="custom-file-input img-input"><i class="fa-solid fa-upload"></i></label>
+                </div>
+            </div>
+            <div style="min-width: 210px;">
+                <span>Tài khoản</span> <br>
+                <input class="account-field" type="text" autocomplete="off"> <br>
+                <span>Vai trò</span> <br>
+                <select name="" id="" class="role-cbb">
+                    <option value="0">Adminstrator</option>
+                    <option value="1">Giảng viên</option>
+                    <option value="2">Học viên</option>
+                </select>
+            </div>
+            <div style="min-width: 210px;">
+                <span>Mật khẩu</span>
+                <br>
+                <input class="password-field" type="password" autocomplete="new-password"> <br>
+                <span>Nhập lại mật khẩu</span><br>
+                <input class="confirmed-password-field" type="password" autocomplete="off"> <br>
+            </div>
+        </div>
+
+        <div class="upload-avatar-btn-container">
+        </div>
+
+        <div class="insert-lecturer-form__search-bar-container">
+            <input style="border-radius: 0; height: 30px; width: 90px; z-index: 3" type="text" class="w-25 form-control search-lecturer-input" placeholder="Tìm kiếm">
+            <button class="btn btn-info search-lecturer-button highlight-button"><i class="fas fa-search icon-search highlight-icon" style=""></i></button>
+        </div>
+
+        <div class="insert-student-form__students-table-container">
+            <table class="insert-student-form__students-table table-list">
+                <thead>
+                    <tr>
+                        <td>Mã admin</td>
+                        <td>Họ tên</td>
+                        <td>Email</td>
+                        <td>Chọn</td>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div class="insert-student-form__btn-container">
+            <button class="insert-student-form__cancel-btn insert-user-form__cancel-btn">Hủy</button>
+            <button class="insert-student-form__save-btn insert-user-form__save-btn">Lưu thông tin</button>
+        </div>
+    </div>
+
+    <script>
+        function uploadingNoti(message, type) {
+            if (type) {
+                $(`.upload-avatar-btn-container`).prepend(`
+                                <span class="upload-file-noti upload-file-noti--success">${message}</span>
+                            `);
+                // $(`#filename-display`).text(`Chưa tệp nào được chọn`);
+                // $(`.file-upload-input`).val(``);
+            } else {
+                $(`.upload-avatar-btn-container`).prepend(`
+                                <span class="upload-file-noti upload-file-noti--error">${message}</span>
+                            `);
+            }
+            setTimeout(function () {
+                $(`.upload-file-noti`).css(`opacity`, 0);
+            }, 3000);
+            setTimeout(function () {
+                $(`.upload-file-noti`).remove();
+            }, 4000);
+        }
+        $(document).ready(function () {
+            
+            $(`.insert-user-form__save-btn`).click(function () {
+                if (!confirm("Xác nhận thay đổi user?")) {
+                    return;
+                }
+
+                let account = $(`.account-field`).val();
+                let password = $(`.password-field`).val();
+                let confirmed_password = $(`.confirmed-password-field`).val();
+                let role = $(`.role-cbb`).val();
+                let cb = $(".group-checkbox:checked:first");
+                if (cb.length == 0) {
+                    uploadingNoti("Hãy chọn giảng viên, học viên hoặc admin", false);
+                    return;
+                }
+                let id_role = cb.val();
+                let fileList = $(".file-upload-input").prop("files");
+
+                if (password != confirmed_password) {
+                    uploadingNoti("Mật khẩu xác nhận không khớp", false);
+                    return;
+                }
+
+                if (account == '') {
+                    uploadingNoti("Vui lòng nhập tài khoản", false);
+                    return;
+                }
+                if (password == '') {
+                    uploadingNoti("Vui lòng nhập mật khẩu", false);
+                    return;
+                }
+
+                if (account.length < 8 || account.length > 20) {
+                    uploadingNoti("Tài khoản có từ 8-20 ký tự", false);
+                    return;
+                }
+                if (password.length < 8 || password.length > 20) {
+                    uploadingNoti("Mật khẩu có từ 8-20 ký tự", false);
+                    return;
+                }
+                var file = null;
+                if (fileList.length > 0) {
+                    file = fileList[0];
+                    if (file.size / (1024 * 1024) > 50) {
+                        uploadingNoti("Độ lớn file không vượt quá 50MB", false);
+                        return;
+                    }
+                }
+                console.log(base64Image);
+                
+                // function base64toBlob(base64Data, contentType = '', sliceSize = 512) {
+                //     const byteCharacters = atob(base64Data);
+                //     const byteArrays = [];
+
+                //     for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+                //         const slice = byteCharacters.slice(offset, offset + sliceSize);
+                //         const byteNumbers = new Array(slice.length);
+
+                //         for (let i = 0; i < slice.length; i++) {
+                //             byteNumbers[i] = slice.charCodeAt(i);
+                //         }
+
+                //         const byteArray = new Uint8Array(byteNumbers);
+                //         byteArrays.push(byteArray);
+                //     }
+
+                //     return new Blob(byteArrays, { type: contentType });
+                // }
+
+                // // Create a Blob from the base64 image data
+                // const blob = base64toBlob(base64Image, 'image/jpeg');
+
+                // // Create a File from the Blob
+                // const file = new File([blob], 'image.jpg', { type: 'image/jpeg' });
+                var formData = new FormData();
+
+                //formData.append('file', base64Image);
+                formData.append('file', file);
+                formData.append('id_user', currentUserId);
+                formData.append('account', account);
+                formData.append('password', password);
+                formData.append('role', role);
+                formData.append('id_role', id_role);
+                // console.log("Base64 representation of the image:", base64Image);
+                // console.log(id_role + "id role");
+                console.log(role);
+                loadingEffect(false);
+                $.ajax({
+                    url: 'User/updateUser',
+                    method: 'POST',
+                    dataType: "json",
+                    contentType: false,
+                    processData: false,
+                    data: formData,
+                    success: function (response) {
+                        loadingEffect(false);
+                        //reloadUssers();
+                        $(`.form-container`).remove();
+                        if (response.state) {
+                            toast({
+                                title: `Thành công!`,
+                                message: `Cập nhật user thành công`,
+                                type: "success",
+                                duration: 3000
+                            });
+                        } else {
+                            toast({
+                                title: `Đã có lỗi xảy ra!`,
+                                message: response.message,
+                                type: "error",
+                                duration: 3000
+                            });
+                        }
+                        setTimeout(function () {
+                            location.reload();
+                        }, 2000);
+                        //console.log(response);
+                    },
+                    error: function (response) {
+                        loadingEffect(false);
+                        toast({
+                            title: `Lỗi!`,
+                            message: response.message,
+                            type: "error",
+                            duration: 100000
+                        });
+                    }
+                })
+            })
+            loadingEffect(false);
+            $(`.table-list`).empty();
+            $(`.table-list`).append(`<thead style="top: -1px;">
+                                    <tr>
+                                        <td>Mã admin</td>
+                                        <td>Họ tên</td>
+                                        <td>Email</td>
+                                        <td>Chọn</td>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                                `);
+            loadingEffect(false);
+            // lấy admin
+            $.ajax({
+                url: 'User/getListOfAdmins',
+                method: 'POST',
+                dataType: "json",
+                success: function (response) {
+                    loadingEffect(false);
+                    //console.log(response);
+                    for (let ad of response.admins) {
+                        $('.table-list tbody').append(`
+                                    <tr>
+                                        <td>${ad.id_ad}</td>
+                                        <td>${ad.ho_ten}</td>
+                                        <td>${ad.email}</td>
+                                        <td>
+                                            <input type="checkbox" value="${ad.id_ad}" class="group-checkbox">
+                                        </td>
+                                    </tr>
+                                `);
+                    }
+                }
+            });
+            $(`.role-cbb`).change(function () {
+                let choice = $(`.role-cbb option:selected`).val() * 1;
+                if (choice === 0) {
+                    $(`.table-list`).empty();
+                    $(`.table-list`).append(`<thead style="top: -1px;">
+                                    <tr>
+                                        <td>Mã admin</td>
+                                        <td>Họ tên</td>
+                                        <td>Email</td>
+                                        <td>Chọn</td>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                                `);
+                    loadingEffect(false);
+                    // lấy admin
+                    $.ajax({
+                        url: 'User/getListOfAdmins',
+                        method: 'POST',
+                        dataType: "json",
+                        success: function (response) {
+                            loadingEffect(false);
+                            //console.log(response);
+                            for (let ad of response.admins) {
+                                $('.table-list tbody').append(`
+                                            <tr>
+                                                <td>${ad.id_ad}</td>
+                                                <td>${ad.ho_ten}</td>
+                                                <td>${ad.email}</td>
+                                                <td>
+                                                    <input type="checkbox" value="${ad.id_ad}" class="group-checkbox">
+                                                </td>
+                                            </tr>
+                                        `);
+                            }
+                        }
+                    });
+                } else if (choice === 2) {
+                    loadingEffect(false);
+
+                    $(`.table-list`).empty();
+                    $(`.table-list`).append(`<thead style="top: -1px;">
+                                    <tr>
+                                        <td>Mã học viên</td>
+                                        <td>Họ tên</td>
+                                        <td>Giới tính</td>
+                                        <td>Ngày sinh</td>
+                                        <td>Email</td>
+                                        <td>Chọn</td>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            `);
+                    $.ajax({
+                        url: 'User/getListOfStudents',
+                        method: 'POST',
+                        dataType: "json",
+                        success: function (response) {
+                            loadingEffect(false);
+                            //console.log(response);
+                            for (let student of response.students) {
+                                $('.table-list tbody').append(`
+                                            <tr>
+                                                <td>${student.id_hoc_vien}</td>
+                                                <td>${student.ho_ten}</td>
+                                                <td>${student.gioi_tinh == 1 ? "Nam" : "Nữ"}</td>
+                                                <td>${student.ngay_sinh}</td>
+                                                <td>${student.email}</td>
+                                                <td>
+                                                    <input type="checkbox" value="${student.id_hoc_vien}" class="group-checkbox">
+                                                </td>
+                                            </tr>
+                                        `);
+                            }
+                        }
+                    });
+                } else if (choice === 1) {
+                    loadingEffect(false);
+                    $(`.table-list`).empty();
+                    $(`.table-list`).append(`<thead style="top: -1px;">
+                                    <tr>
+                                        <td>Mã giảng viên</td>
+                                        <td>Họ tên</td>
+                                        <td>Giới tính</td>
+                                        <td>Ngày sinh</td>
+                                        <td>Email</td>
+                                        <td>Chọn</td>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                                `);
+                    $.ajax({
+                        url: 'User/getListOfLecturers',
+                        method: 'POST',
+                        dataType: "json",
+                        success: function (response) {
+                            loadingEffect(false);
+                            //console.log(response);
+                            for (let gv of response.lecturers) {
+                                $('.table-list tbody').append(`
+                                            <tr>
+                                                <td>${gv.id_giang_vien}</td>
+                                                <td>${gv.ho_ten}</td>
+                                                <td>${gv.gioi_tinh == 1 ? "Nam" : "Nữ"}</td>
+                                                <td>${gv.ngay_sinh}</td>
+                                                <td>${gv.email}</td>
+                                                <td>
+                                                    <input type="checkbox" value="${gv.id_giang_vien}" class="group-checkbox">
+                                                </td>
+                                            </tr>
+                                        `);
+                            }
+                        }
+                    });
+                }
+            })
+            $(document).on('change', '.group-checkbox', function () {
+                // Uncheck all checkboxes in the group
+                $('.group-checkbox').prop('checked', false);
+                // Check the one that was clicked
+                $(this).prop('checked', true);
+            });
+            $(`.insert-user-form__cancel-btn`).click(function () {
+                if (confirm("Xác nhận hủy bỏ thông tin hiện tại?"))
+                    $(`.form-container`).remove();
+            })
+
+            $('#fileInput').change(function () {
+                // Lấy ra đối tượng input file
+                var input = this;
+
+                // Kiểm tra xem người dùng đã chọn file hay chưa
+                if (input.files && input.files[0]) {
+                    // Tạo đối tượng FileReader để đọc nội dung file
+                    var reader = new FileReader();
+
+                    // Lắng nghe sự kiện khi FileReader đã đọc xong file
+                    reader.onload = function (e) {
+                        // Gán nội dung của file vào thuộc tính src của thẻ img
+                        $('.uploaded-ava').attr('src', e.target.result);
+                    };
+
+                    // Đọc file như là một đối tượng dữ liệu URL
+                    reader.readAsDataURL(input.files[0]);
+                }
+            });
+
+            $('.account-field').val('');
+            $('.password-field').val('');
+            $('.confirmed-password-field').val('');
+        });
+    </script>
+</div>
+
