@@ -1,0 +1,104 @@
+﻿@model AccountRequest
+@{
+    Layout = "_AdministratorMainLayout";
+}
+
+@section Navbar {
+    @await Html.PartialAsync("Navbar")
+}
+
+@section MainSection {
+    <style>
+        .avatar {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%  ;
+            overflow: hidden;
+            position: relative;
+        }
+
+            .avatar img {
+                width: 100%;
+                height: auto;
+                display: block;
+            }
+
+        .custom-file-input {
+            visibility: hidden;
+            width: 0;
+        }
+
+        .custom-file-label {
+            cursor: pointer;
+        }
+
+        .upload-btn {
+            position: absolute;
+            bottom: 5px;
+            right: 83px;
+        }
+    </style>
+    <div class="container mt-4">
+        <h4>Tài khoản của tôi</h4>
+        <form method="post" enctype="multipart/form-data" asp-controller="AccountManagement" asp-action="ChangeAvatarAndPassword">
+        <div class="row mt-3">
+                
+            <div class="col-md-3">
+                <div class="avatar">
+                        <img src="@{
+                        if (@ViewData["avatar_data"] != null) {
+                            string base64Image = Convert.ToBase64String(ViewData["avatar_data"] as byte[]);
+                                @($"data:image/png;base64,{base64Image}");}}"
+                                alt="Avatar">
+                        <input type="file" class="custom-file-input" id="uploadAvatar" name="Avatar" accept="image/*">
+                    <label class="btn btn-light  upload-btn" for="uploadAvatar"><i class="fa-solid fa-upload  "></i></label>
+                </div>
+            </div>
+            <div class="col-md-9">
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div asp-validation-summary="All" class="alert alert-danger" style="color: red !important"></div>
+                    }
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success" role="alert">
+                            @TempData["SuccessMessage"]
+                        </div>                        
+                    }
+                    <div class="mb-3">
+                        <label for="currentPassword" class="form-label">Mật khẩu hiện tại</label>
+                        <input type="password" asp-for="CurrentPassword" class="form-control" id="currentPassword" name="currentPassword">
+                    </div>
+                    <div class="mb-3">
+                        <label for="newPassword" class="form-label">Mật khẩu mới</label>
+                        <input type="password" asp-for="NewPassword" class="form-control" id="newPassword" name="newPassword">
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirmNewPassword" class="form-label">Xác nhận mật khẩu mới</label>
+                        <input type="password" asp-for="ConfirmNewPassword" class="form-control" id="confirmNewPassword" name="confirmNewPassword">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+               
+            </div>
+        </div>
+        </form>
+    </div>
+    <script>
+        document.getElementById('uploadAvatar').addEventListener('change', function (event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            const avatarImg = document.querySelector('.avatar img');
+
+            reader.onload = function (e) {
+                avatarImg.src = e.target.result;
+            };
+
+            reader.readAsDataURL(file);
+        });
+    </script>
+
+
+}
+
+
+   
