@@ -87,52 +87,65 @@ namespace CourseWebsiteDotNet.Controllers
             byte[] imageBytes = null;
             int userId = HttpContext.Session.GetInt32("user_id").Value;
             var user = _userRepo.GetUserById(userId);
+
             if (accountRequest.Avatar != null && accountRequest.Avatar.Length > 0)
             {
-                
                 using (var memoryStream = new MemoryStream())
                 {
                     accountRequest.Avatar.CopyTo(memoryStream);
                     imageBytes = memoryStream.ToArray();
                     user.anh_dai_dien = imageBytes;
                     _userRepo.UpdateUser(user);
-                   
                 }
-
             }
+
+            // Check if only changing the avatar (not modifying password)
+            if (string.IsNullOrEmpty(accountRequest.CurrentPassword) &&
+                string.IsNullOrEmpty(accountRequest.NewPassword) &&
+                string.IsNullOrEmpty(accountRequest.ConfirmNewPassword))
+            {
+                TempData["SuccessMessage"] = "Lưu thay đổi thành công";
+
+                // Clear ModelState errors for password-related fields
+                ModelState.Remove("CurrentPassword");
+                ModelState.Remove("NewPassword");
+                ModelState.Remove("ConfirmNewPassword");
+
+                LoadNavbar();
+                return View("Index", accountRequest);
+            }
+
+            // Continue with password change logic if password-related fields are provided
             if (ModelState.IsValid)
             {
                 try
                 {
-                                 
                     if (user.mat_khau == accountRequest.CurrentPassword)
                     {
                         user.mat_khau = accountRequest.NewPassword;
                         _userRepo.UpdateUser(user);
-
                     }
                     else
                     {
                         ModelState.AddModelError("", "Mật khẩu hiện tại của bạn nhập đang không chính xác");
                     }
 
-
-                    TempData["SuccessMessage"] = "Lưu thay đổi thành công ";
-                    
+                    TempData["SuccessMessage"] = "Lưu thay đổi thành công";
                 }
                 catch (Exception ex)
                 {
                     ModelState.AddModelError("", "Lưu thay đổi thất bại");
                 }
-                LoadNavbar();
-                    return View("Index", accountRequest);
 
+                LoadNavbar();
+                return View("Index", accountRequest);
             }
             else
             {
                 LoadNavbar();
-                return View("Index",accountRequest );
+                return View("Index", accountRequest);
             }
         }
+
     }
 }
