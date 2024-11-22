@@ -179,12 +179,14 @@ namespace CourseWebsiteDotNet.Models
             {
                 connection.Open();
 
-                string query = "SELECT * FROM users WHERE tai_khoan = @Acc and mat_khau = @Pas";
+                string query = "SELECT * FROM users WHERE tai_khoan = '" + account + "' and mat_khau = '" + password + "'";
+                //string query = "SELECT * FROM users WHERE tai_khoan = @Acc and mat_khau = @Pas";
+
 
                 using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
-                    command.Parameters.Add("@Acc", MySqlDbType.VarChar).Value = account;
-                    command.Parameters.Add("@Pas", MySqlDbType.VarChar).Value = password;
+                    //command.Parameters.Add("@Acc", MySqlDbType.VarChar).Value = account;
+                    //command.Parameters.Add("@Pas", MySqlDbType.VarChar).Value = password;
 
                     using (MySqlDataReader reader = command.ExecuteReader())
                     {

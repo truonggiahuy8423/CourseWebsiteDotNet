@@ -77,6 +77,7 @@ namespace CourseWebsiteDotNet.Controllers
                 ViewData["username"] = username;
                 ViewData["role"] = "Học viên";
                 ViewData["avatar_data"] = avatarData;
+                ViewData["id"] = HttpContext.Session.GetInt32("id_role");
             }
 
         }

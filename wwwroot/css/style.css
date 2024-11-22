@@ -1866,12 +1866,12 @@ input[type="file"] {
     margin-bottom: 26px;
 }
 
-.list-of-lecturers-container a {
-    display: inline-flex;
-    color: #35abff !important;
-    text-decoration: none;
-    font-size: 14px;
-}
+    .list-of-lecturers-container a {
+        display: inline-flex;
+        color: #35abff !important;
+        text-decoration: none;
+        children-folder font-size: 14px;
+    }
 
 .list-of-lecturers-container span {
     display: flex;

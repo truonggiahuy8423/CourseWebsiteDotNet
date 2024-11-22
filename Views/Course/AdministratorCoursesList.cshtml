@@ -5,7 +5,11 @@
 
 @{
     Layout = "_AdministratorMainLayout";
-    var courses = ViewData["courses"] as DataTable;
+    DataTable? courses = ViewData["courses"] as DataTable;
+    if (courses == null)
+    {
+        
+    }
     string kiem_tra_tinh_trang(string ngay_bat_dau, string ngay_ket_thuc)
     {
         DateTime datetime_bat_dau = DateTime.ParseExact(ngay_bat_dau, "dd/MM/yyyy", null);

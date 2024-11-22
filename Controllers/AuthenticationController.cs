@@ -68,34 +68,55 @@ namespace CourseWebsiteDotNet.Controllers
 
         public IActionResult Login()
         {
+            string userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
+            string? ip = HttpContext.Connection.RemoteIpAddress?.ToString();
+
+            BannedUserAgentRepository bannedUserAgentRepository = new BannedUserAgentRepository();
+            BannedUserAgentModel? model = bannedUserAgentRepository.GetBannedUserAgentByUserAgentAndIp(userAgent, ip);
+
+            if (model != null && model.banned_to.HasValue && model.banned_to.Value > DateTime.Now)
+            {
+                HttpContext.Response.StatusCode = 401;
+                return Index("Vui lòng thử lại sau, bạn đã nhập sai mật khẩu nhiều lần");
+            }
+
+
             string userAccount = HttpContext.Request.Form["account"];
             string userPassword = HttpContext.Request.Form["password"];
 
             // Validate Format
             if (userAccount == "")
             {
+                HttpContext.Response.StatusCode = 401;
                 return Index("Vui lòng nhập tài khoản", userAccount, userPassword);
             }
 
             if (userAccount.Length < 6 || userAccount.Length > 20)
             {
+                HttpContext.Response.StatusCode = 401;
                 return Index("Tài khoản chứa từ 6 - 20 ký tự", userAccount, userPassword);
             }
 
             if (userPassword == "")
             {
+                HttpContext.Response.StatusCode = 401;
                 return Index("Vui lòng nhập tài khoản", userAccount, userPassword);
             }
 
-            if (userPassword.Length < 6 || userPassword.Length > 20)
+            if (userPassword.Length < 3 || userPassword.Length > 20)
             {
-                return Index("Mật khẩu chứa từ 6 - 20 ký tự", userAccount, userPassword);
+                HttpContext.Response.StatusCode = 401;
+                return Index("Mật khẩu chứa từ 3 - 20 ký tự", userAccount, userPassword);
             }
 
             // Authentication
             var userModel = new UserRepository();
             UserModel? user = userModel.GetUserByAuthentication(userAccount, userPassword);
 
+            UserAgentLoginStatusRepository userAgentLoginStatusRepository = new UserAgentLoginStatusRepository();
+            UserAgentLoginStatusModel userAgentLoginStatusModel = new UserAgentLoginStatusModel();
+            userAgentLoginStatusModel.user_agent = userAgent;
+            userAgentLoginStatusModel.ip = ip;
 
             if (user != null)
             {
@@ -103,7 +124,7 @@ namespace CourseWebsiteDotNet.Controllers
                 {
                     HttpContext.Session.SetInt32("user_id", user.id_user);
                     HttpContext.Session.SetInt32("role", 1);
-                    HttpContext.Session.SetInt32("role_id", (int)user.id_ad );
+                    HttpContext.Session.SetInt32("role_id", (int)user.id_ad);
                 }
                 else if (user.id_giang_vien != null)
                 {
@@ -117,15 +138,143 @@ namespace CourseWebsiteDotNet.Controllers
                     HttpContext.Session.SetInt32("role", 3);
                     HttpContext.Session.SetInt32("role_id", (int)user.id_hoc_vien);
                 }
+
+                userAgentLoginStatusModel.login_status = 1;
+                userAgentLoginStatusRepository.InsertUserAgentLoginStatus(userAgentLoginStatusModel);
+
                 return RedirectToRoute("courses");
             }
             else
             {
+                userAgentLoginStatusModel.login_status = 0;
+                userAgentLoginStatusRepository.InsertUserAgentLoginStatus(userAgentLoginStatusModel);
+
+                // banned
+                List<UserAgentLoginStatusModel> rs = userAgentLoginStatusRepository.GetUserAgentLoginStatus(userAgent, ip, 5);
+
+
+                bool isBanned = true;
+                for (int i = 0; i < rs.Count; i++)
+                {
+                    if (rs[i].login_status == 1)
+                    {
+                        isBanned = false;
+                        break;
+                    }
+                }
+
+                System.Diagnostics.Debug.WriteLine($"Số lượng phần tử trong rs: {rs.Count} {isBanned}");
+
+                // Kiểm tra nếu tất cả `login_status` bằng 0
+                if (rs.Count == 5 && isBanned)
+                {
+                    // Banned
+                    BannedUserAgentModel? banner;
+                    banner = bannedUserAgentRepository.GetBannedUserAgentByUserAgentAndIp(userAgent, ip);
+                    System.Diagnostics.Debug.WriteLine($"Số lượng phần tử trong rs: {rs.Count}");
+
+                    if (banner != null)
+                    {
+                        banner.banned_to = DateTime.Now.AddMinutes(2);
+                        System.Diagnostics.Debug.WriteLine($"Banned to: {banner.banned_to}");
+                        bannedUserAgentRepository.UpdateBannedUserAgent(banner);
+                    } else
+                    {
+                        banner = new BannedUserAgentModel();
+                        banner.ip = ip;
+                        banner.user_agent = userAgent;
+                        banner.banned_to = DateTime.Now.AddMinutes(2); // Thời gian hiện tại + 2 phút
+                        bannedUserAgentRepository.InsertBannedUserAgent(banner);
+                    }
+                }
+
+
+
+                HttpContext.Response.StatusCode = 401;
                 return Index("Tài khoản hoặc mật khẩu không đúng", userAccount, userPassword);
             }
 
 
         }
+        //public IActionResult Login()
+        //{
+        //    //string userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
+        //    //string? ip = HttpContext.Connection.RemoteIpAddress?.ToString();
+
+        //    //var bannedUserAgentRepository = new BannedUserAgentRepository();
+        //    //BannedUserAgentModel? model = bannedUserAgentRepository.GetBannedUserAgentByUserAgentAndIp(userAgent, ip);
+
+        //    //if (model != null && model.banned_to.HasValue && model.banned_to.Value > DateTime.Now)
+        //    //{
+        //    //    HttpContext.Response.StatusCode = 401;
+        //    //    return Index("Vui lòng thử lại sau, bạn đã nhập sai mật khẩu nhiều lần");
+        //    //}
+
+
+        //    string userAccount = HttpContext.Request.Form["account"];
+        //    string userPassword = HttpContext.Request.Form["password"];
+
+        //    // Validate Format
+        //    if (userAccount == "")
+        //    {
+        //        HttpContext.Response.StatusCode = 401;
+        //        return Index("Vui lòng nhập tài khoản", userAccount, userPassword);
+        //    }
+
+        //    if (userAccount.Length < 6 || userAccount.Length > 20)
+        //    {
+        //        HttpContext.Response.StatusCode = 401;
+        //        return Index("Tài khoản chứa từ 6 - 20 ký tự", userAccount, userPassword);
+        //    }
+
+        //    if (userPassword == "")
+        //    {
+        //        HttpContext.Response.StatusCode = 401;
+        //        return Index("Vui lòng nhập tài khoản", userAccount, userPassword);
+        //    }
+
+        //    if (userPassword.Length < 3 || userPassword.Length > 20)
+        //    {
+        //        HttpContext.Response.StatusCode = 401;
+        //        return Index("Mật khẩu chứa từ 3 - 20 ký tự", userAccount, userPassword);
+        //    }
+
+        //    // Authentication
+        //    var userModel = new UserRepository();
+        //    UserModel? user = userModel.GetUserByAuthentication(userAccount, userPassword);
+
+        //    if (user != null)
+        //    {
+        //        if (user.id_ad != null)
+        //        {
+        //            HttpContext.Session.SetInt32("user_id", user.id_user);
+        //            HttpContext.Session.SetInt32("role", 1);
+        //            HttpContext.Session.SetInt32("role_id", (int)user.id_ad);
+        //        }
+        //        else if (user.id_giang_vien != null)
+        //        {
+        //            HttpContext.Session.SetInt32("user_id", user.id_user);
+        //            HttpContext.Session.SetInt32("role", 2);
+        //            HttpContext.Session.SetInt32("role_id", (int)user.id_giang_vien);
+        //        }
+        //        else if (user.id_hoc_vien != null)
+        //        {
+        //            HttpContext.Session.SetInt32("user_id", user.id_user);
+        //            HttpContext.Session.SetInt32("role", 3);
+        //            HttpContext.Session.SetInt32("role_id", (int)user.id_hoc_vien);
+        //        }
+
+        //        return RedirectToRoute("courses");
+        //    }
+        //    else
+        //    {
+        //        HttpContext.Response.StatusCode = 401;
+        //        return Index("Tài khoản hoặc mật khẩu không đúng", userAccount, userPassword);
+        //    }
+
+
+        //}
+
 
         public IActionResult ForgotPassword()
         {
