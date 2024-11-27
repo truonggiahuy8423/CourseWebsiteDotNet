@@ -424,7 +424,7 @@
                                 <span class="label">Tiêu đề:</span>
                             </td>
                             <td>
-                                <input class="noti-title-input text-input" type="text" placeholder="Nhập tiêu đề thông báo...">
+                                        <input class="noti-title-input text-input" type="text" placeholder="Nhập tiêu đề thông báo...">
                             </td>
                         </tr>
                         <tr>
@@ -432,11 +432,33 @@
                                 <span class="label">Nội dung:</span>
                             </td>
                             <td>
-                                <textarea class="noti-content-input" name="message" rows="4" cols="50" placeholder="Nhập nội dung"></textarea>
+                                        <textarea class="noti-content-input" name="message" rows="4" cols="50" placeholder="Nhập nội dung"></textarea>
                             </td>
                         </tr>
                     </table>
+
                     `);
+
+                // Bảo vệ start: oninput="sanitizeInput(this)
+                function sanitizeInput(inputElement) {
+                    // Biểu thức chính quy để phát hiện tất cả các thẻ HTML
+                    const invalidPattern = /<\/?[^>]+(>|$)/gi;
+
+                    // Lấy giá trị hiện tại của trường nhập liệu
+                    let sanitizedValue = $(inputElement).val();
+
+                    // Thay thế các thẻ HTML bằng chuỗi rỗng
+                    sanitizedValue = sanitizedValue.replace(invalidPattern, '');
+
+                    // Cập nhật lại giá trị sau khi làm sạch
+                    $(inputElement).val(sanitizedValue);
+                }
+
+                $(document).on('input', '.noti-title-input, .noti-content-input', function () {
+                    sanitizeInput(this);
+                });
+                // Bảo vệ end.
+
                 $(document).ready(function () {
                     $(`.insert-resource-form__save-btn`).off("click");
                     $(`.insert-resource-form__save-btn`).click(function () {

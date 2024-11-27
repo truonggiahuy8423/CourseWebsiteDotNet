@@ -18,6 +18,7 @@ namespace CourseWebsiteDotNet
                 options.IdleTimeout = TimeSpan.FromMinutes(20);
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
+                //options.Cookie.SameSite = SameSiteMode.None;
             });
 
             builder.Services.AddHttpContextAccessor();
