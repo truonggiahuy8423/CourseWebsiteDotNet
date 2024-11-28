@@ -178,7 +178,8 @@ namespace CourseWebsiteDotNet.Controllers
                         banner.banned_to = DateTime.Now.AddMinutes(2);
                         System.Diagnostics.Debug.WriteLine($"Banned to: {banner.banned_to}");
                         bannedUserAgentRepository.UpdateBannedUserAgent(banner);
-                    } else
+                    }
+                    else
                     {
                         banner = new BannedUserAgentModel();
                         banner.ip = ip;
@@ -198,19 +199,6 @@ namespace CourseWebsiteDotNet.Controllers
         }
         //public IActionResult Login()
         //{
-        //    //string userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
-        //    //string? ip = HttpContext.Connection.RemoteIpAddress?.ToString();
-
-        //    //var bannedUserAgentRepository = new BannedUserAgentRepository();
-        //    //BannedUserAgentModel? model = bannedUserAgentRepository.GetBannedUserAgentByUserAgentAndIp(userAgent, ip);
-
-        //    //if (model != null && model.banned_to.HasValue && model.banned_to.Value > DateTime.Now)
-        //    //{
-        //    //    HttpContext.Response.StatusCode = 401;
-        //    //    return Index("Vui lòng thử lại sau, bạn đã nhập sai mật khẩu nhiều lần");
-        //    //}
-
-
         //    string userAccount = HttpContext.Request.Form["account"];
         //    string userPassword = HttpContext.Request.Form["password"];
 
@@ -271,8 +259,6 @@ namespace CourseWebsiteDotNet.Controllers
         //        HttpContext.Response.StatusCode = 401;
         //        return Index("Tài khoản hoặc mật khẩu không đúng", userAccount, userPassword);
         //    }
-
-
         //}
 
 
